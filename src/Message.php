@@ -1,0 +1,66 @@
+<?php
+
+namespace Nopolabs\Yabot;
+
+
+class Message extends \Slackyboy\Message
+{
+    protected $bot;
+    public $data;
+
+    public function __construct(Bot $bot, array $data)
+    {
+        $this->bot = $bot;
+        $this->data = $data;
+        parent::__construct($bot->getSlackClient(), $data);
+    }
+
+    public function getBot() : Bot
+    {
+        return $this->bot;
+    }
+
+    public function getChannelId()
+    {
+        return $this->data['channel'];
+    }
+
+    public function getUserId()
+    {
+        return $this->data['user'];
+    }
+
+    public function matchesChannel($channel)
+    {
+        $channelId = $this->getBot()->getChannelByName($channel)->getId();
+        return $this->getChannelId() === $channelId;
+    }
+
+    public function matchesUser($user)
+    {
+        $users = is_array($user) ? $user : [$user];
+
+        foreach ($users as $user) {
+            $userId = $this->getBot()->getUserByName($user)->getId();
+            if ($this->getUserId() === $userId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function matchPattern($pattern)
+    {
+        $patterns = is_array($pattern) ? $pattern : [$pattern];
+        $text = $this->getText();
+        $matches = [];
+        $matched = false;
+        foreach ($patterns as $pattern) {
+            if ($matched = preg_match($pattern, $text, $matches)) {
+                break;
+            }
+        }
+        return $matched ? $matches : false;
+    }
+}

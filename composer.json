@@ -1,0 +1,35 @@
+{
+    "name": "nopolabs/yabot",
+    "description": "Yet Another Bot",
+    "type": "package",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/nopolabs/slackyboy"
+        }
+    ],
+    "require": {
+        "coderstephen/slackyboy": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dan Revel",
+            "email": "dan@nopolabs.com"
+        }
+            ],
+            "minimum-stability": "dev",
+            "autoload": {
+                "psr-4": {
+                    "Nopolabs\\Yabot\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nopolabs\\Yabot\\Tests\\": "tests"
+        }
+    }
+}

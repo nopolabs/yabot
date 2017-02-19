@@ -1,0 +1,28 @@
+<?php
+return [
+    'log' => 'logs/bot.log',
+    'plugins' => [
+        'Slackyboy\\Plugins\\AdminControl\\Plugin' => [],
+        'Slackyboy\\Plugins\\Config\\Plugin' => [],
+        'Nopolabs\\Yabot\\Hey' => [],
+        'Nopolabs\\Yabot\\Lookup' => [],
+    ],
+    'slack' => [
+        'token' => 'you-need-to-get-a-slack-api-token'
+    ],
+    'Nopolabs\\Yabot\\Hey' => [
+        'hey' => [
+            'pattern' => "/\\b(?'hey'hey)\\b/",
+            'channel' => 'general',
+            'user' => 'dan',
+            'method' => 'hey',
+        ],
+    ],
+    'Nopolabs\\Yabot\\Lookup' => [
+        'channel' => 'general',
+        'matchers' => [
+            'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",
+            'lookupChannel' => "/\\blookup <#(?'channel'\\w+)\\|\\w+>/",
+        ],
+    ],
+];
