@@ -1,7 +1,10 @@
 <?php
 
-namespace Nopolabs\Yabot;
+namespace Nopolabs\Yabot\Plugins;
 
+
+use Nopolabs\Yabot\Bot;
+use Nopolabs\Yabot\Message;
 
 class Lookup extends ChannelPlugin
 {

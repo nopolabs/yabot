@@ -1,8 +1,9 @@
 <?php
 
-namespace Nopolabs\Yabot;
+namespace Nopolabs\Yabot\Plugins;
 
 
+use Nopolabs\Yabot\Message;
 use Slackyboy\Bot;
 use Slackyboy\Plugins\PluginInterface;
 use Slackyboy\Plugins\PluginManager;

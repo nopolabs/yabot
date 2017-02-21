@@ -5,6 +5,7 @@ namespace Nopolabs\Yabot;
 
 use Exception;
 use Noodlehaus\Config;
+use Nopolabs\Yabot\Plugins\BasePlugin;
 use Slack\Channel;
 use Slack\Payload;
 use Slack\User;
@@ -26,10 +27,6 @@ class Bot extends \Slackyboy\Bot
     protected $channelsById;
     protected $channelsByName;
 
-    /**
-     * Creates a new bot instance.
-     * @param string $configPath path to config file
-     */
     public function __construct(string $configPath)
     {
         $this->configPath = $configPath;
@@ -101,9 +98,6 @@ class Bot extends \Slackyboy\Bot
         $this->say($text, $this->getChannelById($msg->getChannelId()));
     }
 
-    /**
-     * Runs the bot.
-     */
     public function run()
     {
         $this->client->on('message', function (Payload $data) {
@@ -116,25 +110,13 @@ class Bot extends \Slackyboy\Bot
             $this->emit('message', [$message]);
         });
 
+        $this->initChannelUpdateHandlers();
+        $this->initUserUpdateHandlers();
+
         $this->client->connect()->then(function () {
-            return $this->client->getAuthedUser();
-        })->then(function (User $user) {
-            $this->botUser = $user;
-            $this->log->info('Bot user name is configured as '.$user->getUsername());
-            return $this->client->getUsers();
-        })->then(function(array $users) {
-            $this->users = $users;
-            foreach ($this->users as $index => $user) {
-                $this->usersById[$user->getId()] = $index;
-                $this->usersByName[$user->getUsername()] = $index;
-            }
-            return $this->client->getChannels();
-        })->then(function(array $channels) {
-            $this->channels = $channels;
-            foreach ($this->channels as $index => $channel) {
-                $this->channelsById[$channel->getId()] = $index;
-                $this->channelsByName[$channel->getName()] = $index;
-            }
+            $this->getBotUser();
+            $this->updateUsers();
+            $this->updateChannels();
         });
 
         $this->loop->run();
@@ -143,6 +125,52 @@ class Bot extends \Slackyboy\Bot
     public function getLog()
     {
         return $this->log;
+    }
+
+    protected function initChannelUpdateHandlers()
+    {
+        $events = ['channel_created', 'channel_deleted', 'channel_rename'];
+        foreach ($events as $event) {
+            $this->client->on($event, [$this, 'updateChannels']);
+        }
+    }
+
+    protected function initUserUpdateHandlers()
+    {
+        $events = ['user_change'];
+        foreach ($events as $event) {
+            $this->client->on($event, [$this, 'updateUsers']);
+        }
+    }
+
+    protected function getBotUser()
+    {
+        $this->client->getAuthedUser()->then(function (User $user) {
+            $this->botUser = $user;
+            $this->log->info('Bot user name is configured as '.$user->getUsername());
+        });
+    }
+
+    protected function updateUsers()
+    {
+        $this->client->getUsers()->then(function(array $users) {
+            $this->users = $users;
+            foreach ($this->users as $index => $user) {
+                $this->usersById[$user->getId()] = $index;
+                $this->usersByName[$user->getUsername()] = $index;
+            }
+        });
+    }
+
+    protected function updateChannels()
+    {
+        $this->client->getChannels()->then(function(array $channels) {
+            $this->channels = $channels;
+            foreach ($this->channels as $index => $channel) {
+                $this->channelsById[$channel->getId()] = $index;
+                $this->channelsByName[$channel->getName()] = $index;
+            }
+        });
     }
 
     protected function getConfigPath()

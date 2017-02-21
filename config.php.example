@@ -4,13 +4,13 @@ return [
     'plugins' => [
         'Slackyboy\\Plugins\\AdminControl\\Plugin' => [],
         'Slackyboy\\Plugins\\Config\\Plugin' => [],
-        'Nopolabs\\Yabot\\Hey' => [],
-        'Nopolabs\\Yabot\\Lookup' => [],
+        'Nopolabs\\Yabot\\Plugins\\Hey' => [],
+        'Nopolabs\\Yabot\\Plugins\\Lookup' => [],
     ],
     'slack' => [
         'token' => 'you-need-to-get-a-slack-api-token'
     ],
-    'Nopolabs\\Yabot\\Hey' => [
+    'Nopolabs\\Yabot\\Plugins\\Hey' => [
         'hey' => [
             'pattern' => "/\\b(?'hey'hey)\\b/",
             'channel' => 'general',
@@ -18,7 +18,7 @@ return [
             'method' => 'hey',
         ],
     ],
-    'Nopolabs\\Yabot\\Lookup' => [
+    'Nopolabs\\Yabot\\Plugins\\Lookup' => [
         'channel' => 'general',
         'matchers' => [
             'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",

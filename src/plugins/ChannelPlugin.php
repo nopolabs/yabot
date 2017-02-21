@@ -1,6 +1,6 @@
 <?php
 
-namespace Nopolabs\Yabot;
+namespace Nopolabs\Yabot\Plugins;
 
 
 class ChannelPlugin extends BasePlugin
