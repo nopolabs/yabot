@@ -5,14 +5,26 @@ namespace Nopolabs\Yabot;
 
 class Message extends \Slackyboy\Message
 {
-    protected $bot;
     public $data;
+    protected $bot;
+    protected $handled;
 
     public function __construct(Bot $bot, array $data)
     {
         $this->bot = $bot;
         $this->data = $data;
+        $this->handled = false;
         parent::__construct($bot->getSlackClient(), $data);
+    }
+
+    public function isHandled() : bool
+    {
+        return $this->handled;
+    }
+
+    public function setHandled(bool $handled) : bool
+    {
+        $this->handled = $handled;
     }
 
     public function getBot() : Bot

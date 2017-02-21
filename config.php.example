@@ -8,19 +8,4 @@ return [
     'slack' => [
         'token' => 'you-need-to-get-a-slack-api-token'
     ],
-    'Nopolabs\\Yabot\\Plugins\\Hey' => [
-        'hey' => [
-            'pattern' => "/\\b(?'hey'hey)\\b/",
-            'channel' => 'general',
-            'user' => 'dan',
-            'method' => 'hey',
-        ],
-    ],
-    'Nopolabs\\Yabot\\Plugins\\Lookup' => [
-        'channel' => 'general',
-        'matchers' => [
-            'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",
-            'lookupChannel' => "/\\blookup <#(?'channel'\\w+)\\|\\w+>/",
-        ],
-    ],
 ];

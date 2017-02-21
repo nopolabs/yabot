@@ -68,6 +68,10 @@ abstract class BasePlugin implements PluginInterface
 
     protected function dispatchMessage(Message $message, array $matched)
     {
+        if ($message->isHandled()) {
+            return;
+        }
+        
         list($method, $matches) = $matched;
 
         $plugin = $this->getPlugin();
