@@ -2,8 +2,6 @@
 return [
     'log' => 'logs/bot.log',
     'plugins' => [
-        'Slackyboy\\Plugins\\AdminControl\\Plugin' => [],
-        'Slackyboy\\Plugins\\Config\\Plugin' => [],
         'Nopolabs\\Yabot\\Plugins\\Hey' => [],
         'Nopolabs\\Yabot\\Plugins\\Lookup' => [],
     ],

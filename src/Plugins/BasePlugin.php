@@ -12,7 +12,6 @@ abstract class BasePlugin implements PluginInterface
 {
     protected $bot;
     protected $plugins;
-    protected $config;
     protected $matchers;
 
     /**
@@ -23,13 +22,12 @@ abstract class BasePlugin implements PluginInterface
     {
         $this->bot = $bot;
         $this->plugins = $plugins;
-        $this->config = $this->bot->getConfig()->get(static::class);
         $this->matchers = [];
     }
 
     public function enable()
     {
-        $this->matchers = $this->prepareMatchers($this->config);
+        $this->matchers = $this->prepareMatchers($this->getConfig());
 
         $this->bot->on('message', function (Message $message) {
             $this->onMessage($message);
@@ -42,6 +40,11 @@ abstract class BasePlugin implements PluginInterface
             $method = isset($params['method']) ? $params['method'] : $name;
             $this->verifyMethod($method);
         }
+    }
+
+    protected function getConfig(array $default = null) : array
+    {
+        return $this->bot->getConfig()->get(static::class, $default);
     }
 
     protected function prepareMatchers(array $config) : array

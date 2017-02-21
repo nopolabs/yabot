@@ -108,6 +108,14 @@ class Bot extends \Slackyboy\Bot
             ]);
 
             $this->emit('message', [$message]);
+
+            if ($message->matchesAny(
+                '/\b'.$this->botUser->getUsername().'\b/i',
+                '/\b<@'.$this->botUser->getId().'>\b/i'))
+            {
+                $this->log->debug('Mentioned in message', [$message]);
+                $this->emit('mention', [$message]);
+            }
         });
 
         $this->initChannelUpdateHandlers();
@@ -125,6 +133,28 @@ class Bot extends \Slackyboy\Bot
     public function getLog()
     {
         return $this->log;
+    }
+
+    public function updateUsers()
+    {
+        $this->client->getUsers()->then(function(array $users) {
+            $this->users = $users;
+            foreach ($this->users as $index => $user) {
+                $this->usersById[$user->getId()] = $index;
+                $this->usersByName[$user->getUsername()] = $index;
+            }
+        });
+    }
+
+    public function updateChannels()
+    {
+        $this->client->getChannels()->then(function(array $channels) {
+            $this->channels = $channels;
+            foreach ($this->channels as $index => $channel) {
+                $this->channelsById[$channel->getId()] = $index;
+                $this->channelsByName[$channel->getName()] = $index;
+            }
+        });
     }
 
     protected function initChannelUpdateHandlers()
@@ -148,28 +178,6 @@ class Bot extends \Slackyboy\Bot
         $this->client->getAuthedUser()->then(function (User $user) {
             $this->botUser = $user;
             $this->log->info('Bot user name is configured as '.$user->getUsername());
-        });
-    }
-
-    protected function updateUsers()
-    {
-        $this->client->getUsers()->then(function(array $users) {
-            $this->users = $users;
-            foreach ($this->users as $index => $user) {
-                $this->usersById[$user->getId()] = $index;
-                $this->usersByName[$user->getUsername()] = $index;
-            }
-        });
-    }
-
-    protected function updateChannels()
-    {
-        $this->client->getChannels()->then(function(array $channels) {
-            $this->channels = $channels;
-            foreach ($this->channels as $index => $channel) {
-                $this->channelsById[$channel->getId()] = $index;
-                $this->channelsByName[$channel->getName()] = $index;
-            }
         });
     }
 

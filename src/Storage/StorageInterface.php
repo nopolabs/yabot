@@ -1,4 +1,5 @@
 <?php
+namespace Nopolabs\Yabot\Storage;
 
 interface StorageInterface
 {

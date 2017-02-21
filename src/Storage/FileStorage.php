@@ -1,4 +1,5 @@
 <?php
+namespace Nopolabs\Yabot\Storage;
 
 class FileStorage implements StorageInterface
 {
