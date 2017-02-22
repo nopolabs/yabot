@@ -47,7 +47,7 @@ abstract class BasePlugin implements PluginInterface
         $className = static::class;
         $options = $this->bot->getConfig()->get("plugins.$className", []);
 
-        return $options ?: $default;
+        return array_merge($default, $options);
     }
 
     protected function prepareMatchers(array $options) : array
