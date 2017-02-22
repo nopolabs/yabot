@@ -10,7 +10,7 @@ use Slack\Channel;
 use Slack\Payload;
 use Slack\User;
 
-class Bot extends \Slackyboy\Bot
+class Yabot extends \Slackyboy\Bot
 {
     protected $configPath;
 

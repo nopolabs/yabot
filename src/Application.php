@@ -17,7 +17,7 @@ class Application
 
         $configPath = isset($options['config']) ? $options['config'] : 'config.php';
 
-        $bot = new Bot($configPath);
+        $bot = new Yabot($configPath);
         $bot->run();
     }
 

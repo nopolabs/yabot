@@ -3,14 +3,14 @@
 namespace Nopolabs\Yabot\Plugins;
 
 
-use Nopolabs\Yabot\Bot;
+use Nopolabs\Yabot\Yabot;
 use Nopolabs\Yabot\Message;
 
 class Lookup extends ChannelPlugin
 {
-    protected function getConfig(array $default = null) : array
+    protected function getPluginOptions(array $default = null) : array
     {
-        return parent::getConfig([
+        return parent::getPluginOptions([
             'channel' => 'general',
             'matchers' => [
                 'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",
@@ -19,12 +19,12 @@ class Lookup extends ChannelPlugin
         ]);
     }
 
-    public function lookupUser(Bot $bot, Message $msg, array $matches)
+    public function lookupUser(Yabot $bot, Message $msg, array $matches)
     {
         $bot->reply($msg, 'user: '.$matches['user']);
     }
 
-    public function lookupChannel(Bot $bot, Message $msg, array $matches)
+    public function lookupChannel(Yabot $bot, Message $msg, array $matches)
     {
         $bot->reply($msg, 'channel: '.$matches['channel']);
     }

@@ -5,12 +5,12 @@ namespace Nopolabs\Yabot\Plugins;
 
 class ChannelPlugin extends BasePlugin
 {
-    protected function prepareMatchers(array $config) : array
+    protected function prepareMatchers(array $options) : array
     {
-        $channel = $config['channel'];
+        $channel = $options['channel'];
 
         $matchers = [];
-        foreach ($config['matchers'] as $name => $params) {
+        foreach ($options['matchers'] as $name => $params) {
             $params = is_array($params) ? $params : ['pattern' => $params];
             $params['channel'] = $channel;
             $matchers[$name] = $params;

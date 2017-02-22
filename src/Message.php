@@ -9,7 +9,7 @@ class Message extends \Slackyboy\Message
     protected $bot;
     protected $handled;
 
-    public function __construct(Bot $bot, array $data)
+    public function __construct(Yabot $bot, array $data)
     {
         $this->bot = $bot;
         $this->data = $data;
@@ -27,7 +27,7 @@ class Message extends \Slackyboy\Message
         $this->handled = $handled;
     }
 
-    public function getBot() : Bot
+    public function getBot() : Yabot
     {
         return $this->bot;
     }

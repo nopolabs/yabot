@@ -2,10 +2,17 @@
 return [
     'log' => 'logs/bot.log',
     'plugins' => [
-        'Nopolabs\\Yabot\\Plugins\\Hey' => [],
+        'Nopolabs\\Yabot\\Plugins\\Hey' => [
+            'hey' => [
+                'pattern' => "/\\b(?'hey'hey)\\b/",
+                'channel' => 'general',
+                'user' => 'dan',
+                'method' => 'hey',
+            ],
+        ],
         'Nopolabs\\Yabot\\Plugins\\Lookup' => [],
     ],
     'slack' => [
-        'token' => 'you-need-to-get-a-slack-api-token'
+        'token' => 'you-need-to-get-a-slack-api-token',
     ],
 ];
