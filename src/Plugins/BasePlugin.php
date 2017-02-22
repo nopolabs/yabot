@@ -3,7 +3,9 @@
 namespace Nopolabs\Yabot\Plugins;
 
 
+use InvalidArgumentException;
 use Nopolabs\Yabot\Message;
+use Nopolabs\Yabot\Yabot;
 use Slackyboy\Bot;
 use Slackyboy\Plugins\PluginInterface;
 use Slackyboy\Plugins\PluginManager;
@@ -14,15 +16,15 @@ abstract class BasePlugin implements PluginInterface
     protected $plugins;
     protected $matchers;
 
-    /**
-     * @param Bot $bot
-     * @param PluginManager $plugins
-     */
     public function __construct(Bot $bot, PluginManager $plugins)
     {
-        $this->bot = $bot;
-        $this->plugins = $plugins;
-        $this->matchers = [];
+        if ($bot instanceof Yabot) {
+            $this->bot = $bot;
+            $this->plugins = $plugins;
+            $this->matchers = [];
+        } else {
+            throw new InvalidArgumentException('instanceof '.static::class.' required.');
+        }
     }
 
     public function enable()
@@ -32,6 +34,11 @@ abstract class BasePlugin implements PluginInterface
         $this->bot->on('message', function (Message $message) {
             $this->onMessage($message);
         });
+    }
+
+    public function getBot() : Yabot
+    {
+        return $this->bot;
     }
 
     public function verifyMethods()
@@ -129,5 +136,20 @@ abstract class BasePlugin implements PluginInterface
     protected function getPlugin()
     {
         return $this->plugins->getPlugins()[static::class];
+    }
+
+    protected function load($key)
+    {
+        return $this->getBot()->getStorage()->get($this->storageKey($key));
+    }
+
+    protected function save($key, $data)
+    {
+        $this->getBot()->getStorage()->save($this->storageKey($key), $data);
+    }
+
+    protected function storageKey($key)
+    {
+        return str_replace('\\', '_', static::class).'.'.$key;
     }
 }

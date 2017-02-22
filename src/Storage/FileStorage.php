@@ -4,10 +4,12 @@ namespace Nopolabs\Yabot\Storage;
 class FileStorage implements StorageInterface
 {
     private $path;
+    private $jsonEncodeOptions;
 
-    public function __construct($path = '')
+    public function __construct($path = '', $jsonEncodeOptions = JSON_PRETTY_PRINT)
     {
         $this->path = $path;
+        $this->jsonEncodeOptions = $jsonEncodeOptions;
     }
 
     protected function getFilename($key)
@@ -51,7 +53,7 @@ class FileStorage implements StorageInterface
         if (!is_dir(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
-        file_put_contents($file, json_encode($data));
+        file_put_contents($file, json_encode($data, $this->jsonEncodeOptions));
     }
 
     protected function getFile($file)

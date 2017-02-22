@@ -4,8 +4,13 @@ namespace Nopolabs\Yabot;
 
 
 use Exception;
+use Monolog\Logger;
 use Noodlehaus\Config;
 use Nopolabs\Yabot\Plugins\BasePlugin;
+use Nopolabs\Yabot\Storage\FileStorage;
+use Nopolabs\Yabot\Storage\StorageInterface;
+use Psr\Log\LoggerInterface;
+use React\EventLoop\LoopInterface;
 use Slack\Channel;
 use Slack\Payload;
 use Slack\User;
@@ -27,6 +32,9 @@ class Yabot extends \Slackyboy\Bot
     protected $channelsById;
     protected $channelsByName;
 
+    /** @var StorageInterface */
+    protected $storage;
+
     public function __construct(string $configPath)
     {
         $this->configPath = $configPath;
@@ -36,6 +44,10 @@ class Yabot extends \Slackyboy\Bot
         $this->channels = [];
         $this->channelsById = [];
         $this->channelsByName = [];
+
+        $this->loadConfig();
+
+        $this->storage = new FileStorage($this->getConfig()->get('storage'));
 
         parent::__construct();
 
@@ -48,13 +60,15 @@ class Yabot extends \Slackyboy\Bot
 
     public function loadConfig()
     {
-        // if no config file exists, create the default
-        if (!is_file($this->getConfigPath())) {
-            $this->createDefaultConfig();
-        }
+        if (!$this->config) {
+            // if no config file exists, create the default
+            if (!is_file($this->getConfigPath())) {
+                $this->createDefaultConfig();
+            }
 
-        // load config
-        $this->config = new Config($this->getConfigPath());
+            // load config
+            $this->config = new Config($this->getConfigPath());
+        }
     }
 
     public function getUserByName($name)
@@ -109,9 +123,9 @@ class Yabot extends \Slackyboy\Bot
 
             $this->emit('message', [$message]);
 
-            if ($message->matchesAny(
+            if ($this->botUser && $message->matchesAny(
                 '/\b'.$this->botUser->getUsername().'\b/i',
-                '/\b<@'.$this->botUser->getId().'>\b/i'))
+                '/<@'.$this->botUser->getId().'>/i'))
             {
                 $this->log->debug('Mentioned in message', [$message]);
                 $this->emit('mention', [$message]);
@@ -130,9 +144,19 @@ class Yabot extends \Slackyboy\Bot
         $this->loop->run();
     }
 
-    public function getLog()
+    public function getLoop() : LoopInterface
+    {
+        return $this->loop;
+    }
+
+    public function getLog() : Logger
     {
         return $this->log;
+    }
+
+    public function getStorage() : StorageInterface
+    {
+        return $this->storage;
     }
 
     public function updateUsers()

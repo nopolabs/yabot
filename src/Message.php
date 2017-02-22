@@ -37,9 +37,19 @@ class Message extends \Slackyboy\Message
         return $this->data['channel'];
     }
 
+    public function getChannel()
+    {
+        return $this->getBot()->getChannelById($this->getChannelId());
+    }
+
     public function getUserId()
     {
         return $this->data['user'];
+    }
+
+    public function getUser()
+    {
+        return $this->getBot()->getUserById($this->getUserId());
     }
 
     public function matchesChannel($channel)
