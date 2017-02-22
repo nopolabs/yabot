@@ -22,7 +22,7 @@ class Message extends \Slackyboy\Message
         return $this->handled;
     }
 
-    public function setHandled(bool $handled) : bool
+    public function setHandled(bool $handled)
     {
         $this->handled = $handled;
     }

@@ -6,12 +6,12 @@ namespace Nopolabs\Yabot\Plugins;
 use DateTime;
 use Nopolabs\Yabot\Message;
 use Nopolabs\Yabot\Yabot;
-use Slack\User;
 use Slackyboy\Bot;
 use Slackyboy\Plugins\PluginManager;
 
 class Reservations extends ChannelPlugin
 {
+    /** @var Resources */
     protected $resources;
 
     public function __construct(Bot $bot, PluginManager $plugins)
@@ -21,15 +21,9 @@ class Reservations extends ChannelPlugin
 
     public function enable()
     {
-        $resources = $this->load('resources');
+        $options = $this->getPluginOptions()['resources'];
 
-        $this->resources = [];
-
-        foreach ($this->getPluginOptions()['resources'] as $key) {
-            $this->resources[$key] = isset($resources[$key]) ? $resources[$key] : [];
-        }
-
-        $this->saveResources();
+        $this->resources = new Resources($this->getBot()->getStorage(), $options);
 
         parent::enable();
     }
@@ -42,12 +36,12 @@ class Reservations extends ChannelPlugin
             'resourceNamePlural' => 'resources',
             'resources' => ['dev1', 'dev2', 'dev3'],
             'matchers' => [
+                'reserveForever' => "/reserve #resourceCapture# forever\\b/",
+                'reserveUntil' => "/reserve #resourceCapture# until (?'until'.+)/",
                 'reserve' => "/reserve #resourceCapture#/",
                 'release' => "/release #resourceCapture#/",
                 'list' => "/list #resourceNamePlural#\\b/",
 
-//                'reserveForever' => "/reserve #resourceCapture# forever\\b/",
-//                'reserveUntil' => "/reserve #resourceCapture# until (?'until'.+)/",
 //                'releaseMine' => "/release mine\\b/",
 //                'releaseAll' => "/release all\\b/",
 //                'isResourceFree' => "/is #resourceCapture# free\\b/",
@@ -74,76 +68,70 @@ class Reservations extends ChannelPlugin
         return $matchers;
     }
 
-    public function isResource($key)
-    {
-        return array_key_exists($key, $this->resources);
-    }
-
-    public function isReserved($key)
-    {
-        return !empty($this->resources[$key]);
-    }
-
-    public function getStatus($key)
-    {
-        return json_encode([$key => $this->resources[$key]]);
-    }
-
     public function reserve(Yabot $bot, Message $msg, array $matches)
     {
         $key = $matches['resource'];
-        if ($this->isResource($key)) {
-            if ($this->isReserved($key)) {
-                $bot->reply($msg, "$key is alreday reserved.");
+        if ($this->resources->isResource($key)) {
+            if ($this->resources->isReserved($key)) {
+                $bot->reply($msg, "$key is already reserved.");
             } else {
-                $this->makeReservation($key, $msg->getUser(), new DateTime('+ 12 hours'));
+                $this->resources->reserve($key, $msg->getUser(), new DateTime('+ 12 hours'));
                 $bot->reply($msg, "Reserved $key for {$msg->getUser()->getUsername()}.");
             }
-            $bot->reply($msg, $this->getStatus($key));
+            $bot->reply($msg, $this->resources->getStatus($key));
         }
+        $msg->setHandled(true);
+    }
+
+    public function reserveForever(Yabot $bot, Message $msg, array $matches)
+    {
+        $key = $matches['resource'];
+        if ($this->resources->isResource($key)) {
+            if ($this->resources->isReserved($key)) {
+                $bot->reply($msg, "$key is already reserved.");
+            } else {
+                $this->resources->reserve($key, $msg->getUser());
+                $bot->reply($msg, "Reserved $key for {$msg->getUser()->getUsername()}.");
+            }
+            $bot->reply($msg, $this->resources->getStatus($key));
+        }
+        $msg->setHandled(true);
+    }
+
+    public function reserveUntil(Yabot $bot, Message $msg, array $matches)
+    {
+        $key = $matches['resource'];
+        $until = $matches['until'];
+        if ($this->resources->isResource($key)) {
+            if ($this->resources->isReserved($key)) {
+                $bot->reply($msg, "$key is already reserved.");
+            } else {
+                $this->resources->reserve($key, $msg->getUser(), new DateTime($until));
+                $bot->reply($msg, "Reserved $key for {$msg->getUser()->getUsername()}.");
+            }
+            $bot->reply($msg, $this->resources->getStatus($key));
+        }
+        $msg->setHandled(true);
     }
 
     public function release(Yabot $bot, Message $msg, array $matches)
     {
         $key = $matches['resource'];
-        if ($this->isReserved($key)) {
-            $this->clearReservation($key);
+        if ($this->resources->isReserved($key)) {
+            $this->resources->release($key);
             $bot->reply($msg, "Released $key.");
         }
-        $bot->reply($msg, $this->getStatus($key));
+        $bot->reply($msg, $this->resources->getStatus($key));
+        $msg->setHandled(true);
     }
 
     public function list(Yabot $bot, Message $msg, array $matches)
     {
         $list = [];
-        foreach (array_keys($this->resources) as $key) {
-            $list[] = $this->getStatus($key);
+        foreach ($this->resources->getKeys() as $key) {
+            $list[] = $this->resources->getStatus($key);
         }
         $bot->reply($msg, join("\n", $list));
-    }
-
-    protected function makeReservation($key, User $user, DateTime $until)
-    {
-        $this->updateResource($key, [
-            'user' => $user->getUsername(),
-            'userId' => $user->getId(),
-            'until' => $until->format('Y-m-d H:i:s'),
-        ]);
-    }
-
-    protected function clearReservation($key)
-    {
-        $this->updateResource($key, []);
-    }
-
-    protected function updateResource($key, $data)
-    {
-        $this->resources[$key] = $data;
-        $this->saveResources();
-    }
-
-    protected function saveResources()
-    {
-        $this->save('resources', $this->resources);
+        $msg->setHandled(true);
     }
 }

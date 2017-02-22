@@ -3,6 +3,7 @@
 namespace Nopolabs\Yabot\Plugins;
 
 
+use Exception;
 use InvalidArgumentException;
 use Nopolabs\Yabot\Message;
 use Nopolabs\Yabot\Yabot;
@@ -86,7 +87,13 @@ abstract class BasePlugin implements PluginInterface
 
         $plugin = $this->getPlugin();
 
-        call_user_func([$plugin, $method], $this->bot, $message, $matches);
+        try {
+            call_user_func([$plugin, $method], $this->bot, $message, $matches);
+        } catch (Exception $e) {
+            $this->bot->getLog()->warning('Exception in '.static::class.'::'.$method);
+            $this->bot->getLog()->warning($e->getMessage());
+            $this->bot->getLog()->warning($e->getTraceAsString());
+        }
     }
 
     protected function matchMessage(Message $message, $name, array $params)
@@ -136,20 +143,5 @@ abstract class BasePlugin implements PluginInterface
     protected function getPlugin()
     {
         return $this->plugins->getPlugins()[static::class];
-    }
-
-    protected function load($key)
-    {
-        return $this->getBot()->getStorage()->get($this->storageKey($key));
-    }
-
-    protected function save($key, $data)
-    {
-        $this->getBot()->getStorage()->save($this->storageKey($key), $data);
-    }
-
-    protected function storageKey($key)
-    {
-        return str_replace('\\', '_', static::class).'.'.$key;
     }
 }
