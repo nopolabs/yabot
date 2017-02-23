@@ -5,12 +5,14 @@ namespace Nopolabs\Yabot\Plugins;
 
 use Exception;
 use Nopolabs\Yabot\Message;
+use Nopolabs\Yabot\Storage\StorageInterface;
 use Nopolabs\Yabot\Yabot;
 use Psr\Log\LoggerInterface;
 
 trait PluginTrait
 {
     private $bot;
+    private $config;
     private $matchers;
 
     public function onMessage(Message $message)
@@ -32,9 +34,20 @@ trait PluginTrait
         $this->bot = $bot;
     }
 
-    public function setMatchers(array $matchers)
+    public function setConfig(array $config)
     {
-        $this->matchers = $matchers;
+        $default = $this->getDefaultConfig();
+        $this->config = array_merge($default, $config);
+    }
+
+    public function prepare()
+    {
+        $this->matchers = $this->config;
+    }
+
+    public function getDefaultConfig() : array
+    {
+        return [];
     }
 
     protected function getBot() : Yabot
@@ -50,6 +63,11 @@ trait PluginTrait
     protected function getLog() : LoggerInterface
     {
         return $this->getBot()->getLog();
+    }
+
+    protected function getStorage() : StorageInterface
+    {
+        return $this->getBot()->getStorage();
     }
 
     protected function dispatchMessage(Message $message, array $matched)

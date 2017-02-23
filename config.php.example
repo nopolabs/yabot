@@ -1,16 +1,23 @@
 <?php
 return [
     'log' => 'logs/bot.log',
+    'storage' => 'storage',
     'plugins' => [
-        'Nopolabs\\Yabot\\Plugins\\Hey' => [
-            'hey' => [
-                'pattern' => "/\\b(?'hey'hey)\\b/",
-                'channel' => 'general',
-                'user' => 'dan',
-                'method' => 'hey',
+        'hey-example' => [
+            'class' => 'Nopolabs\\Yabot\\Examples\\Hey',
+            'config' => [
+                'hey' => [
+                    'pattern' => "/\\b(?'hey'hey)\\b/",
+                    'channel' => 'general',
+                    'user' => 'dan',
+                    'method' => 'hey',
+                ],
             ],
         ],
-        'Nopolabs\\Yabot\\Plugins\\Lookup' => [],
+        'Nopolabs\\Yabot\\Examples\\Lookup' => [
+            'channel' => 'random'
+        ],
+        'Nopolabs\\Yabot\\Reservations\\Reservations' => [],
     ],
     'slack' => [
         'token' => 'you-need-to-get-a-slack-api-token',

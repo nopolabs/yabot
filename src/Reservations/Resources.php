@@ -1,6 +1,6 @@
 <?php
 
-namespace Nopolabs\Yabot\Plugins;
+namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
@@ -27,6 +27,16 @@ class Resources
         $this->save();
     }
 
+    public function isResource($key)
+    {
+        return array_key_exists($key, $this->resources);
+    }
+
+    public function getResource($key)
+    {
+        return $this->isResource($key) ? $this->resources[$key] : null;
+    }
+
     public function setResource($key, $resource)
     {
         $this->resources[$key] = $resource;
@@ -41,11 +51,6 @@ class Resources
     public function getKeys() : array
     {
         return array_keys($this->resources);
-    }
-
-    public function isResource($key)
-    {
-        return array_key_exists($key, $this->resources);
     }
 
     public function isReserved($key)

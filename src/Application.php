@@ -44,8 +44,8 @@ class Application
 
         $bot = new Yabot($config, $storage, $logger, $loop, $client, $guzzle);
 
-        foreach ($config->get('plugins') as $className => $options) {
-            $this->loadPlugin($className, $options, $bot);
+        foreach ($config->get('plugins') as $name => $pluginConfig) {
+            $this->loadPlugin($name, $pluginConfig, $bot);
         }
 
         $bot->run();
@@ -102,8 +102,15 @@ EOD;
         return new Client();
     }
 
-    protected function loadPlugin($className, array $config, Yabot $bot)
+    protected function loadPlugin($name, array $config, Yabot $bot)
     {
+        if (isset($config['class'])) {
+            $className = $config['class'];
+            $config = $config['config'];
+        } else {
+            $className = $name;
+        }
+
         if (!class_exists($className)) {
             throw new \Exception('The plugin class "'.$className.'" could not be found.');
         }
@@ -114,8 +121,9 @@ EOD;
 
         /** @var PluginInterface $plugin */
         $plugin = new $className();
-        $plugin->setMatchers($config);
         $plugin->setBot($bot);
+        $plugin->setConfig($config);
+        $plugin->prepare();
 
         $bot->addPlugin($plugin);
     }

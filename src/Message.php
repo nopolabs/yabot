@@ -3,6 +3,9 @@
 namespace Nopolabs\Yabot;
 
 
+use Slack\ChannelInterface;
+use Slack\User;
+
 class Message extends \Slack\Message\Message
 {
     public $data;
@@ -44,9 +47,24 @@ class Message extends \Slack\Message\Message
         return $this->data['channel'];
     }
 
+    public function getChannel() : ChannelInterface
+    {
+        return $this->getBot()->getChannels()->byId($this->getChannelId());
+    }
+
     public function getUserId()
     {
         return $this->data['user'];
+    }
+
+    public function getUser() : User
+    {
+        return $this->getBot()->getUsers()->byId($this->getUserId());
+    }
+
+    public function getUsername()
+    {
+        return $this->getUser()->getUsername();
     }
 
     public function matchesChannel($channel)

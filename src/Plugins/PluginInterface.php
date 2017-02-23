@@ -10,5 +10,6 @@ interface PluginInterface
 {
     function onMessage(Message $message);
     function setBot(Yabot $bot);
-    function setMatchers(array $matchers);
+    function setConfig(array $config);
+    function prepare();
 }

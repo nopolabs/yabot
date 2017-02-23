@@ -1,11 +1,11 @@
 <?php
 
-namespace Nopolabs\Yabot\Plugins;
+namespace Nopolabs\Yabot\Examples;
 
 
-use Nopolabs\Yabot\Yabot;
+use Nopolabs\Yabot\Plugins\PluginInterface;
+use Nopolabs\Yabot\Plugins\PluginTrait;
 use Nopolabs\Yabot\Message;
-use Psr\Log\LoggerInterface;
 
 class Hey implements PluginInterface
 {
