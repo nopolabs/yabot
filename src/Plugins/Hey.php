@@ -5,11 +5,14 @@ namespace Nopolabs\Yabot\Plugins;
 
 use Nopolabs\Yabot\Yabot;
 use Nopolabs\Yabot\Message;
+use Psr\Log\LoggerInterface;
 
-class Hey extends BasePlugin
+class Hey implements PluginInterface
 {
-    public function hey(Yabot $bot, Message $msg, array $matches)
+    use PluginTrait;
+
+    public function hey(Message $msg, array $matches)
     {
-        $bot->reply($msg, 'hey');
+        $msg->reply('hey');
     }
 }

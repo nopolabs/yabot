@@ -3,7 +3,7 @@
 namespace Nopolabs\Yabot;
 
 
-class Message extends \Slackyboy\Message
+class Message extends \Slack\Message\Message
 {
     public $data;
     protected $bot;
@@ -11,10 +11,17 @@ class Message extends \Slackyboy\Message
 
     public function __construct(Yabot $bot, array $data)
     {
+        parent::__construct($bot->getClient(), $data);
+
         $this->bot = $bot;
         $this->data = $data;
         $this->handled = false;
-        parent::__construct($bot->getSlackClient(), $data);
+    }
+
+    public function reply($text)
+    {
+        $channel = $this->getBot()->getChannels()->byId($this->getChannelId());
+        $this->getBot()->say($text, $channel);
     }
 
     public function isHandled() : bool
@@ -37,24 +44,14 @@ class Message extends \Slackyboy\Message
         return $this->data['channel'];
     }
 
-    public function getChannel()
-    {
-        return $this->getBot()->getChannelById($this->getChannelId());
-    }
-
     public function getUserId()
     {
         return $this->data['user'];
     }
 
-    public function getUser()
-    {
-        return $this->getBot()->getUserById($this->getUserId());
-    }
-
     public function matchesChannel($channel)
     {
-        $channelId = $this->getBot()->getChannelByName($channel)->getId();
+        $channelId = $this->getBot()->getChannels()->byName($channel)->getId();
         return $this->getChannelId() === $channelId;
     }
 
@@ -63,7 +60,7 @@ class Message extends \Slackyboy\Message
         $users = is_array($user) ? $user : [$user];
 
         foreach ($users as $user) {
-            $userId = $this->getBot()->getUserByName($user)->getId();
+            $userId = $this->getBot()->getUsers()->byName($user)->getId();
             if ($this->getUserId() === $userId) {
                 return true;
             }
