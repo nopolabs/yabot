@@ -10,8 +10,8 @@ trait ChannelPluginTrait
     public function prepare()
     {
         $channel = $this->config['channel'];
-        $matchers = $this->config['matchers'];
 
+        $matchers = $this->config['matchers'];
         $this->matchers = $this->addChannelToMatchers($channel, $matchers);
     }
 
@@ -19,8 +19,7 @@ trait ChannelPluginTrait
     {
         $channelMatchers = [];
 
-        foreach ($matchers as $name => $params) {
-            $params = is_array($params) ? $params : ['pattern' => $params];
+        foreach ($this->expandMatchers($matchers) as $name => $params) {
             $params['channel'] = $channel;
             $channelMatchers[$name] = $params;
         }

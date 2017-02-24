@@ -182,4 +182,9 @@ class Yabot
     {
         $this->on('message', [$plugin, 'onMessage']);
     }
+
+    public function removePlugin(PluginInterface $plugin)
+    {
+        $this->removeListener('message', [$plugin, 'onMessage']);
+    }
 }

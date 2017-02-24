@@ -42,7 +42,33 @@ trait PluginTrait
 
     public function prepare()
     {
-        $this->matchers = $this->config;
+        $this->matchers = $this->expandMatchers($this->config);
+    }
+
+    public function expandMatchers(array $matchers) : array
+    {
+        $expanded = [];
+
+        foreach ($matchers as $method => $matcher) {
+            $matcher = is_array($matcher) ? $matcher : ['pattern' => $matcher];
+            $expanded[$method] = $matcher;
+        }
+
+        return $expanded;
+    }
+
+    public function replaceInPatterns($search, $replace, array $matchers)
+    {
+        $replaced = [];
+
+        foreach ($this->expandMatchers($matchers) as $method => $matcher) {
+            $pattern = $matcher['pattern'];
+            $pattern = str_replace($search, $replace, $pattern);
+            $matcher['pattern'] = $pattern;
+            $replaced[$method] = $matcher;
+        }
+
+        return $replaced;
     }
 
     public function getDefaultConfig() : array

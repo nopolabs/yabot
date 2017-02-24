@@ -4,22 +4,28 @@ namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Promise\PromiseInterface;
+use Nopolabs\Yabot\Plugins\StorageTrait;
 use Nopolabs\Yabot\Storage\StorageInterface;
+use Nopolabs\Yabot\Yabot;
 use Slack\User;
 
 class Resources
 {
-    protected $storage;
+    use StorageTrait;
+
+    protected $name;
     protected $resources;
 
-    public function __construct(StorageInterface $storage, array $options)
+    public function __construct(Yabot $bot, array $keys, $name = 'resources')
     {
-        $this->storage = $storage;
-        $this->resources = [];
+        $this->setStorageKey($name);
+        $this->setStorage($bot->getStorage());
 
         $resources = $this->load();
-
-        foreach ($options as $key) {
+        $this->resources = [];
+        foreach ($keys as $key) {
             $resource = isset($resources[$key]) ? $resources[$key] : [];
             $this->resources[$key] = $resource;
         }
@@ -60,7 +66,14 @@ class Resources
 
     public function getStatus($key)
     {
-        return json_encode([$key => $this->resources[$key]]);
+        return $this->getStatusAsync($key)->wait();
+    }
+
+    public function getStatusAsync($key) : PromiseInterface
+    {
+        $status = json_encode([$key => $this->resources[$key]]);
+
+        return new FulfilledPromise($status);
     }
 
     public function reserve($key, User $user, DateTime $until = null)
@@ -75,20 +88,5 @@ class Resources
     public function release($key)
     {
         $this->setResource($key, []);
-    }
-
-    protected function load()
-    {
-        return $this->storage->get($this->storageKey());
-    }
-
-    protected function save()
-    {
-        $this->storage->save($this->storageKey(), $this->resources);
-    }
-
-    protected function storageKey()
-    {
-        return str_replace('\\', '_', static::class).'.resources';
     }
 }

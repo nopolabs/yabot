@@ -17,8 +17,9 @@ return [
         'Nopolabs\\Yabot\\Examples\\Lookup' => [
             'channel' => 'random'
         ],
-        'Nopolabs\\Yabot\\Reservations\\Reservations' => [],
+        'Nopolabs\\Yabot\\Reservations\\ReservationsPlugin' => [],
     ],
+    'refTagUrlTemplate' => 'https://#KEY#.nopolabs.com/version/reftag',
     'slack' => [
         'token' => 'you-need-to-get-a-slack-api-token',
     ],
