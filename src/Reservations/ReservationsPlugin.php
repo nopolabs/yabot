@@ -112,10 +112,7 @@ class ReservationsPlugin implements PluginInterface
 
     public function list(Message $msg, array $matches)
     {
-        $list = [];
-        foreach ($this->resources->getKeys() as $key) {
-            $list[] = $this->resources->getStatus($key);
-        }
+        $list = $this->resources->getAllStatuses();
         $msg->reply(join("\n", $list));
         $msg->setHandled(true);
     }

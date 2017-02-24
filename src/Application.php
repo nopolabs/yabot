@@ -99,7 +99,7 @@ EOD;
 
     protected function getGuzzle() : Client
     {
-        return new Client();
+        return new Client(['timeout' => 5]);
     }
 
     protected function loadPlugin($name, array $config, Yabot $bot)
