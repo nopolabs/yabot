@@ -43,9 +43,6 @@ class ReservationsPlugin implements PluginInterface
 
     public function prepare()
     {
-        $resourcesClass = $this->config['resourcesClass'];
-        $this->resources = new $resourcesClass($this->getBot(), $this->config['resourceKeys']);
-
         $resourceCapture = $this->config['resourceCapture'];
         $resourceNamePlural = $this->config['resourceNamePlural'];
 
@@ -56,6 +53,14 @@ class ReservationsPlugin implements PluginInterface
         $matchers = $this->replaceInPatterns('#resourceNamePlural#', $resourceNamePlural, $matchers);
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
         $this->matchers = $matchers;
+
+        $this->getLog()->info("PLUGIN: ".static::class);
+        foreach ($matchers as $method => $matcher) {
+            $this->getLog()->info("  MATCHER: {$method} => ".json_encode($matcher));
+        }
+
+        $resourcesClass = $this->config['resourcesClass'];
+        $this->resources = new $resourcesClass($this->getBot(), $this->config['resourceKeys'], $channel);
     }
 
     public function reserve(Message $msg, array $matches)

@@ -4,33 +4,42 @@ namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
+use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
+use Nopolabs\Yabot\Plugins\BotTrait;
+use Nopolabs\Yabot\Plugins\LoopTrait;
 use Nopolabs\Yabot\Plugins\StorageTrait;
-use Nopolabs\Yabot\Storage\StorageInterface;
 use Nopolabs\Yabot\Yabot;
 use Slack\User;
 
 class Resources
 {
     use StorageTrait;
+    use LoopTrait;
+    use BotTrait;
 
-    protected $name;
+    protected $channel;
     protected $resources;
 
-    public function __construct(Yabot $bot, array $keys, $name = 'resources')
+    public function __construct(Yabot $bot, array $keys, $channel, $name = 'resources')
     {
-        $this->setStorageKey($name);
         $this->setStorage($bot->getStorage());
+        $this->setStorageKey($name);
 
-        $resources = $this->load();
+        $this->setLoop($bot->getLoop());
+        $this->addPeriodicTimer(10, [$this, 'expireResources']);
+
+        $this->setBot($bot);
+
+        $resources = $this->load() ?: [];
         $this->resources = [];
         foreach ($keys as $key) {
             $resource = isset($resources[$key]) ? $resources[$key] : [];
             $this->resources[$key] = $resource;
         }
 
-        $this->save();
+        $this->save($this->resources);
     }
 
     public function isResource($key)
@@ -46,7 +55,7 @@ class Resources
     public function setResource($key, $resource)
     {
         $this->resources[$key] = $resource;
-        $this->save();
+        $this->save($this->resources);
     }
 
     public function getAll() : array
@@ -64,9 +73,33 @@ class Resources
         return !empty($this->resources[$key]);
     }
 
+    public function isExpired($key)
+    {
+        if ($this->isReserved($key)) {
+            $until = $this->getResource($key)['until'];
+            if ($until === 'forever') {
+                return false;
+            } else {
+                $expires = new DateTime($until);
+                return $expires < new DateTime();
+            }
+        }
+    }
+
     public function getStatus($key)
     {
         return $this->getStatusAsync($key)->wait();
+    }
+
+    public function getAllStatuses()
+    {
+        $statuses = [];
+
+        foreach ($this->getKeys() as $key) {
+            $statuses = $this->getStatusAsync($key);
+        }
+
+        return Promise\settle($statuses)->wait();
     }
 
     public function getStatusAsync($key) : PromiseInterface
@@ -88,5 +121,15 @@ class Resources
     public function release($key)
     {
         $this->setResource($key, []);
+    }
+
+    public function expireResources()
+    {
+        foreach ($this->getKeys() as $key) {
+            if ($this->isExpired($key)) {
+                $this->release($key);
+                $this->say("released $key", $this->channel);
+            }
+        }
     }
 }

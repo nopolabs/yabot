@@ -30,8 +30,8 @@ trait StorageTrait
         return $this->getStorage()->get($this->storageKey);
     }
 
-    protected function save()
+    protected function save($data)
     {
-        $this->getStorage()->save($this->storageKey, $this->resources);
+        $this->getStorage()->save($this->storageKey, $data);
     }
 }

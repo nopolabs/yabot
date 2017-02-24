@@ -15,9 +15,9 @@ class DevResources extends Resources
 
     protected $refTagUrlTemplate;
 
-    public function __construct(Yabot $bot, array $keys, $name = 'resources')
+    public function __construct(Yabot $bot, array $keys, $channel, $name = 'resources')
     {
-        parent::__construct($bot, $keys, $name);
+        parent::__construct($bot, $keys, $channel, $name);
         $this->setGuzzle($bot->getGuzzle());
         $this->refTagUrlTemplate = $bot->getConfig()->get('refTagUrlTemplate');
     }

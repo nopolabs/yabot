@@ -91,11 +91,6 @@ trait PluginTrait
         return $this->getBot()->getLog();
     }
 
-    protected function getStorage() : StorageInterface
-    {
-        return $this->getBot()->getStorage();
-    }
-
     protected function dispatchMessage(Message $message, array $matched)
     {
         if ($message->isHandled()) {

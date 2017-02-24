@@ -16,11 +16,14 @@ class QueuePlugin implements PluginInterface
     public function getDefaultConfig() : array
     {
         return [
-            'push' => "^push #?(?'element'[0-9]{4,5})\\b",
-            'next' => "^next\\b",
-            'remove' => "^rm #?(?'element'[0-9]{4,5})\\b",
-            'clear' => "^clear\\b",
-            'list' => "^list\\b",
+            'channel' => 'general',
+            'matchers' => [
+                'push' => "/^push #?(?'element'[0-9]{4,5})\\b/",
+                'next' => "/^next\\b/",
+                'remove' => "/^rm #?(?'element'[0-9]{4,5})\\b/",
+                'clear' => "/^clear\\b/",
+                'list' => "/^list\\b/",
+            ],
         ];
     }
 
@@ -69,13 +72,18 @@ class QueuePlugin implements PluginInterface
 
     public function list(Message $msg, array $matches = [])
     {
-        $list = [];
+        $details = $this->queue->getDetails();
 
-        foreach ($this->queue->getDetails() as $detail) {
-            $list[] = $detail;
+        if (empty($details)) {
+            $msg->reply('The queue is empty.');
+        } else {
+            $list = [];
+            foreach ($this->queue->getDetails() as $detail) {
+                $list[] = $detail;
+            }
+            $msg->reply(join("\n", $list));
         }
 
-        $msg->reply(join("\n", $list));
         $msg->setHandled(true);
     }
 }

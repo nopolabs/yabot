@@ -17,21 +17,21 @@ class Queue
         $this->setStorageKey($name);
         $this->setStorage($bot->getStorage());
 
-        $this->queue = $this->load();
+        $this->queue = $this->load() ?: [];
 
-        $this->save();
+        $this->save($this->queue);
     }
 
     public function push($element)
     {
         array_push($this->queue, $element);
-        $this->save();
+        $this->save($this->queue);
     }
 
     public function next()
     {
         array_shift($this->queue);
-        $this->save();
+        $this->save($this->queue);
     }
 
     public function remove($el)
@@ -43,13 +43,13 @@ class Queue
             }
         }
         $this->queue = $queue;
-        $this->save();
+        $this->save($this->queue);
     }
 
     public function clear()
     {
         $this->queue = [];
-        $this->save();
+        $this->save($this->queue);
     }
 
     public function getQueue() : array
