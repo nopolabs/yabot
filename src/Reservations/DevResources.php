@@ -3,22 +3,26 @@
 namespace Nopolabs\Yabot\Reservations;
 
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
-use Nopolabs\Yabot\Plugins\GuzzleTrait;
-use Nopolabs\Yabot\Yabot;
+use Nopolabs\Yabot\Bot\SlackClient;
+use Nopolabs\Yabot\Storage\StorageInterface;
+use React\EventLoop\LoopInterface;
 
 class DevResources extends Resources
 {
-    use GuzzleTrait;
-
     protected $refTagUrlTemplate;
 
-    public function __construct(Yabot $bot, array $config)
+    public function __construct(
+        SlackClient $slack,
+        StorageInterface $storage,
+        LoopInterface $eventLoop,
+        Client $guzzle,
+        array $config)
     {
-        parent::__construct($bot, $config);
-        $this->setGuzzle($bot->getGuzzle());
+        parent::__construct($slack, $storage, $eventLoop, $guzzle, $config);
         $this->refTagUrlTemplate = $config['refTagUrlTemplate'];
     }
 
@@ -41,10 +45,12 @@ class DevResources extends Resources
 
         return $this->getAsync($uri)->then(
             function(Response $response) {
-                return trim($response->getBody());
+                $body = $response->getBody();
+                return trim($body);
             },
             function(RequestException $e) {
-                return $e->getMessage();
+                $class = preg_replace('/^.*\\\/', '', get_class($e));
+                return "$class code={$e->getCode()}";
             }
         );
     }

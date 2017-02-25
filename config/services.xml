@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <imports>
+        <import resource="config.xml"/>
+    </imports>
+
+    <parameters>
+        <parameter key="storage.dir">storage</parameter>
+        <parameter key="log.file">logs/bot.log</parameter>
+        <parameter key="log.name">bot</parameter>
+        <parameter key="log.level" type="constant">Monolog\Logger::DEBUG</parameter>
+        <parameter key="guzzle.config" type="collection">
+            <parameter key="timeout">5</parameter>
+        </parameter>
+        <parameter key="lookup.config" type="collection">
+            <parameter key="channel">random</parameter>
+        </parameter>
+        <parameter key="resources.config" type="collection">
+            <parameter key="channel">general</parameter>
+            <parameter key="storageName">resources</parameter>
+            <parameter key="keys" type="collection">
+                <parameter>dev1</parameter>
+                <parameter>dev2</parameter>
+                <parameter>dev3</parameter>
+            </parameter>
+        </parameter>
+    </parameters>
+
+    <services>
+        <service id="storage" class="Nopolabs\Yabot\Storage\FileStorage">
+            <argument>%storage.dir%</argument>
+        </service>
+
+        <service id="log.handler" class="Monolog\Handler\StreamHandler">
+            <argument>%log.file%</argument>
+            <argument>%log.level%</argument>
+        </service>
+
+        <service id="logger" class="Monolog\Logger">
+            <argument>%log.name%</argument>
+            <call method="pushHandler">
+                <argument type="service" id="log.handler" />
+            </call>
+        </service>
+
+        <service id="event.loop" class="React\EventLoop\LoopInterface">
+            <factory class="React\EventLoop\Factory" method="create" />
+        </service>
+
+        <service id="guzzle" class="GuzzleHttp\Client">
+            <argument>%guzzle.config%</argument>
+        </service>
+
+        <service id="slack.realTimeClient" class="Slack\RealTimeClient">
+            <argument type="service" id="event.loop" />
+            <argument type="service" id="guzzle" />
+            <call method="setToken">
+                <argument>%slack.token%</argument>
+            </call>
+        </service>
+
+        <service id="slack.client" class="Nopolabs\Yabot\Bot\SlackClient">
+            <argument type="service" id="slack.realTimeClient" />
+            <argument type="service" id="users" />
+            <argument type="service" id="channels" />
+        </service>
+
+        <service id="users" class="Nopolabs\Yabot\Bot\Users" />
+
+        <service id="channels" class="Nopolabs\Yabot\Bot\Channels" />
+
+        <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory">
+            <argument type="service" id="slack.client" />
+        </service>
+
+        <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher">
+            <argument type="service" id="logger" />
+        </service>
+
+        <service id="yabot" class="Nopolabs\Yabot\Yabot">
+            <argument type="service" id="logger" />
+            <argument type="service" id="event.loop" />
+            <argument type="service" id="slack.client" />
+            <argument type="service" id="message.factory" />
+            <call method="addPlugin">
+                <argument type="service" id="plugin.hey" />
+            </call>
+            <call method="addPlugin">
+                <argument type="service" id="plugin.lookup" />
+            </call>
+            <call method="addPlugin">
+                <argument type="service" id="plugin.reservations" />
+            </call>
+        </service>
+
+        <service id="plugin.hey" class="Nopolabs\Yabot\Examples\Hey">
+            <argument type="service" id="message.dispatcher" />
+        </service>
+
+        <service id="plugin.lookup" class="Nopolabs\Yabot\Examples\Lookup">
+            <argument type="service" id="message.dispatcher" />
+            <argument>%lookup.config%</argument>
+        </service>
+
+        <service id="plugin.reservations" class="Nopolabs\Yabot\Reservations\ReservationsPlugin">
+            <argument type="service" id="message.dispatcher" />
+            <argument type="service" id="resources" />
+        </service>
+
+        <service id="resources" class="Nopolabs\Yabot\Reservations\Resources">
+            <argument type="service" id="slack.client" />
+            <argument type="service" id="storage" />
+            <argument type="service" id="event.loop" />
+            <argument>%resources.config%</argument>
+        </service>
+
+    </services>
+</container>

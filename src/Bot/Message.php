@@ -1,6 +1,6 @@
 <?php
 
-namespace Nopolabs\Yabot;
+namespace Nopolabs\Yabot\Bot;
 
 
 use Slack\ChannelInterface;
@@ -9,22 +9,33 @@ use Slack\User;
 class Message extends \Slack\Message\Message
 {
     public $data;
-    protected $bot;
+
+    /** @var SlackClient */
+    protected $slack;
+
+    /** @var User */
+    protected $user;
+
+    /** @var ChannelInterface */
+    protected $channel;
+
+    /** @var bool */
     protected $handled;
 
-    public function __construct(Yabot $bot, array $data)
+    public function __construct(SlackClient $slack, array $data)
     {
-        parent::__construct($bot->getClient(), $data);
+        parent::__construct($slack->getRealTimeClient(), $data);
 
-        $this->bot = $bot;
         $this->data = $data;
+        $this->slack = $slack;
+        $this->user = $slack->userById($data['user']);
+        $this->channel = $slack->channelById($data['channel']);
         $this->handled = false;
     }
 
     public function reply($text)
     {
-        $channel = $this->getBot()->getChannels()->byId($this->getChannelId());
-        $this->getBot()->say($text, $channel);
+        $this->slack->say($text, $this->getChannel());
     }
 
     public function isHandled() : bool
@@ -37,29 +48,14 @@ class Message extends \Slack\Message\Message
         $this->handled = $handled;
     }
 
-    public function getBot() : Yabot
-    {
-        return $this->bot;
-    }
-
-    public function getChannelId()
-    {
-        return $this->data['channel'];
-    }
-
     public function getChannel() : ChannelInterface
     {
-        return $this->getBot()->getChannels()->byId($this->getChannelId());
-    }
-
-    public function getUserId()
-    {
-        return $this->data['user'];
+        return $this->channel;
     }
 
     public function getUser() : User
     {
-        return $this->getBot()->getUsers()->byId($this->getUserId());
+        return $this->user;
     }
 
     public function getUsername()
@@ -67,19 +63,19 @@ class Message extends \Slack\Message\Message
         return $this->getUser()->getUsername();
     }
 
-    public function matchesChannel($channel)
+    public function matchesChannel($name)
     {
-        $channelId = $this->getBot()->getChannels()->byName($channel)->getId();
-        return $this->getChannelId() === $channelId;
+        $channel = $this->slack->channelByName($name);
+        return $this->channel === $channel;
     }
 
-    public function matchesUser($user)
+    public function matchesUser($name)
     {
-        $users = is_array($user) ? $user : [$user];
+        $names = is_array($name) ? $name : [$name];
 
-        foreach ($users as $user) {
-            $userId = $this->getBot()->getUsers()->byName($user)->getId();
-            if ($this->getUserId() === $userId) {
+        foreach ($names as $name) {
+            $user = $this->slack->userByName($name);
+            if ($this->user === $user) {
                 return true;
             }
         }

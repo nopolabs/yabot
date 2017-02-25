@@ -3,13 +3,12 @@
 namespace Nopolabs\Yabot\Queue;
 
 
-use Nopolabs\Yabot\Message;
-use Nopolabs\Yabot\Plugins\StorageTrait;
+use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Yabot;
 
 class Queue
 {
-    use StorageTrait;
+    use Nopolabs\Yabot\Helpers\StorageTrait;
 
     protected $queue;
 

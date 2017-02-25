@@ -4,40 +4,48 @@ namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
+use GuzzleHttp\Client;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
-use Nopolabs\Yabot\Plugins\BotTrait;
-use Nopolabs\Yabot\Plugins\LoopTrait;
-use Nopolabs\Yabot\Plugins\StorageTrait;
-use Nopolabs\Yabot\Yabot;
+use Nopolabs\Yabot\Bot\SlackClient;
+use Nopolabs\Yabot\Helpers\GuzzleTrait;
+use Nopolabs\Yabot\Helpers\LoopTrait;
+use Nopolabs\Yabot\Helpers\SlackTrait;
+use Nopolabs\Yabot\Helpers\StorageTrait;
+use Nopolabs\Yabot\Storage\StorageInterface;
+use React\EventLoop\LoopInterface;
 use Slack\User;
 
 class Resources
 {
     use StorageTrait;
     use LoopTrait;
-    use BotTrait;
+    use SlackTrait;
 
     protected $channel;
     protected $resources;
 
-    public function __construct(Yabot $bot, array $config)
+    public function __construct(
+        SlackClient $slack,
+        StorageInterface $storage,
+        LoopInterface $eventLoop,
+        array $config)
     {
         $this->channel = $config['channel'];
 
-        $this->setStorage($bot->getStorage());
+        $this->setSlack($slack);
+
+        $this->setStorage($storage);
         $this->setStorageKey($config['storageName']);
 
-        $this->setLoop($bot->getLoop());
-        $this->addPeriodicTimer(10, [$this, 'expireResources']);
-
-        $this->setBot($bot);
+        $this->setLoop($eventLoop);
+        $this->addPeriodicTimer(60, [$this, 'expireResources']);
 
         $resources = $this->load() ?: [];
         $this->resources = [];
-        foreach ($config['resourceKeys'] as $key) {
+        foreach ($config['keys'] as $key) {
             $resource = isset($resources[$key]) ? $resources[$key] : [];
             $this->resources[$key] = $resource;
         }

@@ -4,25 +4,27 @@ namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
-use Nopolabs\Yabot\Message;
-use Nopolabs\Yabot\Plugins\ChannelPluginTrait;
-use Nopolabs\Yabot\Plugins\PluginInterface;
+use Nopolabs\Yabot\Bot\Message;
+use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\PluginTrait;
 
-class ReservationsPlugin implements PluginInterface
+class ReservationsPlugin
 {
-    use ChannelPluginTrait;
+    use PluginTrait;
 
     /** @var Resources */
-    protected $resources;
+    private $resources;
 
-    public function getDefaultConfig() : array
+    /** @var array */
+    private $matchers;
+
+    /** @var MessageDispatcher */
+    private $dispatcher;
+
+    public function __construct(MessageDispatcher $dispatcher, Resources $resources, array $config = [])
     {
-        return [
-            'resourcesClass' => 'Nopolabs\\Yabot\\Reservations\\Resources',
-            'resourceCapture' => "(?'resource'\\w+)",
+        $default = [
             'resourceNamePlural' => 'resources',
-            'resourceKeys' => ['dev1', 'dev2', 'dev3'],
-            'storageName' => 'resources',
             'channel' => 'general',
             'matchers' => [
                 'reserveForever' => "/reserve #resourceCapture# forever\\b/",
@@ -40,41 +42,37 @@ class ReservationsPlugin implements PluginInterface
                 'isFree' => "/is #resourceCapture# free\\b/",
             ],
         ];
-    }
 
-    public function prepare()
-    {
-        $resourceCapture = $this->config['resourceCapture'];
-        $resourceNamePlural = $this->config['resourceNamePlural'];
+        $config = array_merge($default, $config);
 
-        $channel = $this->config['channel'];
-        $matchers = $this->config['matchers'];
-        $matchers = $this->addChannelToMatchers($channel, $matchers);
-        $matchers = $this->replaceInPatterns('#resourceCapture#', $resourceCapture, $matchers);
+        $channel = $config['channel'];
+        $matchers = $config['matchers'];
+        $resourceNamePlural = $config['resourceNamePlural'];
+        $resourceCapture = "(?'resource'".join('|', $resources->getKeys()).")";
+
+        $matchers = $this->addToMatchers('channel', $channel, $matchers);
         $matchers = $this->replaceInPatterns('#resourceNamePlural#', $resourceNamePlural, $matchers);
+        $matchers = $this->replaceInPatterns('#resourceCapture#', $resourceCapture, $matchers);
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
+
         $this->matchers = $matchers;
-
-        $this->getLog()->info("PLUGIN: ".static::class);
-        foreach ($matchers as $method => $matcher) {
-            $this->getLog()->info("  MATCHER: {$method} => ".json_encode($matcher));
-        }
-
-        $resourcesClass = $this->config['resourcesClass'];
-        $this->resources = new $resourcesClass($this->getBot(), $this->config);
+        $this->resources = $resources;
+        $this->dispatcher = $dispatcher;
     }
 
     public function reserve(Message $msg, array $matches)
     {
         $key = $matches['resource'];
-        $this->placeReservation($msg, $key, new DateTime('+ 12 hours'));
+        $results = $this->placeReservation($msg, $key, new DateTime('+ 12 hours'));
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function reserveForever(Message $msg, array $matches)
     {
         $key = $matches['resource'];
-        $this->placeReservation($msg, $key);
+        $results = $this->placeReservation($msg, $key);
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
@@ -82,118 +80,129 @@ class ReservationsPlugin implements PluginInterface
     {
         $key = $matches['resource'];
         $until = $matches['until'];
-        $this->placeReservation($msg, $key, new DateTime($until));
+        $results = $this->placeReservation($msg, $key, new DateTime($until));
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function release(Message $msg, array $matches)
     {
         $key = $matches['resource'];
-        $this->releaseReservation($msg, $key);
+        $results = $this->releaseReservation($msg, $key);
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function releaseMine(Message $msg, array $matches)
     {
+        $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
             if ($resource['user'] === $msg->getUsername()) {
-                $this->releaseReservation($msg, $key);
+                $results = array_merge($results, $this->releaseReservation($msg, $key));
             }
         }
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function releaseAll(Message $msg, array $matches)
     {
+        $results = [];
         foreach ($this->resources->getKeys() as $key) {
-            $this->releaseReservation($msg, $key);
+            $results = array_merge($results, $this->releaseReservation($msg, $key));
         }
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function list(Message $msg, array $matches)
     {
-        $list = $this->resources->getAllStatuses();
-        $msg->reply(join("\n", $list));
+        $results = $this->resources->getAllStatuses();
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
     public function listMine(Message $msg, array $matches)
     {
-        $list = [];
+        $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
             if ($resource['user'] === $msg->getUsername()) {
-                $list[] = $key;
+                $results[] = $key;
             }
         }
-        $msg->reply(join(',', $list));
+        $msg->reply(join(',', $results));
         $msg->setHandled(true);
     }
 
     public function listFree(Message $msg, array $matches)
     {
-        $list = [];
+        $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
             if (empty($resource)) {
-                $list[] = $key;
+                $results[] = $key;
             }
         }
-        $msg->reply(join(',', $list));
+        $msg->reply(join(',', $results));
         $msg->setHandled(true);
     }
 
     public function isFree(Message $msg, array $matches)
     {
+        $results = [];
         $key = $matches['resource'];
         $resource = $this->resources->getResource($key);
         if ($resource === null) {
-            $msg->reply("$key not found.");
+            $results[] = "$key not found.";
         } else {
             if (empty($resource)) {
-                $msg->reply("$key is free.");
+                $results[] = "$key is free.";
             } else {
-                $msg->reply("$key is reserved by {$resource['user']}");
+                $results[] = "$key is reserved by {$resource['user']}";
             }
         }
+        $msg->reply(join(',', $results));
         $msg->setHandled(true);
     }
 
-    protected function placeReservation(Message $msg, $key, DateTime $until = null)
+    protected function placeReservation(Message $msg, $key, DateTime $until = null) : array
     {
+        $results = [];
         $resource = $this->resources->getResource($key);
 
         if ($resource === null) {
-            $msg->reply("$key not found.");
+            $results[] = "$key not found.";
         } else {
             if (empty($resource)) {
                 $this->resources->reserve($key, $msg->getUser(), $until);
-                $msg->reply("Reserved $key for {$msg->getUser()->getUsername()}.");
+                $results[] = "Reserved $key for {$msg->getUser()->getUsername()}.";
             } elseif ($resource['user'] === $msg->getUsername()) {
                 $this->resources->reserve($key, $msg->getUser(), $until);
-                $msg->reply("Updated $key for {$msg->getUser()->getUsername()}.");
+                $results[] = "Updated $key for {$msg->getUser()->getUsername()}.";
             } else {
-                $msg->reply("$key is reserved by {$resource['user']}");
+                $results[] = "$key is reserved by {$resource['user']}";
             }
-            $msg->reply($this->resources->getStatus($key));
+            $results[] = $this->resources->getStatus($key);
         }
+
+        return $results;
     }
 
-    protected function releaseReservation(Message $msg, $key)
+    protected function releaseReservation(Message $msg, $key) : array
     {
+        $results = [];
         $resource = $this->resources->getResource($key);
 
         if ($resource === null) {
-            $msg->reply("$key not found.");
+            $results[] = "$key not found.";
         } else {
             if (empty($resource)) {
-                $msg->reply("$key is not reserved.");
-            } elseif ($resource['user'] === $msg->getUsername()) {
-                $this->resources->release($key);
-                $msg->reply("Released $key.");
+                $results[] = "$key is not reserved.";
             } else {
-                $msg->reply("$key is reserved by {$resource['user']}");
+                $this->resources->release($key);
+                $results[] = "Released $key.";
             }
-            $msg->reply($this->resources->getStatus($key));
         }
+
+        return $results;
     }
 }

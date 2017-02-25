@@ -3,24 +3,33 @@
 namespace Nopolabs\Yabot\Examples;
 
 
-use Nopolabs\Yabot\Plugins\ChannelPluginTrait;
-use Nopolabs\Yabot\Plugins\PluginInterface;
-use Nopolabs\Yabot\Yabot;
-use Nopolabs\Yabot\Message;
+use Nopolabs\Yabot\Bot\Message;
+use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\PluginTrait;
 
-class Lookup implements PluginInterface
+class Lookup
 {
-    use ChannelPluginTrait;
+    use PluginTrait;
 
-    public function getDefaultConfig() : array
+    public function __construct(MessageDispatcher $dispatcher, array $config = [])
     {
-        return [
+        $default = [
             'channel' => 'general',
             'matchers' => [
                 'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",
                 'lookupChannel' => "/\\blookup <#(?'channel'\\w+)\\|\\w+>/",
             ],
         ];
+
+        $config = array_merge($default, $config);
+
+        $channel = $config['channel'];
+        $matchers = $config['matchers'];
+
+        $matchers = $this->addToMatchers('channel', $channel, $matchers);
+
+        $this->setMatchers($matchers);
+        $this->setDispatcher($dispatcher);
     }
 
     public function lookupUser(Message $msg, array $matches)

@@ -2,7 +2,7 @@
 
 namespace Nopolabs\Yabot\Queue;
 
-use Nopolabs\Yabot\Message;
+use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Plugins\ChannelPluginTrait;
 use Nopolabs\Yabot\Plugins\PluginInterface;
 

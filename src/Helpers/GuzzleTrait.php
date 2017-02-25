@@ -1,6 +1,6 @@
 <?php
 
-namespace Nopolabs\Yabot\Plugins;
+namespace Nopolabs\Yabot\Helpers;
 
 
 use GuzzleHttp\Client;
