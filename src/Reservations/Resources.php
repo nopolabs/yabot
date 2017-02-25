@@ -93,13 +93,40 @@ class Resources
 
     public function getAllStatuses()
     {
-        $statuses = [];
+        $requests = [];
 
         foreach ($this->getKeys() as $key) {
-            $statuses = $this->getStatusAsync($key);
+            $requests[] = $this->getStatusAsync($key);
         }
 
-        return Promise\settle($statuses)->wait();
+        $statuses = [];
+        foreach (Promise\settle($requests)->wait() as $key => $result) {
+            if ($result['state'] === PromiseInterface::FULFILLED) {
+                $statuses[] = $result['value'];
+            }
+        }
+
+        return $statuses;
+    }
+
+    public function getReftags($envs)
+    {
+        $getTags = [];
+        foreach ($envs as $env) {
+            $uri = "https://$env.opensky.com/version/reftag";
+            $getTags[$env] = $this->getAsync($uri);
+        }
+
+        $reftags = [];
+        foreach (Promise\settle($getTags)->wait() as $env => $result) {
+            if ($result['state'] === PromiseInterface::FULFILLED) {
+                /** @var Response $rsp */
+                $rsp = $result['value'];
+                $reftags[$env] = trim($rsp->getBody());
+            }
+        }
+
+        return $reftags;
     }
 
     public function getStatusAsync($key) : PromiseInterface
