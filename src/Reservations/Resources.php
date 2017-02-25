@@ -7,6 +7,7 @@ use DateTime;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Response;
 use Nopolabs\Yabot\Plugins\BotTrait;
 use Nopolabs\Yabot\Plugins\LoopTrait;
 use Nopolabs\Yabot\Plugins\StorageTrait;

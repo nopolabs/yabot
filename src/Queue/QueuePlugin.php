@@ -43,7 +43,7 @@ class QueuePlugin implements PluginInterface
 
     public function push(Message $msg, array $matches)
     {
-        $element = $matches['element'];
+        $element = $this->queue->buildElement($msg, $matches);
 
         $this->queue->push($element);
 
@@ -59,7 +59,7 @@ class QueuePlugin implements PluginInterface
 
     public function remove(Message $msg, array $matches)
     {
-        $element = $matches['element'];
+        $element = $this->queue->buildElement($msg, $matches);
 
         $this->queue->remove($element);
 

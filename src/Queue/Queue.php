@@ -3,6 +3,7 @@
 namespace Nopolabs\Yabot\Queue;
 
 
+use Nopolabs\Yabot\Message;
 use Nopolabs\Yabot\Plugins\StorageTrait;
 use Nopolabs\Yabot\Yabot;
 
@@ -34,12 +35,12 @@ class Queue
         $this->save($this->queue);
     }
 
-    public function remove($el)
+    public function remove($element)
     {
         $queue = [];
-        foreach ($this->queue as $element) {
+        foreach ($this->queue as $el) {
             if ($el !== $element) {
-                $queue[] = $element;
+                $queue[] = $el;
             }
         }
         $this->queue = $queue;
@@ -50,6 +51,11 @@ class Queue
     {
         $this->queue = [];
         $this->save($this->queue);
+    }
+
+    public function buildElement(Message $msg, array $matches)
+    {
+        return $matches['element'];
     }
 
     public function getQueue() : array
