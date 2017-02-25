@@ -22,10 +22,12 @@ class Resources
     protected $channel;
     protected $resources;
 
-    public function __construct(Yabot $bot, array $keys, $channel, $name = 'resources')
+    public function __construct(Yabot $bot, array $config)
     {
+        $this->channel = $config['channel'];
+
         $this->setStorage($bot->getStorage());
-        $this->setStorageKey($name);
+        $this->setStorageKey($config['storageName']);
 
         $this->setLoop($bot->getLoop());
         $this->addPeriodicTimer(10, [$this, 'expireResources']);
@@ -34,7 +36,7 @@ class Resources
 
         $resources = $this->load() ?: [];
         $this->resources = [];
-        foreach ($keys as $key) {
+        foreach ($config['resourceKeys'] as $key) {
             $resource = isset($resources[$key]) ? $resources[$key] : [];
             $this->resources[$key] = $resource;
         }

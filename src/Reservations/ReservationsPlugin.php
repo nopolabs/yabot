@@ -22,6 +22,7 @@ class ReservationsPlugin implements PluginInterface
             'resourceCapture' => "(?'resource'\\w+)",
             'resourceNamePlural' => 'resources',
             'resourceKeys' => ['dev1', 'dev2', 'dev3'],
+            'storageName' => 'resources',
             'channel' => 'general',
             'matchers' => [
                 'reserveForever' => "/reserve #resourceCapture# forever\\b/",
@@ -60,7 +61,7 @@ class ReservationsPlugin implements PluginInterface
         }
 
         $resourcesClass = $this->config['resourcesClass'];
-        $this->resources = new $resourcesClass($this->getBot(), $this->config['resourceKeys'], $channel);
+        $this->resources = new $resourcesClass($this->getBot(), $this->config);
     }
 
     public function reserve(Message $msg, array $matches)

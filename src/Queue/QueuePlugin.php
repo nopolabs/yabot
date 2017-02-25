@@ -16,6 +16,8 @@ class QueuePlugin implements PluginInterface
     public function getDefaultConfig() : array
     {
         return [
+            'queueClass' => 'Nopolabs\\Yabot\\Queue\\Queue',
+            'storageName' => 'queue',
             'channel' => 'general',
             'matchers' => [
                 'push' => "/^push #?(?'element'[0-9]{4,5})\\b/",
@@ -29,7 +31,8 @@ class QueuePlugin implements PluginInterface
 
     public function prepare()
     {
-        $this->queue = new Queue($this->getBot());
+        $queueClass = $this->config['queueClass'];
+        $this->queue = new $queueClass($this->getBot(), $this->config);
 
         $channel = $this->config['channel'];
         $matchers = $this->config['matchers'];

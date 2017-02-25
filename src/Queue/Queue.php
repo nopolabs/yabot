@@ -12,9 +12,9 @@ class Queue
 
     protected $queue;
 
-    public function __construct(Yabot $bot, $name = 'queue')
+    public function __construct(Yabot $bot, array $config)
     {
-        $this->setStorageKey($name);
+        $this->setStorageKey($config['storageName']);
         $this->setStorage($bot->getStorage());
 
         $this->queue = $this->load() ?: [];
