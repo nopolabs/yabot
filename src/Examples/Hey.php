@@ -2,13 +2,13 @@
 
 namespace Nopolabs\Yabot\Examples;
 
-
-use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\MessageInterface;
+use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\PluginTrait;
 use Psr\Log\LoggerInterface;
 
-class Hey
+class Hey implements PluginInterface
 {
     use PluginTrait;
 
@@ -35,7 +35,7 @@ class Hey
         $this->setMatchers($matchers);
     }
 
-    public function hey(Message $msg, array $matches)
+    public function hey(MessageInterface $msg, array $matches)
     {
         $msg->reply('hey');
     }

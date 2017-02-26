@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot;
 
 use Evenement\EventEmitterTrait;
 use Nopolabs\Yabot\Bot\MessageFactory;
+use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\SlackClient;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
@@ -55,7 +56,7 @@ class Yabot
 
             $this->logger->info('Received message', $data);
 
-            $message = $this->messageFactory->create($data);
+            $message = $this->messageFactory->create($this->slackClient, $data);
 
             $this->emit('message', [$message]);
         });
@@ -75,12 +76,12 @@ class Yabot
         $this->slackClient->disconnect();
     }
 
-    public function addPlugin($plugin)
+    public function addPlugin(PluginInterface $plugin)
     {
         $this->on('message', [$plugin, 'onMessage']);
     }
 
-    public function removePlugin($plugin)
+    public function removePlugin(PluginInterface $plugin)
     {
         $this->removeListener('message', [$plugin, 'onMessage']);
     }

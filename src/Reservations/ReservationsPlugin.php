@@ -2,14 +2,14 @@
 
 namespace Nopolabs\Yabot\Reservations;
 
-
 use DateTime;
-use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\MessageInterface;
+use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\PluginTrait;
 use Psr\Log\LoggerInterface;
 
-class ReservationsPlugin
+class ReservationsPlugin implements PluginInterface
 {
     use PluginTrait;
 
@@ -65,7 +65,7 @@ class ReservationsPlugin
         $this->setMatchers($matchers);
     }
 
-    public function reserve(Message $msg, array $matches)
+    public function reserve(MessageInterface $msg, array $matches)
     {
         $key = $matches['resource'];
         $results = $this->placeReservation($msg, $key, new DateTime('+ 12 hours'));
@@ -73,7 +73,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function reserveForever(Message $msg, array $matches)
+    public function reserveForever(MessageInterface $msg, array $matches)
     {
         $key = $matches['resource'];
         $results = $this->placeReservation($msg, $key);
@@ -81,7 +81,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function reserveUntil(Message $msg, array $matches)
+    public function reserveUntil(MessageInterface $msg, array $matches)
     {
         $key = $matches['resource'];
         $until = $matches['until'];
@@ -90,7 +90,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function release(Message $msg, array $matches)
+    public function release(MessageInterface $msg, array $matches)
     {
         $key = $matches['resource'];
         $results = $this->releaseReservation($msg, $key);
@@ -98,7 +98,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function releaseMine(Message $msg, array $matches)
+    public function releaseMine(MessageInterface $msg, array $matches)
     {
         $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
@@ -110,7 +110,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function releaseAll(Message $msg, array $matches)
+    public function releaseAll(MessageInterface $msg, array $matches)
     {
         $results = [];
         foreach ($this->resources->getKeys() as $key) {
@@ -120,14 +120,14 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function list(Message $msg, array $matches)
+    public function list(MessageInterface $msg, array $matches)
     {
         $results = $this->resources->getAllStatuses();
         $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 
-    public function listMine(Message $msg, array $matches)
+    public function listMine(MessageInterface $msg, array $matches)
     {
         $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
@@ -139,7 +139,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function listFree(Message $msg, array $matches)
+    public function listFree(MessageInterface $msg, array $matches)
     {
         $results = [];
         foreach ($this->resources->getAll() as $key => $resource) {
@@ -151,7 +151,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    public function isFree(Message $msg, array $matches)
+    public function isFree(MessageInterface $msg, array $matches)
     {
         $results = [];
         $key = $matches['resource'];
@@ -169,7 +169,7 @@ class ReservationsPlugin
         $msg->setHandled(true);
     }
 
-    protected function placeReservation(Message $msg, $key, DateTime $until = null) : array
+    protected function placeReservation(MessageInterface $msg, $key, DateTime $until = null) : array
     {
         $results = [];
         $resource = $this->resources->getResource($key);
@@ -192,7 +192,7 @@ class ReservationsPlugin
         return $results;
     }
 
-    protected function releaseReservation(Message $msg, $key) : array
+    protected function releaseReservation(MessageInterface $msg, $key) : array
     {
         $results = [];
         $resource = $this->resources->getResource($key);

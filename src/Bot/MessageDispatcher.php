@@ -6,7 +6,7 @@ namespace Nopolabs\Yabot\Bot;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-class MessageDispatcher
+class MessageDispatcher implements MessageDispatcherInterface
 {
     private $logger;
 
@@ -15,7 +15,7 @@ class MessageDispatcher
         $this->logger = $logger;
     }
 
-    public function dispatch($object, Message $message, array $matchers)
+    public function dispatch($plugin, MessageInterface $message, array $matchers)
     {
         foreach ($matchers as $name => $params) {
             if ($message->isHandled()) {
@@ -28,11 +28,11 @@ class MessageDispatcher
                 continue;
             }
 
-            $this->dispatchMessage($object, $message, $matched);
+            $this->dispatchMessage($plugin, $message, $matched);
         }
     }
 
-    protected function matchMessage(Message $message, $name, array $params)
+    protected function matchMessage(MessageInterface $message, $name, array $params)
     {
         $params = is_array($params) ? $params : ['pattern' => $params];
 
@@ -64,12 +64,12 @@ class MessageDispatcher
         return [$method, $matches];
     }
 
-    protected function dispatchMessage($object, Message $message, array $matched)
+    protected function dispatchMessage($plugin, MessageInterface $message, array $matched)
     {
         list($method, $matches) = $matched;
 
         try {
-            call_user_func([$object, $method], $message, $matches);
+            call_user_func([$plugin, $method], $message, $matches);
         } catch (Exception $e) {
             $this->logger->warning('Exception in '.static::class.'::'.$method);
             $this->logger->warning($e->getMessage());

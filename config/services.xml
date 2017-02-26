@@ -125,9 +125,7 @@
 
         <service id="channels" class="Nopolabs\Yabot\Bot\Channels" />
 
-        <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory">
-            <argument type="service" id="slack.client" />
-        </service>
+        <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory" />
 
         <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher">
             <argument type="service" id="logger" />

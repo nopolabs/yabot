@@ -2,14 +2,13 @@
 
 namespace Nopolabs\Yabot\Queue;
 
-use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\MessageInterface;
+use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\PluginTrait;
-use Nopolabs\Yabot\Plugins\ChannelPluginTrait;
-use Nopolabs\Yabot\Plugins\PluginInterface;
 use Psr\Log\LoggerInterface;
 
-class QueuePlugin
+class QueuePlugin implements PluginInterface
 {
     use PluginTrait;
 
@@ -52,7 +51,7 @@ class QueuePlugin
         $this->setMatchers($matchers);
     }
 
-    public function push(Message $msg, array $matches)
+    public function push(MessageInterface $msg, array $matches)
     {
         $element = $this->queue->buildElement($msg, $matches);
 
@@ -61,14 +60,14 @@ class QueuePlugin
         $this->list($msg);
     }
 
-    public function next(Message $msg, array $matches)
+    public function next(MessageInterface $msg, array $matches)
     {
         $this->queue->next();
 
         $this->list($msg);
     }
 
-    public function remove(Message $msg, array $matches)
+    public function remove(MessageInterface $msg, array $matches)
     {
         $element = $this->queue->buildElement($msg, $matches);
 
@@ -77,14 +76,14 @@ class QueuePlugin
         $this->list($msg);
     }
 
-    public function clear(Message $msg, array $matches)
+    public function clear(MessageInterface $msg, array $matches)
     {
         $this->queue->clear();
 
         $this->list($msg);
     }
 
-    public function list(Message $msg, array $matches = [])
+    public function list(MessageInterface $msg, array $matches = [])
     {
         $results = [];
 

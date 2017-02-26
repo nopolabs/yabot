@@ -2,7 +2,6 @@
 
 namespace Nopolabs\Yabot\Bot;
 
-
 use Nopolabs\Yabot\Helpers\LogTrait;
 
 trait PluginTrait
@@ -14,6 +13,21 @@ trait PluginTrait
 
     /** @var MessageDispatcher */
     private $dispatcher;
+
+    public function onMessage(MessageInterface $message)
+    {
+        $this->dispatcher->dispatch($this, $message, $this->matchers);
+    }
+
+    public function getDispatcher() : MessageDispatcher
+    {
+        return $this->dispatcher;
+    }
+
+    public function setDispatcher(MessageDispatcher $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
 
     public function getMatchers() : array
     {
@@ -27,21 +41,6 @@ trait PluginTrait
         }
 
         $this->matchers = $matchers;
-    }
-
-    public function getDispatcher() : MessageDispatcher
-    {
-        return $this->dispatcher;
-    }
-
-    public function setDispatcher(MessageDispatcher $dispatcher)
-    {
-        $this->dispatcher = $dispatcher;
-    }
-
-    public function onMessage(Message $message)
-    {
-        $this->dispatcher->dispatch($this, $message, $this->matchers);
     }
 
     public function expandMatchers(array $matchers) : array
