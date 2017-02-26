@@ -6,18 +6,25 @@ namespace Nopolabs\Yabot\Examples;
 use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
 use Nopolabs\Yabot\Bot\PluginTrait;
+use Psr\Log\LoggerInterface;
 
 class Lookup
 {
     use PluginTrait;
 
-    public function __construct(MessageDispatcher $dispatcher, array $config = [])
+    public function __construct(
+        MessageDispatcher $dispatcher,
+        LoggerInterface $logger,
+        array $config = [])
     {
+        $this->setDispatcher($dispatcher);
+        $this->setLog($logger);
+
         $default = [
             'channel' => 'general',
             'matchers' => [
-                'lookupUser' => "/\\blookup <@(?'user'\\w+)>/",
-                'lookupChannel' => "/\\blookup <#(?'channel'\\w+)\\|\\w+>/",
+                'lookupUser' => "/^lookup <@(?'user'\\w+)>/",
+                'lookupChannel' => "/^lookup <#(?'channel'\\w+)\\|\\w+>/",
             ],
         ];
 
@@ -29,7 +36,6 @@ class Lookup
         $matchers = $this->addToMatchers('channel', $channel, $matchers);
 
         $this->setMatchers($matchers);
-        $this->setDispatcher($dispatcher);
     }
 
     public function lookupUser(Message $msg, array $matches)

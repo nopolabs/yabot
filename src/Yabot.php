@@ -39,12 +39,23 @@ class Yabot
 
     public function run()
     {
-        $this->slackClient->on('message', function (Payload $data) {
-            $message = $this->messageFactory->create($data);
+        $this->slackClient->on('message', function (Payload $payload) {
 
-            $this->logger->info('Noticed message', [
-                'text' => $message->getText(),
-            ]);
+            $data = $payload->getData();
+
+            if (isset($data['subtype'])) {
+                if ($data['subtype'] === 'message_changed') {
+                    $channel = $data['channel'];
+                    $data = $data['message'];
+                    $data['channel'] = $channel;
+                } elseif ($data['subtype'] !== 'bot_message') {
+                    return;
+                }
+            }
+
+            $this->logger->info('Received message', $data);
+
+            $message = $this->messageFactory->create($data);
 
             $this->emit('message', [$message]);
         });

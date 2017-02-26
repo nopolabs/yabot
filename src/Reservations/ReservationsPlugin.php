@@ -7,39 +7,42 @@ use DateTime;
 use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
 use Nopolabs\Yabot\Bot\PluginTrait;
+use Psr\Log\LoggerInterface;
 
 class ReservationsPlugin
 {
     use PluginTrait;
 
-    /** @var Resources */
-    private $resources;
+    /** @var ResourcesInterface */
+    protected $resources;
 
-    /** @var array */
-    private $matchers;
-
-    /** @var MessageDispatcher */
-    private $dispatcher;
-
-    public function __construct(MessageDispatcher $dispatcher, Resources $resources, array $config = [])
+    public function __construct(
+        MessageDispatcher $dispatcher,
+        LoggerInterface $logger,
+        ResourcesInterface $resources,
+        array $config = [])
     {
+        $this->setDispatcher($dispatcher);
+        $this->setLog($logger);
+        $this->resources = $resources;
+
         $default = [
             'resourceNamePlural' => 'resources',
             'channel' => 'general',
             'matchers' => [
-                'reserveForever' => "/reserve #resourceCapture# forever\\b/",
-                'reserveUntil' => "/reserve #resourceCapture# until (?'until'.+)/",
-                'reserve' => "/reserve #resourceCapture#/",
+                'reserveForever' => "/^reserve #resourceCapture# forever\\b/",
+                'reserveUntil' => "/^reserve #resourceCapture# until (?'until'.+)/",
+                'reserve' => "/^reserve #resourceCapture#/",
 
-                'release' => "/release #resourceCapture#/",
-                'releaseMine' => "/release mine\\b/",
-                'releaseAll' => "/release all\\b/",
+                'release' => "/^release #resourceCapture#/",
+                'releaseMine' => "/^release mine\\b/",
+                'releaseAll' => "/^release all\\b/",
 
-                'list' => "/list #resourceNamePlural#\\b/",
-                'listMine' => "/what #resourceNamePlural# are mine\\b/",
-                'listFree' => "/what #resourceNamePlural# are free\\b/",
+                'list' => "/^list #resourceNamePlural#\\b/",
+                'listMine' => "/^what #resourceNamePlural# are mine\\b/",
+                'listFree' => "/^what #resourceNamePlural# are free\\b/",
 
-                'isFree' => "/is #resourceCapture# free\\b/",
+                'isFree' => "/^is #resourceCapture# free\\b/",
             ],
         ];
 
@@ -51,13 +54,15 @@ class ReservationsPlugin
         $resourceCapture = "(?'resource'".join('|', $resources->getKeys()).")";
 
         $matchers = $this->addToMatchers('channel', $channel, $matchers);
+        if (isset($config['commandPrefix'])) {
+            $prefix = $config['commandPrefix'];
+            $matchers = $this->replaceInPatterns('/^', "/^$prefix ", $matchers);
+        }
         $matchers = $this->replaceInPatterns('#resourceNamePlural#', $resourceNamePlural, $matchers);
         $matchers = $this->replaceInPatterns('#resourceCapture#', $resourceCapture, $matchers);
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
 
-        $this->matchers = $matchers;
-        $this->resources = $resources;
-        $this->dispatcher = $dispatcher;
+        $this->setMatchers($matchers);
     }
 
     public function reserve(Message $msg, array $matches)

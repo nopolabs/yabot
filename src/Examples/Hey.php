@@ -6,16 +6,23 @@ namespace Nopolabs\Yabot\Examples;
 use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
 use Nopolabs\Yabot\Bot\PluginTrait;
+use Psr\Log\LoggerInterface;
 
 class Hey
 {
     use PluginTrait;
 
-    public function __construct(MessageDispatcher $dispatcher, array $config = [])
+    public function __construct(
+        MessageDispatcher $dispatcher,
+        LoggerInterface $logger,
+        array $config = [])
     {
+        $this->setDispatcher($dispatcher);
+        $this->setLog($logger);
+
         $default =[
             'hey' => [
-                'pattern' => "/\\b(?'hey'hey)\\b/",
+                'pattern' => "/^(?'hey'hey)\\b/",
                 'channel' => 'general',
                 'user' => 'dan',
                 'method' => 'hey',
@@ -26,7 +33,6 @@ class Hey
         $matchers = $this->expandMatchers($matchers);
 
         $this->setMatchers($matchers);
-        $this->setDispatcher($dispatcher);
     }
 
     public function hey(Message $msg, array $matches)

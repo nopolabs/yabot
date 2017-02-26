@@ -15,8 +15,14 @@
         <parameter key="guzzle.config" type="collection">
             <parameter key="timeout">5</parameter>
         </parameter>
-        <parameter key="lookup.config" type="collection">
+        <parameter key="plugin.lookup.config" type="collection">
             <parameter key="channel">random</parameter>
+        </parameter>
+        <parameter key="plugin.reservations.config" type="collection">
+            <parameter key="commandPrefix">ya</parameter>
+        </parameter>
+        <parameter key="plugin.queue.config" type="collection">
+            <parameter key="commandPrefix">ya</parameter>
         </parameter>
         <parameter key="resources.config" type="collection">
             <parameter key="channel">general</parameter>
@@ -27,9 +33,56 @@
                 <parameter>dev3</parameter>
             </parameter>
         </parameter>
+        <parameter key="queue.config" type="collection">
+            <parameter key="storageName">queue</parameter>
+        </parameter>
     </parameters>
 
     <services>
+        <service id="yabot" class="Nopolabs\Yabot\Yabot">
+            <argument type="service" id="logger" />
+            <argument type="service" id="event.loop" />
+            <argument type="service" id="slack.client" />
+            <argument type="service" id="message.factory" />
+            <call method="addPlugin">
+                <argument type="service" id="plugin.hey" />
+            </call>
+            <call method="addPlugin">
+                <argument type="service" id="plugin.lookup" />
+            </call>
+            <call method="addPlugin">
+                <argument type="service" id="plugin.reservations" />
+            </call>
+            <call method="addPlugin">
+                <argument type="service" id="plugin.queue" />
+            </call>
+        </service>
+
+        <service id="plugin.hey" class="Nopolabs\Yabot\Examples\Hey">
+            <argument type="service" id="message.dispatcher" />
+            <argument type="service" id="logger" />
+        </service>
+
+        <service id="plugin.lookup" class="Nopolabs\Yabot\Examples\Lookup">
+            <argument type="service" id="message.dispatcher" />
+            <argument type="service" id="logger" />
+            <argument>%plugin.lookup.config%</argument>
+        </service>
+
+        <service id="plugin.reservations" class="Nopolabs\Yabot\Reservations\ReservationsPlugin">
+            <argument type="service" id="message.dispatcher" />
+            <argument type="service" id="logger" />
+            <argument type="service" id="resources" />
+            <argument>%plugin.reservations.config%</argument>
+        </service>
+
+        <service id="plugin.queue" class="Nopolabs\Yabot\Queue\QueuePlugin">
+            <argument type="service" id="message.dispatcher" />
+            <argument type="service" id="logger" />
+            <argument type="service" id="queue" />
+            <argument>%plugin.queue.config%</argument>
+        </service>
+
         <service id="storage" class="Nopolabs\Yabot\Storage\FileStorage">
             <argument>%storage.dir%</argument>
         </service>
@@ -80,41 +133,16 @@
             <argument type="service" id="logger" />
         </service>
 
-        <service id="yabot" class="Nopolabs\Yabot\Yabot">
-            <argument type="service" id="logger" />
-            <argument type="service" id="event.loop" />
-            <argument type="service" id="slack.client" />
-            <argument type="service" id="message.factory" />
-            <call method="addPlugin">
-                <argument type="service" id="plugin.hey" />
-            </call>
-            <call method="addPlugin">
-                <argument type="service" id="plugin.lookup" />
-            </call>
-            <call method="addPlugin">
-                <argument type="service" id="plugin.reservations" />
-            </call>
-        </service>
-
-        <service id="plugin.hey" class="Nopolabs\Yabot\Examples\Hey">
-            <argument type="service" id="message.dispatcher" />
-        </service>
-
-        <service id="plugin.lookup" class="Nopolabs\Yabot\Examples\Lookup">
-            <argument type="service" id="message.dispatcher" />
-            <argument>%lookup.config%</argument>
-        </service>
-
-        <service id="plugin.reservations" class="Nopolabs\Yabot\Reservations\ReservationsPlugin">
-            <argument type="service" id="message.dispatcher" />
-            <argument type="service" id="resources" />
-        </service>
-
         <service id="resources" class="Nopolabs\Yabot\Reservations\Resources">
             <argument type="service" id="slack.client" />
             <argument type="service" id="storage" />
             <argument type="service" id="event.loop" />
             <argument>%resources.config%</argument>
+        </service>
+
+        <service id="queue" class="Nopolabs\Yabot\Queue\Queue">
+            <argument type="service" id="storage" />
+            <argument>%queue.config%</argument>
         </service>
 
     </services>

@@ -18,6 +18,9 @@ class MessageDispatcher
     public function dispatch($object, Message $message, array $matchers)
     {
         foreach ($matchers as $name => $params) {
+            if ($message->isHandled()) {
+                return;
+            }
 
             $matched = $this->matchMessage($message, $name, $params);
 
@@ -26,10 +29,6 @@ class MessageDispatcher
             }
 
             $this->dispatchMessage($object, $message, $matched);
-
-            if ($message->isHandled()) {
-                return;
-            }
         }
     }
 
@@ -58,7 +57,7 @@ class MessageDispatcher
             $matches = [];
         }
 
-        $this->logger->info("matched: $name");
+        $this->logger->info("matched: $name => ".json_encode($params));
 
         $method = isset($params['method']) ? $params['method'] : $name;
 

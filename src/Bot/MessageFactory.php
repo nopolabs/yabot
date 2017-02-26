@@ -15,8 +15,8 @@ class MessageFactory
         $this->slack = $slack;
     }
 
-    public function create(Payload $payload) : Message
+    public function create(array $data) : Message
     {
-        return new Message($this->slack, $payload->getData());
+        return new Message($this->slack, $data);
     }
 }

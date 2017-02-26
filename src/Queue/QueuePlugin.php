@@ -3,42 +3,53 @@
 namespace Nopolabs\Yabot\Queue;
 
 use Nopolabs\Yabot\Bot\Message;
+use Nopolabs\Yabot\Bot\MessageDispatcher;
+use Nopolabs\Yabot\Bot\PluginTrait;
 use Nopolabs\Yabot\Plugins\ChannelPluginTrait;
 use Nopolabs\Yabot\Plugins\PluginInterface;
+use Psr\Log\LoggerInterface;
 
-class QueuePlugin implements PluginInterface
+class QueuePlugin
 {
-    use ChannelPluginTrait;
+    use PluginTrait;
 
     /** @var Queue */
     protected $queue;
 
-    public function getDefaultConfig() : array
+    public function __construct(
+        MessageDispatcher $dispatcher,
+        LoggerInterface $logger,
+        Queue $queue,
+        array $config = [])
     {
-        return [
-            'queueClass' => 'Nopolabs\\Yabot\\Queue\\Queue',
-            'storageName' => 'queue',
+        $this->setDispatcher($dispatcher);
+        $this->setLog($logger);
+        $this->queue = $queue;
+
+        $default = [
             'channel' => 'general',
             'matchers' => [
-                'push' => "/^push #?(?'element'[0-9]{4,5})\\b/",
-                'next' => "/^next\\b/",
-                'remove' => "/^rm #?(?'element'[0-9]{4,5})\\b/",
-                'clear' => "/^clear\\b/",
-                'list' => "/^list\\b/",
+                'push' => "/^push #?(?'item'[0-9]{4,5})\\b/",
+                'next' => "/^next\\s*$/",
+                'remove' => "/^rm #?(?'item'[0-9]{4,5})\\b/",
+                'clear' => "/^clear\\s*$/",
+                'list' => "/^list$/",
             ],
         ];
-    }
 
-    public function prepare()
-    {
-        $queueClass = $this->config['queueClass'];
-        $this->queue = new $queueClass($this->getBot(), $this->config);
+        $config = array_merge($default, $config);
 
-        $channel = $this->config['channel'];
-        $matchers = $this->config['matchers'];
-        $matchers = $this->addChannelToMatchers($channel, $matchers);
+        $channel = $config['channel'];
+        $matchers = $config['matchers'];
+
+        $matchers = $this->addToMatchers('channel', $channel, $matchers);
+        if (isset($config['commandPrefix'])) {
+            $prefix = $config['commandPrefix'];
+            $matchers = $this->replaceInPatterns('/^', "/^$prefix ", $matchers);
+        }
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
-        $this->matchers = $matchers;
+
+        $this->setMatchers($matchers);
     }
 
     public function push(Message $msg, array $matches)
@@ -75,18 +86,19 @@ class QueuePlugin implements PluginInterface
 
     public function list(Message $msg, array $matches = [])
     {
+        $results = [];
+
         $details = $this->queue->getDetails();
 
         if (empty($details)) {
-            $msg->reply('The queue is empty.');
+            $results[] = 'The queue is empty.';
         } else {
-            $list = [];
             foreach ($this->queue->getDetails() as $detail) {
-                $list[] = $detail;
+                $results[] = $detail;
             }
-            $msg->reply(join("\n", $list));
         }
 
+        $msg->reply(join("\n", $results));
         $msg->setHandled(true);
     }
 }

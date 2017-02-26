@@ -3,8 +3,12 @@
 namespace Nopolabs\Yabot\Bot;
 
 
+use Nopolabs\Yabot\Helpers\LogTrait;
+
 trait PluginTrait
 {
+    use LogTrait;
+
     /** @var array */
     private $matchers;
 
@@ -18,6 +22,10 @@ trait PluginTrait
 
     public function setMatchers(array $matchers)
     {
+        foreach ($matchers as $name => $params) {
+            $this->getLog()->debug("$name: ".json_encode($params));
+        }
+
         $this->matchers = $matchers;
     }
 
@@ -40,9 +48,9 @@ trait PluginTrait
     {
         $expanded = [];
 
-        foreach ($matchers as $method => $matcher) {
-            $matcher = is_array($matcher) ? $matcher : ['pattern' => $matcher];
-            $expanded[$method] = $matcher;
+        foreach ($matchers as $name => $params) {
+            $params = is_array($params) ? $params : ['pattern' => $params];
+            $expanded[$name] = $params;
         }
 
         return $expanded;
@@ -52,9 +60,9 @@ trait PluginTrait
     {
         $updated = [];
 
-        foreach ($this->expandMatchers($matchers) as $method => $matcher) {
-            $matcher[$key] = $value;
-            $updated[$method] = $matcher;
+        foreach ($this->expandMatchers($matchers) as $name => $params) {
+            $params[$key] = $value;
+            $updated[$name] = $params;
         }
 
         return $updated;
@@ -64,11 +72,11 @@ trait PluginTrait
     {
         $replaced = [];
 
-        foreach ($this->expandMatchers($matchers) as $method => $matcher) {
-            $pattern = $matcher['pattern'];
+        foreach ($this->expandMatchers($matchers) as $name => $params) {
+            $pattern = $params['pattern'];
             $pattern = str_replace($search, $replace, $pattern);
-            $matcher['pattern'] = $pattern;
-            $replaced[$method] = $matcher;
+            $params['pattern'] = $pattern;
+            $replaced[$name] = $params;
         }
 
         return $replaced;

@@ -4,13 +4,11 @@ namespace Nopolabs\Yabot\Reservations;
 
 
 use DateTime;
-use GuzzleHttp\Client;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
 use Nopolabs\Yabot\Bot\SlackClient;
-use Nopolabs\Yabot\Helpers\GuzzleTrait;
 use Nopolabs\Yabot\Helpers\LoopTrait;
 use Nopolabs\Yabot\Helpers\SlackTrait;
 use Nopolabs\Yabot\Helpers\StorageTrait;
@@ -18,7 +16,7 @@ use Nopolabs\Yabot\Storage\StorageInterface;
 use React\EventLoop\LoopInterface;
 use Slack\User;
 
-class Resources
+class Resources implements ResourcesInterface
 {
     use StorageTrait;
     use LoopTrait;
@@ -84,17 +82,18 @@ class Resources
         return !empty($this->resources[$key]);
     }
 
-    public function isExpired($key)
+    public function reserve($key, User $user, DateTime $until = null)
     {
-        if ($this->isReserved($key)) {
-            $until = $this->getResource($key)['until'];
-            if ($until === 'forever') {
-                return false;
-            } else {
-                $expires = new DateTime($until);
-                return $expires < new DateTime();
-            }
-        }
+        $this->setResource($key, [
+            'user' => $user->getUsername(),
+            'userId' => $user->getId(),
+            'until' => $until ? $until->format('Y-m-d H:i:s') : 'forever',
+        ]);
+    }
+
+    public function release($key)
+    {
+        $this->setResource($key, []);
     }
 
     public function getStatus($key)
@@ -120,7 +119,37 @@ class Resources
         return $statuses;
     }
 
-    public function getReftags($envs)
+    public function getStatusAsync($key) : PromiseInterface
+    {
+        $status = json_encode([$key => $this->resources[$key]]);
+
+        return new FulfilledPromise($status);
+    }
+
+    public function expireResources()
+    {
+        foreach ($this->getKeys() as $key) {
+            if ($this->isExpired($key)) {
+                $this->release($key);
+                $this->say("released $key", $this->channel);
+            }
+        }
+    }
+
+    protected function isExpired($key)
+    {
+        if ($this->isReserved($key)) {
+            $until = $this->getResource($key)['until'];
+            if ($until === 'forever') {
+                return false;
+            } else {
+                $expires = new DateTime($until);
+                return $expires < new DateTime();
+            }
+        }
+    }
+
+    protected function getReftags($envs)
     {
         $getTags = [];
         foreach ($envs as $env) {
@@ -138,36 +167,5 @@ class Resources
         }
 
         return $reftags;
-    }
-
-    public function getStatusAsync($key) : PromiseInterface
-    {
-        $status = json_encode([$key => $this->resources[$key]]);
-
-        return new FulfilledPromise($status);
-    }
-
-    public function reserve($key, User $user, DateTime $until = null)
-    {
-        $this->setResource($key, [
-            'user' => $user->getUsername(),
-            'userId' => $user->getId(),
-            'until' => $until ? $until->format('Y-m-d H:i:s') : 'forever',
-        ]);
-    }
-
-    public function release($key)
-    {
-        $this->setResource($key, []);
-    }
-
-    public function expireResources()
-    {
-        foreach ($this->getKeys() as $key) {
-            if ($this->isExpired($key)) {
-                $this->release($key);
-                $this->say("released $key", $this->channel);
-            }
-        }
     }
 }

@@ -4,18 +4,20 @@ namespace Nopolabs\Yabot\Queue;
 
 
 use Nopolabs\Yabot\Bot\Message;
+use Nopolabs\Yabot\Helpers\StorageTrait;
+use Nopolabs\Yabot\Storage\StorageInterface;
 use Nopolabs\Yabot\Yabot;
 
 class Queue
 {
-    use Nopolabs\Yabot\Helpers\StorageTrait;
+    use StorageTrait;
 
     protected $queue;
 
-    public function __construct(Yabot $bot, array $config)
+    public function __construct(StorageInterface $storage, array $config)
     {
         $this->setStorageKey($config['storageName']);
-        $this->setStorage($bot->getStorage());
+        $this->setStorage($storage);
 
         $this->queue = $this->load() ?: [];
 
@@ -38,7 +40,7 @@ class Queue
     {
         $queue = [];
         foreach ($this->queue as $el) {
-            if ($el !== $element) {
+            if ($el['item'] !== $element['item']) {
                 $queue[] = $el;
             }
         }
@@ -54,7 +56,10 @@ class Queue
 
     public function buildElement(Message $msg, array $matches)
     {
-        return $matches['element'];
+        return [
+            'user' => $msg->getUsername(),
+            'item' => $matches['item'],
+        ];
     }
 
     public function getQueue() : array
@@ -64,6 +69,12 @@ class Queue
 
     public function getDetails() : array
     {
-        return $this->getQueue();
+        $details = [];
+
+        foreach ($this->getQueue() as $element) {
+            $details[] = json_encode($element);
+        }
+
+        return $details;
     }
 }
