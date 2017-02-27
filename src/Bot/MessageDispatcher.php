@@ -32,29 +32,21 @@ class MessageDispatcher implements MessageDispatcherInterface
         }
     }
 
-    protected function matchMessage(MessageInterface $message, $name, array $params)
+    public function matchMessage(MessageInterface $message, $name, array $params)
     {
         $params = is_array($params) ? $params : ['pattern' => $params];
 
-        if (isset($params['enabled']) && !$params['enabled']) {
+        if (!$this->matchesChannel($params, $message)) {
             return false;
         }
-        if (isset($params['disabled']) && $params['disabled']) {
+
+        if (!$this->matchesUser($params, $message)) {
             return false;
         }
-        if (isset($params['channel']) && !$message->matchesChannel($params['channel'])) {
+
+        $matches = $this->matchPattern($params, $message);
+        if ($matches === false) {
             return false;
-        }
-        if (isset($params['user']) && !$message->matchesUser($params['user'])) {
-            return false;
-        }
-        if (isset($params['pattern'])) {
-            $matches = $message->matchPattern($params['pattern']);
-            if ($matches === false) {
-                return false;
-            }
-        } else {
-            $matches = [];
         }
 
         $this->logger->info("matched: $name => ".json_encode($params));
@@ -62,6 +54,33 @@ class MessageDispatcher implements MessageDispatcherInterface
         $method = isset($params['method']) ? $params['method'] : $name;
 
         return [$method, $matches];
+    }
+
+    public function matchesChannel(array $params, MessageInterface $message)
+    {
+        if (isset($params['channel']) && !$message->matchesChannel($params['channel'])) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function matchesUser(array $params, MessageInterface $message)
+    {
+        if (isset($params['user']) && !$message->matchesUser($params['user'])) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function matchPattern(array $params, MessageInterface $message)
+    {
+        if (isset($params['pattern'])) {
+            return $message->matchPattern($params['pattern']);
+        } else {
+            return [];
+        }
     }
 
     protected function dispatchMessage($plugin, MessageInterface $message, array $matched)

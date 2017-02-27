@@ -40,34 +40,34 @@ class Yabot
 
     public function run()
     {
-        $this->slackClient->on('message', function (Payload $payload) {
-
-            $data = $payload->getData();
-
-            if (isset($data['subtype'])) {
-                if ($data['subtype'] === 'message_changed') {
-                    $channel = $data['channel'];
-                    $data = $data['message'];
-                    $data['channel'] = $channel;
-                } elseif ($data['subtype'] !== 'bot_message') {
-                    return;
-                }
-            }
-
-            $this->logger->info('Received message', $data);
-
-            $message = $this->messageFactory->create($this->slackClient, $data);
-
-            $this->emit('message', [$message]);
-        });
+        $this->slackClient->on('message', [$this, 'onMessage']);
 
         $this->slackClient->init();
 
-        $this->slackClient->connect()->then(function () {
-            $this->slackClient->update();
-        });
+        $this->slackClient->connect()->then([$this->slackClient, 'update']);
 
         $this->eventLoop->run();
+    }
+
+    public function onMessage(Payload $payload)
+    {
+        $data = $payload->getData();
+
+        if (isset($data['subtype'])) {
+            if ($data['subtype'] === 'message_changed') {
+                $channel = $data['channel'];
+                $data = $data['message'];
+                $data['channel'] = $channel;
+            } elseif ($data['subtype'] !== 'bot_message') {
+                return;
+            }
+        }
+
+        $this->logger->info('Received message', $data);
+
+        $message = $this->messageFactory->create($this->slackClient, $data);
+
+        $this->emit('message', [$message]);
     }
 
     public function quit()

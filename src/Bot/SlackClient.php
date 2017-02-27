@@ -5,6 +5,7 @@ namespace Nopolabs\Yabot\Bot;
 
 use React\Promise\PromiseInterface;
 use Slack\ChannelInterface;
+use Slack\Payload;
 use Slack\RealTimeClient;
 use Slack\User;
 
@@ -62,9 +63,11 @@ class SlackClient
         $this->slack->send($text, $channel);
     }
 
-    public function on($event, $callable)
+    public function on($event, array $onMessage)
     {
-        $this->slack->on($event, $callable);
+        $this->slack->on($event, function (Payload $payload) use ($onMessage) {
+            call_user_func_array($onMessage, [$payload]);
+        });
     }
 
     public function userById($id) : User
