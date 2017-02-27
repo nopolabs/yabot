@@ -1,6 +1,7 @@
 {
     "name": "nopolabs/yabot",
     "description": "Yet Another Bot",
+    "version": "0.0.1",
     "type": "package",
     "require": {
         "php": ">=5.5.0",
@@ -20,11 +21,12 @@
             "name": "Dan Revel",
             "email": "dan@nopolabs.com"
         }
-            ],
-            "minimum-stability": "dev",
-            "autoload": {
-                "psr-4": {
-                    "Nopolabs\\Yabot\\": "src"
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Nopolabs\\Yabot\\": "src"
         }
     },
     "autoload-dev": {
