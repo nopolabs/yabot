@@ -27,8 +27,4 @@ interface ResourcesInterface
     public function getStatus($key);
 
     public function getAllStatuses();
-
-    public function getStatusAsync($key) : PromiseInterface;
-
-    public function expireResources();
 }

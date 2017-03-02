@@ -10,6 +10,13 @@ you need to provide a token which you get from Slack.
 Please read [Slack's documentation](https://get.slack.help/hc/en-us/articles/215770388)
 for information on how to issue new authentication tokens.
 
+    composer init
+    composer require nopolabs/yabot
+    cp vendor/nopolabs/yabot/yabot.php .
+    mkdir config
+    cp vendor/nopolabs/yabot/config/services.xml config/services.xml
+    cp vendor/nopolabs/yabot/config/config.example.xml config/config.xml
+    
 You tell yabot about the token by placing it in config/config.xml.
 This file is not in source control because the token is not meant 
 to be shared publicly. In fact if you do happen to commit the token

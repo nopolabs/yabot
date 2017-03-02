@@ -2,12 +2,10 @@
 
 namespace Nopolabs\Yabot\Reservations;
 
-
 use DateTime;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Response;
 use Nopolabs\Yabot\Bot\SlackClient;
 use Nopolabs\Yabot\Helpers\LoopTrait;
 use Nopolabs\Yabot\Helpers\SlackTrait;
@@ -16,6 +14,15 @@ use Nopolabs\Yabot\Storage\StorageInterface;
 use React\EventLoop\LoopInterface;
 use Slack\User;
 
+/**
+ * Class Resources
+ * @package Nopolabs\Yabot\Reservations
+ *
+ * $config = [
+ *     'channel' => 'general',
+ *     'storageName' => 'resources',
+ * ];
+ */
 class Resources implements ResourcesInterface
 {
     use StorageTrait;
@@ -119,14 +126,14 @@ class Resources implements ResourcesInterface
         return $statuses;
     }
 
-    public function getStatusAsync($key) : PromiseInterface
+    protected function getStatusAsync($key) : PromiseInterface
     {
         $status = json_encode([$key => $this->resources[$key]]);
 
         return new FulfilledPromise($status);
     }
 
-    public function expireResources()
+    protected function expireResources()
     {
         foreach ($this->getKeys() as $key) {
             if ($this->isExpired($key)) {
@@ -147,25 +154,5 @@ class Resources implements ResourcesInterface
                 return $expires < new DateTime();
             }
         }
-    }
-
-    protected function getReftags($envs)
-    {
-        $getTags = [];
-        foreach ($envs as $env) {
-            $uri = "https://$env.opensky.com/version/reftag";
-            $getTags[$env] = $this->getAsync($uri);
-        }
-
-        $reftags = [];
-        foreach (Promise\settle($getTags)->wait() as $env => $result) {
-            if ($result['state'] === PromiseInterface::FULFILLED) {
-                /** @var Response $rsp */
-                $rsp = $result['value'];
-                $reftags[$env] = trim($rsp->getBody());
-            }
-        }
-
-        return $reftags;
     }
 }
