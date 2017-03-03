@@ -2,17 +2,6 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-
-    <parameters>
-        <parameter key="storage.dir">storage</parameter>
-        <parameter key="log.file">logs/bot.log</parameter>
-        <parameter key="log.name">bot</parameter>
-        <parameter key="log.level" type="constant">Monolog\Logger::DEBUG</parameter>
-        <parameter key="guzzle.config" type="collection">
-            <parameter key="timeout">5</parameter>
-        </parameter>
-    </parameters>
-
     <services>
         <service id="yabot" class="Nopolabs\Yabot\Yabot">
             <argument type="service" id="logger" />

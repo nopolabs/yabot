@@ -12,22 +12,38 @@ for information on how to issue new authentication tokens.
 
     composer init
     composer require nopolabs/yabot
-    cp vendor/nopolabs/yabot/yabot.php yabot.php
-    cp vendor/nopolabs/yabot/config.example.php config.php
     mkdir config
+    cp vendor/nopolabs/yabot/yabot.php yabot.php
     cp vendor/nopolabs/yabot/config/plugins.yml config/plugins.yml
+    cp vendor/nopolabs/yabot/config.example.php config.php
     
-You tell yabot about the token by placing it in config/config.xml.
-This file is not in source control because the token is not meant 
-to be shared publicly. In fact if you do happen to commit the token
-to a public repo Slack will revoke it (I know from experience).
-Add your token to config.php here:
+Edit config.php and add your Slack API token:
 
     'slack.token' => 'SLACK-TOKEN-GOES-HERE',
+
+*Do not save config.php in a public repository.* 
+The slack.token is *not* meant to be shared publicly. 
+If you do happen to commit the token to a public repo 
+Slack will revoke it (I know from experience).
+
+## Configuration
+
+Yabot uses a [Symfony dependency-injection](http://symfony.com/doc/current/components/dependency_injection.html)
+container for configuration.
+
+TODO:
+* creating your own configuration
+* configuring and adding plugins to Yabot
+
+[Importing configuration files](http://symfony.com/doc/current/service_container/import.html)
 
 ## Running yabot
 
     php yabot.php
+    
+## Logging
+
+    tail -f logs/bot.log
 
 ## Plugins
 
@@ -51,12 +67,3 @@ TODO:
 * syntax for matchers
 * responding to a Message
 * Users and Channels
-
-## Configuration
-
-Yabot uses the Symfony dependency-injection container for configuration.
-
-TODO:
-* creating your own configuration
-* configuring and adding plugins to Yabot
-* pointer to symfony DI documentation
