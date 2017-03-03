@@ -12,21 +12,18 @@ for information on how to issue new authentication tokens.
 
     composer init
     composer require nopolabs/yabot
-    cp vendor/nopolabs/yabot/yabot.php .
+    cp vendor/nopolabs/yabot/yabot.php yabot.php
+    cp vendor/nopolabs/yabot/config.example.php config.php
     mkdir config
-    cp vendor/nopolabs/yabot/config/services.xml config/services.xml
-    cp vendor/nopolabs/yabot/config/config.example.xml config/config.xml
+    cp vendor/nopolabs/yabot/config/plugins.yml config/plugins.yml
     
 You tell yabot about the token by placing it in config/config.xml.
 This file is not in source control because the token is not meant 
 to be shared publicly. In fact if you do happen to commit the token
 to a public repo Slack will revoke it (I know from experience).
+Add your token to config.php here:
 
-    cp config/config.example.xml config/config.xml
-
-and add your token here:
-
-        <parameter key="slack.token">SLACK-TOKEN-HERE</parameter>
+    'slack.token' => 'SLACK-TOKEN-GOES-HERE',
 
 ## Running yabot
 
@@ -49,6 +46,7 @@ This discussion will focus on how to use the default Plugin
 implementation provided by `Nopolabs\Yabot\Bot\PluginTrait`.
 
 TODO:
+* YabotContainer and how to add plugins to Yabot
 * what is provided by PluginTrait?
 * syntax for matchers
 * responding to a Message

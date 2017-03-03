@@ -1,5 +1,4 @@
 vendor/
 logs/
 storage/
-config/config.xml
 config.php
