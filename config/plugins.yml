@@ -1,0 +1,69 @@
+parameters:
+    plugin.lookup.config:
+        channel: random
+
+    plugin.reservations.config:
+        commandPrefix: ya
+
+    reservations.resources.config:
+        channel: general
+        storageName: reservations
+        keys: [dev1, dev2, dev3]
+
+    plugin.queue.config:
+        commandPrefix: ya
+
+    queue.config:
+        storageName: queue
+
+services:
+    plugin.hey:
+        class: Nopolabs\Yabot\Examples\Hey
+        arguments:
+            - '@message.dispatcher'
+            - '@logger'
+        tags:
+            - { name: yabot.plugin }
+
+    plugin.lookup:
+        class: Nopolabs\Yabot\Examples\Lookup
+        arguments:
+            - '@message.dispatcher'
+            - '@logger'
+            - '%plugin.lookup.config%'
+        tags:
+            - { name: yabot.plugin }
+
+    plugin.reservations:
+        class: Nopolabs\Yabot\Reservations\ReservationsPlugin
+        arguments:
+            - '@message.dispatcher'
+            - '@logger'
+            - '@reservations.resources'
+            - '%plugin.reservations.config%'
+        tags:
+            - { name: yabot.plugin }
+
+    plugin.queue:
+        class: Nopolabs\Yabot\Queue\QueuePlugin
+        arguments:
+            - '@message.dispatcher'
+            - '@logger'
+            - '@queue'
+            - '%plugin.queue.config%'
+        tags:
+            - { name: yabot.plugin }
+
+    reservations.resources:
+        class: Nopolabs\Yabot\Reservations\Resources
+        arguments:
+            - '@slack.client'
+            - '@storage'
+            - '@event.loop'
+            - '%reservations.resources.config%'
+
+    queue:
+        class: Nopolabs\Yabot\Queue\Queue
+        arguments:
+            - '@storage'
+            - '%queue.config%'
