@@ -1,4 +1,5 @@
-/vendor/
-/logs/
-/storage/
-/config/config.xml
+vendor/
+logs/
+storage/
+config/config.xml
+config.php

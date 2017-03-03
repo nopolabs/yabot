@@ -3,10 +3,6 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <imports>
-        <import resource="config.xml"/>
-    </imports>
-
     <parameters>
         <parameter key="storage.dir">storage</parameter>
         <parameter key="log.file">logs/bot.log</parameter>

@@ -1,28 +1,14 @@
 <?php
-use Nopolabs\Yabot\Bot\PluginInterface;
-use Nopolabs\Yabot\Yabot;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Nopolabs\Yabot\YabotContainer;
 
 require __DIR__.'/vendor/autoload.php';
 
-$container = new ContainerBuilder();
-$loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/config'));
-$loader->load('services.xml');
+$config = require __DIR__.'/config.php';
 
-$plugins = new YamlFileLoader($container, new FileLocator(__DIR__.'/config'));
-$plugins->load('plugins.yml');
+$container = YabotContainer::withConfig($config);
 
-/** @var Yabot $yabot */
-$yabot = $container->get('yabot');
+$container->loadYml(__DIR__.'/config/plugins.yml');
 
-$pluginIds = $container->findTaggedServiceIds('yabot.plugin');
-foreach ($pluginIds as $pluginId => $value) {
-    /** @var PluginInterface $plugin */
-    $plugin = $container->get($pluginId);
-    $yabot->addPlugin($plugin);
-}
+$yabot = $container->getYabot();
 
 $yabot->run();
