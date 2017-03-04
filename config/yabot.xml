@@ -2,19 +2,22 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter id="storage.dir">storage</parameter>
+        <parameter id="log.file">logs/yabot.log</parameter>
+        <parameter id="log.level">debug</parameter>
+        <parameter id="log.name">yabot</parameter>
+        <parameter id="guzzle.config" type="collection">
+            <parameter id="timeout">5</parameter>
+        </parameter>
+    </parameters>
+
     <services>
         <service id="yabot" class="Nopolabs\Yabot\Yabot">
             <argument type="service" id="logger" />
             <argument type="service" id="event.loop" />
             <argument type="service" id="slack.client" />
             <argument type="service" id="message.factory" />
-        </service>
-
-        <service id="plugin.queue" class="Nopolabs\Yabot\Queue\QueuePlugin">
-            <argument type="service" id="message.dispatcher" />
-            <argument type="service" id="logger" />
-            <argument type="service" id="queue" />
-            <argument>%plugin.queue.config%</argument>
         </service>
 
         <service id="storage" class="Nopolabs\Yabot\Storage\FileStorage">

@@ -18,28 +18,23 @@ class YabotContainer extends ContainerBuilder
     const YABOT_PLUGIN_TAG = 'yabot.plugin';
     const SLACK_TOKEN_KEY = 'slack.token';
 
-    public function __construct(ParameterBagInterface $parameterBag)
+    public function __construct($servicesConfigPath = __DIR__.'/../config/yabot.xml')
     {
-        if (!$parameterBag->has(self::SLACK_TOKEN_KEY)) {
-            throw new Exception('parameters must contain '.self::SLACK_TOKEN_KEY);
-        }
+        parent::__construct();
 
-        parent::__construct($parameterBag);
-
-        if ($parameterBag->has('yabot.xml.path')) {
-            $this->loadXml($parameterBag->get('yabot.xml.path'));
-        } elseif ($parameterBag->has('yabot.yml.path')) {
-            $this->loadYml($parameterBag->get('yabot.yml.path'));
+        $extension = pathinfo($servicesConfigPath)['extension'];
+        if ($extension === 'xml') {
+            $this->loadXml($servicesConfigPath);
+        } elseif ($extension === 'yml') {
+            $this->loadYml($servicesConfigPath);
         } else {
-            $this->loadXml(__DIR__.'/../config/yabot.xml');
+            throw new Exception("Do not know how to load $servicesConfigPath");
         }
     }
 
-    public static function withConfig(array $parameters) : YabotContainer
+    public function addConfig(array $parameters)
     {
-        $parameterBag = new ParameterBag($parameters);
-
-        return new self($parameterBag);
+        $this->getParameterBag()->add($parameters);
     }
 
     public function loadXml($file)
@@ -54,10 +49,14 @@ class YabotContainer extends ContainerBuilder
         $loader->load($file);
     }
 
-    public function getYabot($pluginTag = self::YABOT_PLUGIN_TAG) : Yabot
+    public function getYabot(array $config) : Yabot
     {
+        $this->addConfig($config);
+
         $yabot = $this->get(self::YABOT_ID);
-        $this->addTaggedPlugins($yabot, $pluginTag);
+
+        $this->addTaggedPlugins($yabot, self::YABOT_PLUGIN_TAG);
+
         return $yabot;
     }
 

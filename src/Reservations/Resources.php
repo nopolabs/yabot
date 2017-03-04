@@ -43,7 +43,7 @@ class Resources implements ResourcesInterface
         $this->setSlack($slack);
 
         $this->setStorage($storage);
-        $this->setStorageKey($config['storageName']);
+        $this->setStorageKey(isset($config['storageName']) ? $config['storageName'] : 'resources');
 
         $this->setLoop($eventLoop);
         $this->addPeriodicTimer(60, [$this, 'expireResources']);

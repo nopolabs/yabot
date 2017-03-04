@@ -1,20 +1,9 @@
 parameters:
-    plugin.lookup.config:
-        channel: random
-
-    plugin.reservations.config:
-        commandPrefix: ya
-
-    reservations.resources.config:
-        channel: general
-        storageName: reservations
-        keys: [dev1, dev2, dev3]
-
-    plugin.queue.config:
-        commandPrefix: ya
-
-    queue.config:
-        storageName: queue
+    plugin.lookup.config: []
+    plugin.reservations.config: []
+    plugin.queue.config: []
+    reservations.resources.config: []
+    queue.config: []
 
 services:
     plugin.hey:

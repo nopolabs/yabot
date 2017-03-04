@@ -17,7 +17,7 @@ class Queue
 
     public function __construct(StorageInterface $storage, array $config)
     {
-        $this->setStorageKey($config['storageName']);
+        $this->setStorageKey(isset($config['storageName']) ? $config['storageName'] : 'queue');
         $this->setStorage($storage);
 
         $this->queue = $this->load() ?: [];
