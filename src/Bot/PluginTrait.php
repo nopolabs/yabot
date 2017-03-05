@@ -36,6 +36,8 @@ trait PluginTrait
 
     public function setMatchers(array $matchers)
     {
+        $matchers = $this->expandMatchers($matchers);
+
         foreach ($matchers as $name => $params) {
             $this->getLog()->debug("$name: ".json_encode($params));
         }

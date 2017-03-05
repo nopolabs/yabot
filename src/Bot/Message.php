@@ -45,6 +45,15 @@ class Message implements MessageInterface
         return $this->user;
     }
 
+    public function isBot() : bool
+    {
+        if (isset($this->user->data['is_bot'])) {
+            return (bool) $this->user->data['is_bot'];
+        } else {
+            return false;
+        }
+    }
+
     public function hasAttachments()
     {
         return isset($this->data['attachments']) && count($this->data['attachments']) > 0;

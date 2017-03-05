@@ -30,7 +30,6 @@ class Hey implements PluginInterface
         ];
 
         $matchers = array_merge($default, $config);
-        $matchers = $this->expandMatchers($matchers);
 
         $this->setMatchers($matchers);
     }

@@ -34,7 +34,9 @@ class MessageDispatcher implements MessageDispatcherInterface
 
     public function matchMessage(MessageInterface $message, $name, array $params)
     {
-        $params = is_array($params) ? $params : ['pattern' => $params];
+        if (!$this->matchesIsBot($params, $message)) {
+            return false;
+        }
 
         if (!$this->matchesChannel($params, $message)) {
             return false;
@@ -54,6 +56,15 @@ class MessageDispatcher implements MessageDispatcherInterface
         $method = isset($params['method']) ? $params['method'] : $name;
 
         return [$method, $matches];
+    }
+
+    public function matchesIsBot(array $params, MessageInterface $message)
+    {
+        if (isset($params['isBot'])) {
+            return $message->isBot() === $params['isBot'];
+        }
+
+        return true;
     }
 
     public function matchesChannel(array $params, MessageInterface $message)

@@ -5,6 +5,7 @@ namespace Nopolabs\Yabot;
 
 use Exception;
 use Nopolabs\Yabot\Bot\PluginInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -62,8 +63,11 @@ class YabotContainer extends ContainerBuilder
 
     public function addTaggedPlugins(Yabot $yabot, $pluginTag = self::YABOT_PLUGIN_TAG)
     {
+        /** @var LoggerInterface $logger */
+        $logger = $this->get('logger');
         $pluginIds = $this->findTaggedServiceIds($pluginTag);
         foreach ($pluginIds as $pluginId => $value) {
+            $logger->info("loading $pluginId");
             $this->addPluginById($yabot, $pluginId);
         }
     }

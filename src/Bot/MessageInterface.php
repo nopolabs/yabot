@@ -13,6 +13,8 @@ interface MessageInterface
 
     public function getUser() : User;
 
+    public function isBot() : bool;
+
     public function hasAttachments();
 
     public function getAttachments();
