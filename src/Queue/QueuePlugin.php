@@ -87,9 +87,7 @@ class QueuePlugin implements PluginInterface
     {
         $results = [];
 
-        $details = $this->queue->getDetails();
-
-        if (empty($details)) {
+        if (empty($this->queue)) {
             $results[] = 'The queue is empty.';
         } else {
             foreach ($this->queue->getDetails() as $detail) {

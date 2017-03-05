@@ -51,7 +51,7 @@ class ReservationsPlugin implements PluginInterface
         $channel = $config['channel'];
         $matchers = $config['matchers'];
         $resourceNamePlural = $config['resourceNamePlural'];
-        $resourceCapture = "(?'resource'".join('|', $resources->getKeys()).")";
+        $resourceCapture = "(:?\\b(?'resource'".join('|', $resources->getKeys()).")\\b)";
 
         $matchers = $this->addToMatchers('channel', $channel, $matchers);
         if (isset($config['commandPrefix'])) {

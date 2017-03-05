@@ -37,6 +37,6 @@ class Hey implements PluginInterface
 
     public function hey(MessageInterface $msg, array $matches)
     {
-        $msg->reply('hey');
+        $msg->reply('hey https://nopolabs.com <https://nopolabs.com> <https://nopolabs.com|nopolabs>');
     }
 }

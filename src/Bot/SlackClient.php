@@ -23,11 +23,15 @@ class SlackClient
     /** @var User */
     protected $authedUser;
 
-    public function __construct(RealTimeClient $slack, Users $users, Channels $channels)
+    /** @var array */
+    protected $config;
+
+    public function __construct(RealTimeClient $slack, Users $users, Channels $channels, array $config = [])
     {
         $this->slack = $slack;
         $this->users = $users;
         $this->channels = $channels;
+        $this->config = $config;
     }
 
     public function getRealTimeClient()
@@ -58,9 +62,40 @@ class SlackClient
         return $this->slack->disconnect();
     }
 
+    public function useWebSocket() : bool
+    {
+        if (isset($this->config['use.websocket'])) {
+            return (bool) $this->config['use.websocket'];
+        } else {
+            return false;
+        }
+    }
+
     public function say($text, ChannelInterface $channel)
     {
+        if ($this->useWebSocket()) {
+            // WebSocket send does not support message formatting.
+            $this->send($text, $channel);
+        } else {
+            // Http post send supports message formatting.
+            $this->post($text, $channel);
+        }
+    }
+
+    public function send($text, ChannelInterface $channel)
+    {
         $this->slack->send($text, $channel);
+    }
+
+    public function post($text, ChannelInterface $channel, $additionalParameters = [])
+    {
+        $parameters = array_merge([
+            'text' => $text,
+            'channel' => $channel->getId(),
+            'as_user' => true,
+        ], $additionalParameters);
+
+        $this->slack->apiCall('chat.postMessage', $parameters);
     }
 
     public function on($event, array $onMessage)

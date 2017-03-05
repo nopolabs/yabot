@@ -2,13 +2,15 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-    <parameters>
-        <parameter id="storage.dir">storage</parameter>
-        <parameter id="log.file">logs/yabot.log</parameter>
-        <parameter id="log.level">debug</parameter>
-        <parameter id="log.name">yabot</parameter>
-        <parameter id="guzzle.config" type="collection">
-            <parameter id="timeout">5</parameter>
+    <parameters type="collection">
+        <parameter key="storage.dir">storage</parameter>
+        <parameter key="log.file">logs/yabot.log</parameter>
+        <parameter key="log.level">debug</parameter>
+        <parameter key="log.name">yabot</parameter>
+        <parameter key="guzzle.config" type="collection">
+            <parameter key="timeout">5</parameter>
+        </parameter>
+        <parameter key="slack.client.config" type="collection">
         </parameter>
     </parameters>
 
@@ -56,6 +58,7 @@
             <argument type="service" id="slack.realTimeClient" />
             <argument type="service" id="users" />
             <argument type="service" id="channels" />
+            <argument>%slack.client.config%</argument>
         </service>
 
         <service id="users" class="Nopolabs\Yabot\Bot\Users" />

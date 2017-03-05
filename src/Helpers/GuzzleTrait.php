@@ -5,6 +5,7 @@ namespace Nopolabs\Yabot\Helpers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
+use Psr\Http\Message\ResponseInterface;
 
 trait GuzzleTrait
 {
@@ -24,5 +25,10 @@ trait GuzzleTrait
     public function getAsync($uri) : PromiseInterface
     {
         return $this->guzzle->getAsync($uri);
+    }
+
+    public function post($uri, $options = []) : ResponseInterface
+    {
+        return $this->guzzle->post($uri, $options);
     }
 }
