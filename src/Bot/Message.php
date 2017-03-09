@@ -2,7 +2,7 @@
 
 namespace Nopolabs\Yabot\Bot;
 
-use Slack\ChannelInterface;
+use Slack\Channel;
 use Slack\User;
 
 class Message implements MessageInterface
@@ -15,7 +15,7 @@ class Message implements MessageInterface
     /** @var User */
     protected $user;
 
-    /** @var ChannelInterface */
+    /** @var Channel */
     protected $channel;
 
     /** @var bool */
@@ -35,7 +35,7 @@ class Message implements MessageInterface
         return $this->data['text'];
     }
 
-    public function getChannel() : ChannelInterface
+    public function getChannel() : Channel
     {
         return $this->channel;
     }
@@ -84,24 +84,39 @@ class Message implements MessageInterface
         return $this->getUser()->getUsername();
     }
 
-    public function matchesChannel($name)
+    public function getChannelName()
     {
-        $channel = $this->slack->channelByName($name);
-        return $this->channel === $channel;
+        return $this->getChannel()->getName();
     }
 
-    public function matchesUser($name)
+    public function matchesPrefix($prefix) : bool
     {
-        $names = is_array($name) ? $name : [$name];
+        return (substr($this->getText(), 0, strlen($prefix)) === $prefix);
+    }
 
-        foreach ($names as $name) {
-            $user = $this->slack->userByName($name);
-            if ($this->user === $user) {
-                return true;
-            }
+    public function matchesIsBot($isBot) : bool
+    {
+        return $isBot === $this->isBot();
+    }
+
+    public function matchesChannel($name) : bool
+    {
+        $channelName = $this->getChannelName();
+        if (is_array($name)) {
+            return in_array($channelName, $name);
+        } else {
+            return $channelName === $name;
         }
+    }
 
-        return false;
+    public function matchesUser($name) : bool
+    {
+        $username = $this->getUsername();
+        if (is_array($name)) {
+            return in_array($username, $name);
+        } else {
+            return $username === $name;
+        }
     }
 
     public function matchPattern($pattern)

@@ -1,5 +1,5 @@
 <?php
-namespace Nopolabs\Yabot\Test;
+namespace Nopolabs\Yabot\Tests;
 
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Bot\Message;

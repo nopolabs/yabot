@@ -22,7 +22,6 @@ class ReservationsPlugin implements PluginInterface
         ResourcesInterface $resources,
         array $config = [])
     {
-        $this->setDispatcher($dispatcher);
         $this->setLog($logger);
         $this->resources = $resources;
 
@@ -48,16 +47,17 @@ class ReservationsPlugin implements PluginInterface
 
         $config = array_merge($default, $config);
 
+        if (isset($config['prefix'])) {
+            $dispatcher->setPrefix($config['prefix']);
+        }
+        $this->setDispatcher($dispatcher);
+
         $channel = $config['channel'];
         $matchers = $config['matchers'];
         $resourceNamePlural = $config['resourceNamePlural'];
         $resourceCapture = "(:?\\b(?'resource'".join('|', $resources->getKeys()).")\\b)";
 
         $matchers = $this->addToMatchers('channel', $channel, $matchers);
-        if (isset($config['commandPrefix'])) {
-            $prefix = $config['commandPrefix'];
-            $matchers = $this->replaceInPatterns('/^', "/^$prefix ", $matchers);
-        }
         $matchers = $this->replaceInPatterns('#resourceNamePlural#', $resourceNamePlural, $matchers);
         $matchers = $this->replaceInPatterns('#resourceCapture#', $resourceCapture, $matchers);
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);

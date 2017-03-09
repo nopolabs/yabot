@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot\Bot;
 
 
 use React\Promise\PromiseInterface;
+use Slack\Channel;
 use Slack\ChannelInterface;
 use Slack\Payload;
 use Slack\RealTimeClient;
@@ -115,12 +116,12 @@ class SlackClient
         return $this->users->byName($name);
     }
 
-    public function channelById($id) : ChannelInterface
+    public function channelById($id) : Channel
     {
         return $this->channels->byId($id);
     }
 
-    public function channelByName($name) : ChannelInterface
+    public function channelByName($name) : Channel
     {
         return $this->channels->byName($name);
     }

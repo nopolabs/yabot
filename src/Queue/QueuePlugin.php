@@ -21,7 +21,6 @@ class QueuePlugin implements PluginInterface
         Queue $queue,
         array $config = [])
     {
-        $this->setDispatcher($dispatcher);
         $this->setLog($logger);
         $this->queue = $queue;
 
@@ -38,14 +37,15 @@ class QueuePlugin implements PluginInterface
 
         $config = array_merge($default, $config);
 
+        if (isset($config['prefix'])) {
+            $dispatcher->setPrefix($config['prefix']);
+        }
+        $this->setDispatcher($dispatcher);
+
         $channel = $config['channel'];
         $matchers = $config['matchers'];
 
         $matchers = $this->addToMatchers('channel', $channel, $matchers);
-        if (isset($config['commandPrefix'])) {
-            $prefix = $config['commandPrefix'];
-            $matchers = $this->replaceInPatterns('/^', "/^$prefix ", $matchers);
-        }
         $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
 
         $this->setMatchers($matchers);

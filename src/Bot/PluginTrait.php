@@ -51,6 +51,9 @@ trait PluginTrait
 
         foreach ($matchers as $name => $params) {
             $params = is_array($params) ? $params : ['pattern' => $params];
+            if (!isset($params['method'])) {
+                $params['method'] = $name;
+            }
             $expanded[$name] = $params;
         }
 
