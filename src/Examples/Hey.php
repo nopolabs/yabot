@@ -27,6 +27,11 @@ class Hey implements PluginInterface
                 'user' => 'dan',
                 'method' => 'hey',
             ],
+            'thread' => [
+                'pattern' => "/^(?'thread'thread)\\b/",
+                'channel' => 'general',
+                'method' => 'thread',
+            ],
         ];
 
         $matchers = array_merge($default, $config);
@@ -37,5 +42,10 @@ class Hey implements PluginInterface
     public function hey(MessageInterface $msg, array $matches)
     {
         $msg->reply('hey https://nopolabs.com <https://nopolabs.com> <https://nopolabs.com|nopolabs>');
+    }
+
+    public function thread(MessageInterface $msg, array $matches)
+    {
+        $msg->thread('thread https://nopolabs.com <https://nopolabs.com> <https://nopolabs.com|nopolabs>');
     }
 }

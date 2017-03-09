@@ -13,6 +13,10 @@ interface MessageInterface
 
     public function getUser() : User;
 
+    public function getThreadTs();
+
+    public function isSelf() : bool;
+
     public function isBot() : bool;
 
     public function hasAttachments();

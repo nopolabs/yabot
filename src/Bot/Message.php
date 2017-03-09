@@ -45,6 +45,20 @@ class Message implements MessageInterface
         return $this->user;
     }
 
+    public function getThreadTs()
+    {
+        if (isset($this->data['thread_ts'])) {
+            return $this->data['thread_ts'];
+        } else {
+            return $this->data['ts'];
+        }
+    }
+
+    public function isSelf() : bool
+    {
+        return $this->slack->getAuthedUser() === $this->getUser();
+    }
+
     public function isBot() : bool
     {
         if (isset($this->user->data['is_bot'])) {
@@ -67,6 +81,12 @@ class Message implements MessageInterface
     public function reply($text)
     {
         $this->slack->say($text, $this->getChannel());
+    }
+
+    public function thread($text)
+    {
+        $additionalParameters = ['thread_ts' => $this->getThreadTs()];
+        $this->slack->say($text, $this->getChannel(), $additionalParameters);
     }
 
     public function isHandled() : bool

@@ -53,6 +53,11 @@ class SlackClient
         $this->updateChannels();
     }
 
+    public function getAuthedUser()
+    {
+        return $this->authedUser;
+    }
+
     public function connect() : PromiseInterface
     {
         return $this->slack->connect();
@@ -72,14 +77,14 @@ class SlackClient
         }
     }
 
-    public function say($text, ChannelInterface $channel)
+    public function say($text, ChannelInterface $channel, $additionalParameters = [])
     {
-        if ($this->useWebSocket()) {
+        if ($this->useWebSocket() && empty($additionalParameters)) {
             // WebSocket send does not support message formatting.
             $this->send($text, $channel);
         } else {
             // Http post send supports message formatting.
-            $this->post($text, $channel);
+            $this->post($text, $channel, $additionalParameters);
         }
     }
 

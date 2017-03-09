@@ -24,6 +24,10 @@ class MessageDispatcher implements MessageDispatcherInterface
 
     public function dispatch($plugin, MessageInterface $message, array $matchers)
     {
+        if ($message->isSelf()) {
+            return;
+        }
+
         if ($message->isHandled()) {
             return;
         }
