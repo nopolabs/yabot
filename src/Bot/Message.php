@@ -78,14 +78,14 @@ class Message implements MessageInterface
         return $this->hasAttachments() ? $this->data['attachments'] : [];
     }
 
-    public function reply($text)
+    public function reply($text, array $additionalParameters = [])
     {
-        $this->slack->say($text, $this->getChannel());
+        $this->slack->say($text, $this->getChannel(), $additionalParameters);
     }
 
-    public function thread($text)
+    public function thread($text, array $additionalParameters = [])
     {
-        $additionalParameters = ['thread_ts' => $this->getThreadTs()];
+        $additionalParameters['thread_ts'] = $this->getThreadTs();
         $this->slack->say($text, $this->getChannel(), $additionalParameters);
     }
 

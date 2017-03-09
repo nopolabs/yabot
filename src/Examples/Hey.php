@@ -41,11 +41,12 @@ class Hey implements PluginInterface
 
     public function hey(MessageInterface $msg, array $matches)
     {
-        $msg->reply('hey https://nopolabs.com <https://nopolabs.com> <https://nopolabs.com|nopolabs>');
+        $msg->reply('hey');
     }
 
     public function thread(MessageInterface $msg, array $matches)
     {
-        $msg->thread('thread https://nopolabs.com <https://nopolabs.com> <https://nopolabs.com|nopolabs>');
+        $attachments = ['attachments' => json_encode([["text" => "Choose a game to play"]])];
+        $msg->thread('thread', $attachments);
     }
 }

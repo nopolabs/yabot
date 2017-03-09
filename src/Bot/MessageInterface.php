@@ -23,7 +23,9 @@ interface MessageInterface
 
     public function getAttachments();
 
-    public function reply($text);
+    public function reply($text, array $additionalParameters = []);
+
+    public function thread($text, array $additionalParameters = []);
 
     public function isHandled() : bool;
 

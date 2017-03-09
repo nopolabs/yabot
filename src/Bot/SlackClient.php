@@ -77,7 +77,7 @@ class SlackClient
         }
     }
 
-    public function say($text, ChannelInterface $channel, $additionalParameters = [])
+    public function say($text, ChannelInterface $channel, array $additionalParameters = [])
     {
         if ($this->useWebSocket() && empty($additionalParameters)) {
             // WebSocket send does not support message formatting.
@@ -93,7 +93,7 @@ class SlackClient
         $this->slack->send($text, $channel);
     }
 
-    public function post($text, ChannelInterface $channel, $additionalParameters = [])
+    public function post($text, ChannelInterface $channel, array $additionalParameters = [])
     {
         $parameters = array_merge([
             'text' => $text,
