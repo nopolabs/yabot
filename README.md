@@ -67,3 +67,10 @@ TODO:
 * syntax for matchers
 * responding to a Message
 * Users and Channels
+
+## Message formatting and attachments
+
+Yabot uses the Slack REST API to post messages because the web socket API
+doesn't support formatting and attachments. See:
+[Slack API Messages](https://api.slack.com/docs/messages)
+
