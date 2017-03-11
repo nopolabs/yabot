@@ -29,8 +29,6 @@ class Hey implements PluginInterface
             ],
             'thread' => [
                 'pattern' => "/^(?'thread'thread)\\b/",
-                'channel' => 'general',
-                'method' => 'thread',
             ],
         ];
 

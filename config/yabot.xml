@@ -67,7 +67,7 @@
 
         <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory" />
 
-        <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher">
+        <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher" shared="false">
             <argument type="service" id="logger" />
         </service>
 

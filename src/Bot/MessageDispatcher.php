@@ -10,11 +10,13 @@ class MessageDispatcher implements MessageDispatcherInterface
 {
     private $logger;
     private $prefix;
+    private $matchers;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
         $this->prefix = '';
+        $this->matchers = [];
     }
 
     public function setPrefix($prefix)
@@ -22,7 +24,22 @@ class MessageDispatcher implements MessageDispatcherInterface
         $this->prefix = $prefix;
     }
 
-    public function dispatch($plugin, MessageInterface $message, array $matchers)
+    public function getPrefix()
+    {
+        return $this->prefix;
+    }
+
+    public function setMatchers(array $matchers)
+    {
+        $this->matchers = $matchers;
+    }
+
+    public function getMatchers()
+    {
+        return $this->matchers;
+    }
+
+    public function dispatch($plugin, MessageInterface $message)
     {
         if ($message->isSelf()) {
             return;
@@ -32,11 +49,11 @@ class MessageDispatcher implements MessageDispatcherInterface
             return;
         }
 
-        if (!$message->matchesPrefix($this->prefix)) {
+        if (!$message->matchesPrefix($this->getPrefix())) {
             return;
         }
 
-        foreach ($matchers as $name => $params) {
+        foreach ($this->getMatchers() as $name => $params) {
             $matched = $this->matchMessage($message, $name, $params);
 
             if ($matched === false) {

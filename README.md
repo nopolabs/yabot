@@ -61,10 +61,49 @@ Minimally a plugin must implement `Nopolabs\Yabot\Bot\PluginInterface`:
 This discussion will focus on how to use the default Plugin 
 implementation provided by `Nopolabs\Yabot\Bot\PluginTrait`.
 
+`PluginTrait` configures a `MessageDispatcher` and calls `MessageDispatcher::dispatch()`
+with each received message:
+
+```
+    public function onMessage(MessageInterface $message)
+    {
+        $this->dispatcher->dispatch($this, $message);
+    }
+```
+
+`MessageDispatcher` is configured with a set of matchers which it applies to each message.
+
+Matcher syntax:
+
+```
+    // canonical:
+    'matcherName' => [
+        'pattern' => "/^(help)\\b/",  // required
+        'channel' => 'general',       // optional, may be string or aray of strings
+        'user' => 'dan',              // optional, may be string or aray of strings
+        'method' => 'help',           // optional, will use matcherName if not set
+    ],
+    
+    // shorthand:
+    'help' => "/^(help)\\b/",
+    
+    // expands to:
+    'help' => [
+        'pattern => "/^(help)\\b/",
+        'method' => 'help',
+    ],
+```
+
+If the matcher matches `MessageDispatcher` calls the method on the plugin object 
+with the message and any fields captured by the matcher pattern:
+
+```
+call_user_func([$plugin, $method], $message, $matches);
+```
+
 TODO:
 * YabotContainer and how to add plugins to Yabot
 * what is provided by PluginTrait?
-* syntax for matchers
 * responding to a Message
 * Users and Channels
 

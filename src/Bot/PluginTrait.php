@@ -8,30 +8,22 @@ trait PluginTrait
 {
     use LogTrait;
 
-    /** @var array */
-    private $matchers;
-
     /** @var MessageDispatcher */
     private $dispatcher;
 
     public function onMessage(MessageInterface $message)
     {
-        $this->dispatcher->dispatch($this, $message, $this->matchers);
+        $this->dispatcher->dispatch($this, $message);
     }
 
-    public function getDispatcher() : MessageDispatcher
+    public function getDispatcher() : MessageDispatcherInterface
     {
         return $this->dispatcher;
     }
 
-    public function setDispatcher(MessageDispatcher $dispatcher)
+    public function setDispatcher(MessageDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
-    }
-
-    public function getMatchers() : array
-    {
-        return $this->matchers;
     }
 
     public function setMatchers(array $matchers)
@@ -42,7 +34,7 @@ trait PluginTrait
             $this->getLog()->debug("$name: ".json_encode($params));
         }
 
-        $this->matchers = $matchers;
+        $this->getDispatcher()->setMatchers($matchers);
     }
 
     public function expandMatchers(array $matchers) : array

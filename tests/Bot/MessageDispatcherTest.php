@@ -10,11 +10,28 @@ class MessageDispatcherTest extends TestCase
 {
     use MockWithExpectationsTrait;
 
+    public function testDispatchMessageIgnoresSelf()
+    {
+        $plugin = $this->createMock(\stdClass::class);
+
+        $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => true],
+        ]);
+
+        /** @var MessageDispatcher $dispatcher */
+        $dispatcher = $this->newPartialMockWithExpectations(MessageDispatcher::class, [
+            ['dispatchMessage', 'never']
+        ]);
+
+        $dispatcher->dispatch($plugin, $message);
+    }
+
     public function testDispatchMessageAlreadyHandled()
     {
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => true],
         ]);
 
@@ -23,7 +40,7 @@ class MessageDispatcherTest extends TestCase
             ['dispatchMessage', 'never']
         ]);
 
-        $dispatcher->dispatch($plugin, $message, []);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchPrefixNotMatched()
@@ -31,6 +48,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => false],
             'matchesPrefix' => ['result' => false],
         ]);
@@ -40,7 +58,7 @@ class MessageDispatcherTest extends TestCase
             ['dispatchMessage', 'never']
         ]);
 
-        $dispatcher->dispatch($plugin, $message, []);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchMatcherDoesNotMatch()
@@ -48,6 +66,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => false],
             'matchesPrefix' => ['result' => true],
         ]);
@@ -63,8 +82,9 @@ class MessageDispatcherTest extends TestCase
                 'result' => false,
             ]]
         ]);
+        $dispatcher->setMatchers($matchers);
 
-        $dispatcher->dispatch($plugin, $message, $matchers);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchMatcherMatches()
@@ -72,6 +92,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => false, 'invoked' => 2],
             'matchesPrefix' => ['result' => true],
         ]);
@@ -90,8 +111,9 @@ class MessageDispatcherTest extends TestCase
                 'params' => [$plugin, $message, ['something' => ['matches']]],
             ]],
         ]);
+        $dispatcher->setMatchers($matchers);
 
-        $dispatcher->dispatch($plugin, $message, $matchers);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchMatcherMatchesTwice()
@@ -99,6 +121,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => false, 'invoked' => 3],
             'matchesPrefix' => ['result' => true],
         ]);
@@ -125,8 +148,9 @@ class MessageDispatcherTest extends TestCase
                 'params' => [$plugin, $message, ['something-else' => ['matches2']]],
             ]],
         ]);
+        $dispatcher->setMatchers($matchers);
 
-        $dispatcher->dispatch($plugin, $message, $matchers);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchMatcherMatchesSecondMatcher()
@@ -134,6 +158,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            'isSelf' => ['result' => false],
             'isHandled' => ['result' => false, 'invoked' => 2],
             'matchesPrefix' => ['result' => true],
         ]);
@@ -157,8 +182,9 @@ class MessageDispatcherTest extends TestCase
                 'params' => [$plugin, $message, ['something-else' => ['matches2']]],
             ]],
         ]);
+        $dispatcher->setMatchers($matchers);
 
-        $dispatcher->dispatch($plugin, $message, $matchers);
+        $dispatcher->dispatch($plugin, $message);
     }
 
     public function testDispatchMatcherHandledByFirstMatcher()
@@ -166,6 +192,7 @@ class MessageDispatcherTest extends TestCase
         $plugin = $this->createMock(\stdClass::class);
 
         $message = $this->newPartialMockWithExpectations(Message::class, [
+            ['isSelf', ['result' => false]],
             ['isHandled', ['result' => false]],
             ['matchesPrefix', ['result' => true]],
             ['isHandled', ['result' => true]],
@@ -186,7 +213,8 @@ class MessageDispatcherTest extends TestCase
                 'params' => [$plugin, $message, ['something' => ['matches']]],
             ]],
         ]);
+        $dispatcher->setMatchers($matchers);
 
-        $dispatcher->dispatch($plugin, $message, $matchers);
+        $dispatcher->dispatch($plugin, $message);
     }
 }
