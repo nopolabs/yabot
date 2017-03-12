@@ -23,13 +23,13 @@ class Users
         }
     }
 
-    public function byId($id)
+    public function byId($id) : User
     {
         $index = $this->usersById[$id];
         return $this->users[$index];
     }
 
-    public function byName($name)
+    public function byName($name) : User
     {
         $index = $this->usersByName[$name];
         return $this->users[$index];

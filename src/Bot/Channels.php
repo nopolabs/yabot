@@ -23,13 +23,13 @@ class Channels
         }
     }
 
-    public function byId($id)
+    public function byId($id) : Channel
     {
         $index = $this->channelsById[$id];
         return $this->channels[$index];
     }
 
-    public function byName($name)
+    public function byName($name) : Channel
     {
         $index = $this->channelsByName[$name];
         return $this->channels[$index];

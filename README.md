@@ -34,6 +34,7 @@ container for configuration.
 TODO:
 * creating your own configuration
 * configuring and adding plugins to Yabot
+* YabotContainer and how to add plugins to Yabot
 
 [Importing configuration files](http://symfony.com/doc/current/service_container/import.html)
 
@@ -75,10 +76,10 @@ Matcher syntax:
 
     // canonical:
     'matcherName' => [
-        'pattern' => "/^(help)\\b/",  // optional, pattern applied by preg_match()
-        'channel' => 'general',       // optional, may be string or aray of strings
-        'user' => 'dan',              // optional, may be string or aray of strings
-        'method' => 'help',           // optional, will use matcherName if not set
+        'pattern' => "/^help (?'topic'\\w+)\\b/", // optional, pattern applied by preg_match()
+        'channel' => 'general',                   // optional, may be string or aray of strings
+        'user' => 'dan',                          // optional, may be string or aray of strings
+        'method' => 'help',                       // optional, will use matcherName if not set
     ],
 
 
@@ -87,11 +88,11 @@ Matcher syntax:
 `expandMatchers` will expand shorthand notation:
 
     // shorthand:
-    'help' => "/^(help)\\b/",
+    'help' => "/^help (?'topic'\\w+)\\b/",
     
     // expanded to:
     'help' => [
-        'pattern => "/^(help)\\b/",
+        'pattern => "/^help (?'topic'\\w+)\\b/",
         'method' => 'help',
     ],
 
@@ -109,10 +110,25 @@ with the message and any fields captured by the matcher pattern:
 
     call_user_func([$plugin, $method], $message, $matches);
 
-TODO:
-* YabotContainer and how to add plugins to Yabot
-* responding to a Message
-* Users and Channels
+## Responding to a Message
+
+    // assuming: 'help' => "/^help (?'topic'\\w+)\\b/"
+    public function help(MessageInterface $msg, array $matches)
+    {
+        $topic = $matches[1];
+        $msg->reply("you want help with $topic");
+    }
+
+## Users and Channels
+
+Slack messages use ids to reference users and channels, e.g.:
+
+    Why not join <#C024BE7LR>?
+
+    Hey <@U024BE7LH>, did you see my file?
+
+`SlackClient` manages Users and Channels objects and provides methods to help 
+map user and channel names to ids and ids to names.
 
 ## Message formatting and attachments
 
