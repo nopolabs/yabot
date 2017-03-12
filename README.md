@@ -64,18 +64,15 @@ implementation provided by `Nopolabs\Yabot\Bot\PluginTrait`.
 `PluginTrait` configures a `MessageDispatcher` and calls `MessageDispatcher::dispatch()`
 with each received message:
 
-```
     public function onMessage(MessageInterface $message)
     {
         $this->dispatcher->dispatch($this, $message);
     }
-```
 
 `MessageDispatcher` is configured with a set of matchers which it applies to each message.
 
 Matcher syntax:
 
-```
     // canonical:
     'matcherName' => [
         'pattern' => "/^(help)\\b/",  // required
@@ -83,23 +80,34 @@ Matcher syntax:
         'user' => 'dan',              // optional, may be string or aray of strings
         'method' => 'help',           // optional, will use matcherName if not set
     ],
-    
+
+
+`PluginTrait` provides some functions to help build matchers.
+
+`expandMatchers` will expand shorthand notation:
+
     // shorthand:
     'help' => "/^(help)\\b/",
     
-    // expands to:
+    // expanded to:
     'help' => [
         'pattern => "/^(help)\\b/",
         'method' => 'help',
     ],
-```
+
+`addToMatchers` will add a key/value pair to each matcher, e.g. to set 'channel':
+
+    $matchers = $this->addToMatchers('channel', $channel, $matchers);
+
+`replaceInPatterns` will perform string replacement on patterns 
+(e.g. replaces ' ' with '\s+'):
+
+    $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
 
 If the matcher matches `MessageDispatcher` calls the method on the plugin object 
 with the message and any fields captured by the matcher pattern:
 
-```
-call_user_func([$plugin, $method], $message, $matches);
-```
+    call_user_func([$plugin, $method], $message, $matches);
 
 TODO:
 * YabotContainer and how to add plugins to Yabot
