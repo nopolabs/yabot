@@ -75,7 +75,7 @@ Matcher syntax:
 
     // canonical:
     'matcherName' => [
-        'pattern' => "/^(help)\\b/",  // required
+        'pattern' => "/^(help)\\b/",  // optional, pattern applied by preg_match()
         'channel' => 'general',       // optional, may be string or aray of strings
         'user' => 'dan',              // optional, may be string or aray of strings
         'method' => 'help',           // optional, will use matcherName if not set
@@ -111,7 +111,6 @@ with the message and any fields captured by the matcher pattern:
 
 TODO:
 * YabotContainer and how to add plugins to Yabot
-* what is provided by PluginTrait?
 * responding to a Message
 * Users and Channels
 
