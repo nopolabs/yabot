@@ -63,17 +63,15 @@ class YabotContainer extends ContainerBuilder
 
     public function addTaggedPlugins(Yabot $yabot, $pluginTag = self::YABOT_PLUGIN_TAG)
     {
-        /** @var LoggerInterface $logger */
-        $logger = $this->get('logger');
         $pluginIds = $this->findTaggedServiceIds($pluginTag);
         foreach ($pluginIds as $pluginId => $value) {
-            $logger->info("loading $pluginId");
             $this->addPluginById($yabot, $pluginId);
         }
     }
 
     public function addPluginById(Yabot $yabot, $pluginId)
     {
+        $this->get('logger')->info("loading $pluginId");
         $this->addPlugin($yabot, $this->get($pluginId));
     }
 
