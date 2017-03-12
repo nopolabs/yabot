@@ -7,7 +7,7 @@ $config = require __DIR__.'/config.php';
 
 $container = new YabotContainer();
 
-$container->loadYml(__DIR__.'/config/plugins.yml');
+$container->load(__DIR__.'/config/plugins.yml');
 
 $yabot = $container->getYabot($config);
 

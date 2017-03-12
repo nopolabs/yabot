@@ -26,27 +26,45 @@ The slack.token is *not* meant to be shared publicly.
 If you do happen to commit the token to a public repo 
 Slack will revoke it (I know from experience).
 
+## Running yabot
+
+    php yabot.php
+    
 ## Configuration
 
 Yabot uses a [Symfony dependency-injection](http://symfony.com/doc/current/components/dependency_injection.html)
 container for configuration.
 
-TODO:
-* creating your own configuration
-* configuring and adding plugins to Yabot
-* YabotContainer and how to add plugins to Yabot
+`yabot.php` loads three configuration files: 
+`vendor/nopolabs/yabot/config/yabot.xml`, 
+`config/plugins.yml`, and `config.php`.
+
+`vendor/nopolabs/yabot/config/yabot.xml` defines core services used by
+Yabot and available for plugins to get from the container. You should
+not need to modify this file.
+
+`config/plugins.yml` provides a place to configure plugins and shared
+services for your Yabot application. See the discussion of 
+[plugins](#plugins) below.
+
+`config.php` provides a place to set or override runtime settings.
 
 [Importing configuration files](http://symfony.com/doc/current/service_container/import.html)
 
-## Running yabot
 
-    php yabot.php
-    
 ## Logging
 
-    tail -f logs/bot.log
+Logging is configured in config.php:
 
-## Plugins
+    'log.file' => 'logs/bot.log',
+    'log.name' => 'bot',
+    'log.level' => 'DEBUG',
+
+## Plugins <a name="plugins"></a>
+
+TODO:
+* configuring and adding plugins to Yabot
+* YabotContainer and how to add plugins to Yabot
 
 Yabot uses plugins to know what to listen for and how to respond.
 

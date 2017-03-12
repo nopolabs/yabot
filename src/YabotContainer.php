@@ -22,20 +22,24 @@ class YabotContainer extends ContainerBuilder
     public function __construct($servicesConfigPath = __DIR__.'/../config/yabot.xml')
     {
         parent::__construct();
-
-        $extension = pathinfo($servicesConfigPath)['extension'];
-        if ($extension === 'xml') {
-            $this->loadXml($servicesConfigPath);
-        } elseif ($extension === 'yml') {
-            $this->loadYml($servicesConfigPath);
-        } else {
-            throw new Exception("Do not know how to load $servicesConfigPath");
-        }
+        $this->load($servicesConfigPath);
     }
 
     public function addConfig(array $parameters)
     {
         $this->getParameterBag()->add($parameters);
+    }
+
+    public function load($file)
+    {
+        $extension = pathinfo($file)['extension'];
+        if ($extension === 'xml') {
+            $this->loadXml($file);
+        } elseif ($extension === 'yml') {
+            $this->loadYml($file);
+        } else {
+            throw new Exception("Do not know how to load $file");
+        }
     }
 
     public function loadXml($file)
