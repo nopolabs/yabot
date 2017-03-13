@@ -24,11 +24,11 @@ trait GuzzleTrait
 
     public function getAsync($uri) : PromiseInterface
     {
-        return $this->guzzle->getAsync($uri);
+        return $this->getGuzzle()->getAsync($uri);
     }
 
     public function post($uri, $options = []) : ResponseInterface
     {
-        return $this->guzzle->post($uri, $options);
+        return $this->getGuzzle()->post($uri, $options);
     }
 }

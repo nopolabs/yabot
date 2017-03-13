@@ -130,12 +130,22 @@ with the message and any fields captured by the matcher pattern:
 
 ## Responding to a Message
 
+#### Replying in the same channel as the message
+
     // assuming: 'help' => "/^help (?'topic'\\w+)\\b/"
     public function help(MessageInterface $msg, array $matches)
     {
         $topic = $matches[1];
         $msg->reply("you want help with $topic");
     }
+
+#### In a Thread
+
+        $msg->thread("here are the details...");
+        
+#### In a specific channel
+
+        $msg->say("lunchtime!", 'general');
 
 ## Users and Channels
 

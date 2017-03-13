@@ -2,15 +2,15 @@
 
 namespace Nopolabs\Yabot\Bot;
 
+use Nopolabs\Yabot\Helpers\SlackTrait;
 use Slack\Channel;
 use Slack\User;
 
 class Message implements MessageInterface
 {
-    public $data;
+    use SlackTrait;
 
-    /** @var SlackClient */
-    protected $slack;
+    public $data;
 
     /** @var User */
     protected $user;
@@ -24,7 +24,7 @@ class Message implements MessageInterface
     public function __construct(SlackClient $slack, array $data)
     {
         $this->data = $data;
-        $this->slack = $slack;
+        $this->setSlack($slack);
         $this->user = $slack->userById($data['user']);
         $this->channel = $slack->channelById($data['channel']);
         $this->handled = false;
@@ -80,13 +80,13 @@ class Message implements MessageInterface
 
     public function reply($text, array $additionalParameters = [])
     {
-        $this->slack->say($text, $this->getChannel(), $additionalParameters);
+        $this->say($text, $this->getChannel(), $additionalParameters);
     }
 
     public function thread($text, array $additionalParameters = [])
     {
         $additionalParameters['thread_ts'] = $this->getThreadTs();
-        $this->slack->say($text, $this->getChannel(), $additionalParameters);
+        $this->reply($text, $additionalParameters);
     }
 
     public function isHandled() : bool

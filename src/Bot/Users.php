@@ -25,13 +25,19 @@ class Users
 
     public function byId($id) : User
     {
-        $index = $this->usersById[$id];
-        return $this->users[$index];
+        if ($index = $this->usersById[$id]) {
+            return $this->users[$index];
+        } else {
+            return null;
+        }
     }
 
     public function byName($name) : User
     {
-        $index = $this->usersByName[$name];
-        return $this->users[$index];
+        if ($index = $this->usersByName[$name]) {
+            return $this->users[$index];
+        } else {
+            return null;
+        }
     }
 }

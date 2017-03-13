@@ -19,8 +19,8 @@ trait SlackTrait
         return $this->slack;
     }
 
-    public function say($text, $channel)
+    public function say($text, $channel, array $additionalParameters = [])
     {
-        $this->slack->say($text, $channel);
+        $this->getSlack()->say($text, $channel, $additionalParameters);
     }
 }

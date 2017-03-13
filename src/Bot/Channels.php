@@ -25,13 +25,19 @@ class Channels
 
     public function byId($id) : Channel
     {
-        $index = $this->channelsById[$id];
-        return $this->channels[$index];
+        if ($index = $this->channelsById[$id]) {
+            return $this->channels[$index];
+        } else {
+            return null;
+        }
     }
 
     public function byName($name) : Channel
     {
-        $index = $this->channelsByName[$name];
-        return $this->channels[$index];
+        if ($index = $this->channelsByName[$name]) {
+            return $this->channels[$index];
+        } else {
+            return null;
+        }
     }
 }

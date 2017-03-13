@@ -77,8 +77,14 @@ class SlackClient
         }
     }
 
-    public function say($text, ChannelInterface $channel, array $additionalParameters = [])
+    public function say($text, $channel, array $additionalParameters = [])
     {
+        if (!($channel instanceof ChannelInterface)) {
+            if (!($channel = $this->channelByName($channel))) {
+                $channel = $this->channelById($channel);
+            }
+        }
+
         if ($this->useWebSocket() && empty($additionalParameters)) {
             // WebSocket send does not support message formatting.
             $this->send($text, $channel);
