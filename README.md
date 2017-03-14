@@ -51,7 +51,6 @@ services for your Yabot application. See the discussion of
 
 [Importing configuration files](http://symfony.com/doc/current/service_container/import.html)
 
-
 ## Logging
 
 Logging is configured in config.php:
@@ -61,10 +60,6 @@ Logging is configured in config.php:
     'log.level' => 'DEBUG',
 
 ## Plugins <a name="plugins"></a>
-
-TODO:
-* configuring and adding plugins to Yabot
-* YabotContainer and how to add plugins to Yabot
 
 Yabot uses plugins to know what to listen for and how to respond.
 
@@ -76,6 +71,18 @@ Minimally a plugin must implement `Nopolabs\Yabot\Bot\PluginInterface`:
     {
         public function onMessage(MessageInterface $message);
     }
+
+Plugins declared in `plugins.yml` with the tag `yabot.plugin` will be
+loaded automatically: 
+
+    services:
+        plugin.hey:
+            class: Nopolabs\Yabot\Examples\Hey
+            arguments:
+                - '@message.dispatcher'
+                - '@logger'
+            tags:
+                - { name: yabot.plugin }
 
 This discussion will focus on how to use the default Plugin 
 implementation provided by `Nopolabs\Yabot\Bot\PluginTrait`.
