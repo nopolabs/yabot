@@ -25,8 +25,8 @@ class Users
 
     public function byId($id) : User
     {
-        if ($index = $this->usersById[$id]) {
-            return $this->users[$index];
+        if (isset($this->usersById[$id])) {
+            return $this->users[$this->usersById[$id]];
         } else {
             return null;
         }
@@ -34,8 +34,8 @@ class Users
 
     public function byName($name) : User
     {
-        if ($index = $this->usersByName[$name]) {
-            return $this->users[$index];
+        if (isset($this->usersByName[$name])) {
+            return $this->users[$this->usersByName[$name]];
         } else {
             return null;
         }

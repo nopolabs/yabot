@@ -142,14 +142,14 @@ class YabotTest extends TestCase
     public function testAddPlugin()
     {
         $plugin = $this->createMock(PluginInterface::class);
+        $wrapped = function() {};
 
         $yabot = $this->newYabot([
-            ['on', [
-                'params' => ['message', [$plugin, 'onMessage']],
-            ]]
+            ['wrapPlugin', ['params' => ['plugin-id', $plugin], 'result' => $wrapped]],
+            ['on', ['params' => ['message', $wrapped]]],
         ]);
 
-        $yabot->addPlugin($plugin);
+        $yabot->addPlugin('plugin-id', $plugin);
     }
 
     private function newYabot(array $expectations = []) : Yabot

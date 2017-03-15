@@ -25,8 +25,8 @@ class Channels
 
     public function byId($id) : Channel
     {
-        if ($index = $this->channelsById[$id]) {
-            return $this->channels[$index];
+        if (isset($this->channelsById[$id])) {
+            return $this->channels[$this->channelsById[$id]];
         } else {
             return null;
         }
@@ -34,8 +34,8 @@ class Channels
 
     public function byName($name) : Channel
     {
-        if ($index = $this->channelsByName[$name]) {
-            return $this->channels[$index];
+        if (isset($this->channelsByName[$name])) {
+            return $this->channels[$this->channelsByName[$name]];
         } else {
             return null;
         }

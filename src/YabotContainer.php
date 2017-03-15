@@ -69,18 +69,18 @@ class YabotContainer extends ContainerBuilder
     {
         $pluginIds = $this->findTaggedServiceIds($pluginTag);
         foreach ($pluginIds as $pluginId => $value) {
-            $this->addPluginById($yabot, $pluginId);
+            $this->addPluginById($yabot, $pluginId, $pluginId);
         }
     }
 
     public function addPluginById(Yabot $yabot, $pluginId)
     {
         $this->get('logger')->info("loading $pluginId");
-        $this->addPlugin($yabot, $this->get($pluginId));
+        $this->addPlugin($yabot, $pluginId, $this->get($pluginId));
     }
 
-    public function addPlugin(Yabot $yabot, PluginInterface $plugin)
+    public function addPlugin(Yabot $yabot, $pluginId, PluginInterface $plugin)
     {
-        $yabot->addPlugin($plugin);
+        $yabot->addPlugin($pluginId, $plugin);
     }
 }

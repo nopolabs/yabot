@@ -3,7 +3,9 @@
 namespace Nopolabs\Yabot;
 
 use Evenement\EventEmitterTrait;
+use Exception;
 use Nopolabs\Yabot\Bot\MessageFactory;
+use Nopolabs\Yabot\Bot\MessageInterface;
 use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\SlackClient;
 use Psr\Log\LoggerInterface;
@@ -26,6 +28,9 @@ class Yabot
     /** @var MessageFactory */
     protected $messageFactory;
 
+    /** @var array */
+    protected $plugins;
+
     public function __construct(
         LoggerInterface $logger,
         LoopInterface $eventLoop,
@@ -36,6 +41,8 @@ class Yabot
         $this->eventLoop = $eventLoop;
         $this->slackClient = $slackClient;
         $this->messageFactory = $messageFactory;
+
+        $this->plugins = [];
     }
 
     public function run()
@@ -76,13 +83,34 @@ class Yabot
         $this->slackClient->disconnect();
     }
 
-    public function addPlugin(PluginInterface $plugin)
+    public function addPlugin($pluginId, PluginInterface $plugin)
     {
-        $this->on('message', [$plugin, 'onMessage']);
+        if (isset($this->plugins[$pluginId])) {
+            $this->logger->warning("$pluginId already added, ignoring duplicate.");
+            return;
+        }
+
+        $this->plugins[$pluginId] = $this->wrapPlugin($pluginId, $plugin);
+
+        $this->on('message', $this->plugins[$pluginId]);
     }
 
-    public function removePlugin(PluginInterface $plugin)
+    public function removePlugin($pluginId)
     {
-        $this->removeListener('message', [$plugin, 'onMessage']);
+        if (isset($this->plugins[$pluginId])) {
+            $this->removeListener('message', $this->plugins[$pluginId]);
+        }
+    }
+
+    protected function wrapPlugin($pluginId, PluginInterface $plugin)
+    {
+        return function(MessageInterface $message) use ($pluginId, $plugin) {
+            try {
+                $plugin->onMessage($message);
+            } catch (Exception $e) {
+                $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
+                $this->logger->warning($e->getTraceAsString());
+            }
+        };
     }
 }
