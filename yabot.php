@@ -1,7 +1,10 @@
 <?php
+use Nopolabs\Yabot\ErrorExceptionHandler;
 use Nopolabs\Yabot\YabotContainer;
 
 require __DIR__.'/vendor/autoload.php';
+
+set_error_handler([ErrorExceptionHandler::class, 'handler']);
 
 $config = require __DIR__.'/config.php';
 

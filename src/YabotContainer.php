@@ -2,16 +2,12 @@
 
 namespace Nopolabs\Yabot;
 
-
 use Exception;
 use Nopolabs\Yabot\Bot\PluginInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class YabotContainer extends ContainerBuilder
 {
@@ -19,10 +15,10 @@ class YabotContainer extends ContainerBuilder
     const YABOT_PLUGIN_TAG = 'yabot.plugin';
     const SLACK_TOKEN_KEY = 'slack.token';
 
-    public function __construct($servicesConfigPath = __DIR__.'/../config/yabot.xml')
+    public function __construct($servicesPath = __DIR__.'/../config/yabot.xml')
     {
         parent::__construct();
-        $this->load($servicesConfigPath);
+        $this->load($servicesPath);
     }
 
     public function addConfig(array $parameters)
@@ -69,14 +65,24 @@ class YabotContainer extends ContainerBuilder
     {
         $pluginIds = $this->findTaggedServiceIds($pluginTag);
         foreach ($pluginIds as $pluginId => $value) {
-            $this->addPluginById($yabot, $pluginId, $pluginId);
+            $this->addPluginById($yabot, $pluginId);
         }
     }
 
     public function addPluginById(Yabot $yabot, $pluginId)
     {
-        $this->get('logger')->info("loading $pluginId");
-        $this->addPlugin($yabot, $pluginId, $this->get($pluginId));
+        $logger = $this->get('logger');
+
+        $logger->info("loading $pluginId");
+
+        try {
+            /** @var PluginInterface $plugin */
+            $plugin = $this->get($pluginId);
+            $this->addPlugin($yabot, $pluginId, $plugin);
+        } catch (Exception $e) {
+            $logger->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
+            $logger->warning($e->getTraceAsString());
+        }
     }
 
     public function addPlugin(Yabot $yabot, $pluginId, PluginInterface $plugin)
