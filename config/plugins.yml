@@ -1,58 +1,10 @@
 parameters:
-    plugin.lookup.config: []
-    plugin.reservations.config: []
-    plugin.queue.config: []
-    reservations.resources.config: []
-    queue.config: []
 
 services:
-    plugin.hey:
-        class: Nopolabs\Yabot\Examples\Hey
+    plugin.status:
+        class: Nopolabs\Yabot\Status\StatusPlugin
         arguments:
             - '@message.dispatcher'
             - '@logger'
         tags:
             - { name: yabot.plugin }
-
-    plugin.lookup:
-        class: Nopolabs\Yabot\Examples\Lookup
-        arguments:
-            - '@message.dispatcher'
-            - '@logger'
-            - '%plugin.lookup.config%'
-        tags:
-            - { name: yabot.plugin }
-
-    plugin.reservations:
-        class: Nopolabs\Yabot\Reservations\ReservationsPlugin
-        arguments:
-            - '@message.dispatcher'
-            - '@logger'
-            - '@reservations.resources'
-            - '%plugin.reservations.config%'
-        tags:
-            - { name: yabot.plugin }
-
-    plugin.queue:
-        class: Nopolabs\Yabot\Queue\QueuePlugin
-        arguments:
-            - '@message.dispatcher'
-            - '@logger'
-            - '@queue'
-            - '%plugin.queue.config%'
-        tags:
-            - { name: yabot.plugin }
-
-    reservations.resources:
-        class: Nopolabs\Yabot\Reservations\Resources
-        arguments:
-            - '@slack.client'
-            - '@storage'
-            - '@event.loop'
-            - '%reservations.resources.config%'
-
-    queue:
-        class: Nopolabs\Yabot\Queue\Queue
-        arguments:
-            - '@storage'
-            - '%queue.config%'
