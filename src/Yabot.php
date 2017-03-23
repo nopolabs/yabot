@@ -102,6 +102,13 @@ class Yabot
         }
     }
 
+    public function getStatus()
+    {
+        $count = count($this->plugins);
+
+        return "Yabot is running $count plugins:\n". join("\n", array_keys($this->plugins));
+    }
+
     protected function wrapPlugin($pluginId, PluginInterface $plugin)
     {
         return function(MessageInterface $message) use ($pluginId, $plugin) {

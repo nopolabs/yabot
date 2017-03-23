@@ -6,5 +6,6 @@ services:
         arguments:
             - '@message.dispatcher'
             - '@logger'
+            - '@yabot'
         tags:
             - { name: yabot.plugin }
