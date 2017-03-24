@@ -10,12 +10,18 @@ you need to provide a token which you get from Slack.
 Please read [Slack's documentation](https://get.slack.help/hc/en-us/articles/215770388)
 for information on how to issue new authentication tokens.
 
-    composer init
+    composer init \
+        --stability dev \
+        --repository '{"type":"vcs","url":"https://github.com/nopolabs/slack-client"}' \
+        --repository '{"type":"vcs","url":"https://github.com/nopolabs/phpws.git"}'  
     composer require nopolabs/yabot
     mkdir config
     cp vendor/nopolabs/yabot/yabot.php yabot.php
     cp vendor/nopolabs/yabot/config/plugins.yml config/plugins.yml
     cp vendor/nopolabs/yabot/config.example.php config.php
+
+NOTE: Yabot is still under development and it depends on updates to coderstephen/slack-client
+and devristo/phpws that are available in forks of those packages in the repositories above.
     
 Edit config.php and add your Slack API token:
 
