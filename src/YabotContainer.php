@@ -54,6 +54,7 @@ class YabotContainer extends ContainerBuilder
     {
         $this->addConfig($config);
 
+        /** @var Yabot $yabot */
         $yabot = $this->get(self::YABOT_ID);
 
         $this->addTaggedPlugins($yabot, self::YABOT_PLUGIN_TAG);
