@@ -13,7 +13,7 @@ You can download and run yabot-init.sh with this command:
 
     wget -O - https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
 
-NOTE: yabot-init.sh uses nopolabs repositoies for slack-client and phpws
+NOTE: yabot-init.sh uses nopolabs repositories for slack-client and phpws
 because it depends on updates to coderstephen/slack-client
 and devristo/phpws that are not yet available from those packages.
     
