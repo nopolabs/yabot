@@ -50,10 +50,8 @@ class YabotContainer extends ContainerBuilder
         $loader->load($file);
     }
 
-    public function getYabot(array $config) : Yabot
+    public function getYabot() : Yabot
     {
-        $this->addConfig($config);
-
         /** @var Yabot $yabot */
         $yabot = $this->get(self::YABOT_ID);
 

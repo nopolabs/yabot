@@ -49,14 +49,14 @@ class MessageDispatcher implements MessageDispatcherInterface
             return;
         }
 
-        if (!$message->matchesPrefix($this->getPrefix())) {
+        if (!($matches = $message->matchesPrefix($this->getPrefix()))) {
             return;
         }
 
-        foreach ($this->getMatchers() as $name => $params) {
-            $matched = $this->matchMessage($message, $name, $params);
+        $text = ltrim($matches[1]);
 
-            if ($matched === false) {
+        foreach ($this->getMatchers() as $name => $params) {
+            if (!($matched = $this->matchMessage($message, $name, $params, $text))) {
                 continue;
             }
 
@@ -68,7 +68,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         }
     }
 
-    public function matchMessage(MessageInterface $message, $name, array $params)
+    protected function matchMessage(MessageInterface $message, $name, array $params, string $text)
     {
         if (!$this->matchesIsBot($params, $message)) {
             return false;
@@ -82,8 +82,8 @@ class MessageDispatcher implements MessageDispatcherInterface
             return false;
         }
 
-        $matches = $this->matchPattern($params, $message);
-        if ($matches === false) {
+        ;
+        if (!($matches = $this->matchPattern($params, $message, $text))) {
             return false;
         }
 
@@ -94,7 +94,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         return [$method, $matches];
     }
 
-    public function matchesIsBot(array $params, MessageInterface $message)
+    protected function matchesIsBot(array $params, MessageInterface $message)
     {
         if (isset($params['isBot'])) {
             return $message->matchesIsBot($params['isBot']);
@@ -103,7 +103,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         }
     }
 
-    public function matchesChannel(array $params, MessageInterface $message)
+    protected function matchesChannel(array $params, MessageInterface $message)
     {
         if (isset($params['channel'])) {
             return $message->matchesChannel($params['channel']);
@@ -112,7 +112,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         }
     }
 
-    public function matchesUser(array $params, MessageInterface $message)
+    protected function matchesUser(array $params, MessageInterface $message)
     {
         if (isset($params['user'])) {
             return $message->matchesUser($params['user']);
@@ -121,16 +121,16 @@ class MessageDispatcher implements MessageDispatcherInterface
         }
     }
 
-    public function matchPattern(array $params, MessageInterface $message)
+    protected function matchPattern(array $params, MessageInterface $message, string $text)
     {
         if (isset($params['pattern'])) {
-            return $message->matchPattern($params['pattern']);
+            return $message->matchPattern($params['pattern'], $text);
         } else {
             return [];
         }
     }
 
-    public function dispatchMessage($plugin, MessageInterface $message, array $matched)
+    protected function dispatchMessage($plugin, MessageInterface $message, array $matched)
     {
         list($method, $matches) = $matched;
 

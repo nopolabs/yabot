@@ -109,9 +109,22 @@ class Message implements MessageInterface
         return $this->getChannel()->getName();
     }
 
-    public function matchesPrefix($prefix) : bool
+    public function matchesPrefix($prefix) : array
     {
-        return (substr($this->getText(), 0, strlen($prefix)) === $prefix);
+        $text = ltrim($this->getText());
+
+        if ($prefix === '') {
+            return [$text, $text];
+        }
+
+        if (substr($prefix, 0, 1) === '@') {
+            $user = $this->getSlack()->userByName(substr($prefix, 1));
+            $prefix = "<@{$user->getId()}>";
+        }
+
+        preg_match("/^$prefix\s+(.*)/", $text, $matches);
+
+        return $matches;
     }
 
     public function matchesIsBot($isBot) : bool
@@ -139,17 +152,15 @@ class Message implements MessageInterface
         }
     }
 
-    public function matchPattern($pattern)
+    public function matchPattern($pattern, string $text) : array
     {
         $patterns = is_array($pattern) ? $pattern : [$pattern];
-        $text = $this->getText();
         $matches = [];
-        $matched = false;
         foreach ($patterns as $pattern) {
-            if ($matched = preg_match($pattern, $text, $matches)) {
+            if (preg_match($pattern, $text, $matches)) {
                 break;
             }
         }
-        return $matched ? $matches : false;
+        return $matches;
     }
 }

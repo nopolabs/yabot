@@ -67,6 +67,7 @@
 
         <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory" />
 
+        <!-- message dispatchers are not shared, this returns a new instance for each reference -->
         <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher" shared="false">
             <argument type="service" id="logger" />
         </service>

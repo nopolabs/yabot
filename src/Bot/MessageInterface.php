@@ -33,7 +33,7 @@ interface MessageInterface
 
     public function getUsername();
 
-    public function matchesPrefix($prefix) : bool;
+    public function matchesPrefix($prefix) : array;
 
     public function matchesIsBot($isBot) : bool;
 
@@ -41,5 +41,5 @@ interface MessageInterface
 
     public function matchesUser($name) : bool;
 
-    public function matchPattern($pattern);
+    public function matchPattern($pattern, string $text) : array;
 }

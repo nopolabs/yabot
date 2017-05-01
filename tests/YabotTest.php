@@ -39,7 +39,7 @@ class YabotTest extends TestCase
 
         $connectPromise = $this->newPartialMockWithExpectations(PromiseInterface::class, [
             ['then', [
-                'oarams' => [$slackClient, 'update'],
+                'params' => [$slackClient, 'update'],
             ]],
         ]);
 

@@ -10,8 +10,10 @@ $config = require __DIR__.'/config.php';
 
 $container = new YabotContainer();
 
+$container->addConfig($config);
+
 $container->load(__DIR__.'/config/plugins.yml');
 
-$yabot = $container->getYabot($config);
+$yabot = $container->getYabot();
 
 $yabot->run();

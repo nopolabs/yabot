@@ -31,6 +31,9 @@ class Yabot
     /** @var array */
     protected $plugins;
 
+    /** @var array */
+    protected $listeners;
+
     public function __construct(
         LoggerInterface $logger,
         LoopInterface $eventLoop,
@@ -43,6 +46,7 @@ class Yabot
         $this->messageFactory = $messageFactory;
 
         $this->plugins = [];
+        $this->listeners = [];
     }
 
     public function run()
@@ -90,26 +94,47 @@ class Yabot
             return;
         }
 
-        $this->plugins[$pluginId] = $this->wrapPlugin($pluginId, $plugin);
+        $this->plugins[$pluginId] = $plugin;
+        $this->listeners[$pluginId] = $this->callOnMessage($pluginId, $plugin);
 
-        $this->on('message', $this->plugins[$pluginId]);
+        $this->on('message', $this->listeners[$pluginId]);
     }
 
     public function removePlugin($pluginId)
     {
         if (isset($this->plugins[$pluginId])) {
-            $this->removeListener('message', $this->plugins[$pluginId]);
+            $this->removeListener('message', $this->listeners[$pluginId]);
+            unset($this->plugins[$pluginId]);
+            unset($this->listeners[$pluginId]);
         }
     }
 
-    public function getStatus()
+    public function getHelp() : string
+    {
+        $help = [];
+        foreach ($this->plugins as $key => $plugin) {
+            /** @var PluginInterface $plugin */
+            $help[] = "$key: " . $plugin->help();
+        }
+
+        return implode("\n", $help);
+    }
+
+    public function getStatus() : string
     {
         $count = count($this->plugins);
 
-        return "Yabot is running $count plugins:\n". join("\n", array_keys($this->plugins));
+        $statuses = [];
+        $statuses[] = "Yabot has $count plugins.";
+        foreach ($this->plugins as $key => $plugin) {
+            /** @var PluginInterface $plugin */
+            $statuses[] = "$key: " . $plugin->status();
+        }
+
+        return implode("\n", $statuses);
     }
 
-    protected function wrapPlugin($pluginId, PluginInterface $plugin)
+    protected function callOnMessage($pluginId, PluginInterface $plugin)
     {
         return function(MessageInterface $message) use ($pluginId, $plugin) {
             try {

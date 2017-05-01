@@ -11,9 +11,32 @@ trait PluginTrait
     /** @var MessageDispatcher */
     private $dispatcher;
 
+    /** @var array */
+    private $config;
+
+    public function help() : string
+    {
+        return 'no help available';
+    }
+
+    public function status() : string
+    {
+        return 'running';
+    }
+
     public function onMessage(MessageInterface $message)
     {
         $this->dispatcher->dispatch($this, $message);
+    }
+
+    public function init(array $config)
+    {
+        $this->config = $config;
+    }
+
+    public function getConfig() : array
+    {
+        return $this->config;
     }
 
     public function getDispatcher() : MessageDispatcherInterface
@@ -24,6 +47,11 @@ trait PluginTrait
     public function setDispatcher(MessageDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
+    }
+
+    public function setPrefix(string $prefix)
+    {
+        $this->getDispatcher()->setPrefix($prefix);
     }
 
     public function setMatchers(array $matchers)
