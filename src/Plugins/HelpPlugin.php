@@ -16,12 +16,14 @@ class HelpPlugin extends AbstractPlugin
     {
         parent::__construct($dispatcher, $logger, $yabot);
 
-        $this->setPrefix('@npbot');
-        $this->setMatchers(['yabotHelp' => "/^help\\b/"]);
+        $this->setConfig([
+            'matchers' => ['yabotHelp' => "/^help\\b/"],
+        ]);
     }
 
     public function yabotHelp(MessageInterface $msg, array $matches)
     {
         $msg->reply($this->getYabot()->getHelp());
+        $msg->setHandled(true);
     }
 }

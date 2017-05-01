@@ -16,12 +16,14 @@ class StatusPlugin extends AbstractPlugin
     {
         parent::__construct($dispatcher, $logger, $yabot);
 
-        $this->setPrefix('@npbot');
-        $this->setMatchers(['yabotStatus' => "/^status\\b/"]);
+        $this->setConfig([
+            'matchers' => ['yabotStatus' => "/^status\\b/"],
+        ]);
     }
 
     public function yabotStatus(MessageInterface $msg, array $matches)
     {
         $msg->reply($this->getYabot()->getStatus());
+        $msg->setHandled(true);
     }
 }

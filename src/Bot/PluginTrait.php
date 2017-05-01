@@ -8,11 +8,12 @@ trait PluginTrait
 {
     use LogTrait;
 
+    private $prefix;
+
+    private $config = [];
+
     /** @var MessageDispatcher */
     private $dispatcher;
-
-    /** @var array */
-    private $config;
 
     public function help() : string
     {
@@ -24,19 +25,28 @@ trait PluginTrait
         return 'running';
     }
 
-    public function onMessage(MessageInterface $message)
+    public function init(array $params)
     {
-        $this->dispatcher->dispatch($this, $message);
+        $this->config = array_merge($this->config, $params);
+
+        $this->prefix = $this->config['prefix'] ?? '';
+
+        $this->setMatchers($this->config['matchers']);
     }
 
-    public function init(array $config)
+    public function setConfig(array $params)
     {
-        $this->config = $config;
+        $this->config = $params;
     }
 
-    public function getConfig() : array
+    public function getPrefix() : string
     {
-        return $this->config;
+        return $this->prefix;
+    }
+
+    public function dispatch(MessageInterface $message, string $text)
+    {
+        $this->dispatcher->dispatch($this, $message, $text);
     }
 
     public function getDispatcher() : MessageDispatcherInterface
@@ -47,11 +57,6 @@ trait PluginTrait
     public function setDispatcher(MessageDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
-    }
-
-    public function setPrefix(string $prefix)
-    {
-        $this->getDispatcher()->setPrefix($prefix);
     }
 
     public function setMatchers(array $matchers)

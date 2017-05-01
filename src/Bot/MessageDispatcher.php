@@ -24,7 +24,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         $this->prefix = $prefix;
     }
 
-    public function getPrefix()
+    public function getPrefix() : string
     {
         return $this->prefix;
     }
@@ -39,7 +39,7 @@ class MessageDispatcher implements MessageDispatcherInterface
         return $this->matchers;
     }
 
-    public function dispatch($plugin, MessageInterface $message)
+    public function dispatch($plugin, MessageInterface $message, string $text)
     {
         if ($message->isSelf()) {
             return;
@@ -48,12 +48,6 @@ class MessageDispatcher implements MessageDispatcherInterface
         if ($message->isHandled()) {
             return;
         }
-
-        if (!($matches = $message->matchesPrefix($this->getPrefix()))) {
-            return;
-        }
-
-        $text = ltrim($matches[1]);
 
         foreach ($this->getMatchers() as $name => $params) {
             if (!($matched = $this->matchMessage($message, $name, $params, $text))) {

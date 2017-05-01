@@ -1,4 +1,9 @@
 parameters:
+    plugin.help:
+        prefix: '@@npbot'
+
+    plugin.status:
+        prefix: '@@npbot'
 
 services:
     plugin.help:

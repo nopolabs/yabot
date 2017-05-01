@@ -55,37 +55,29 @@ class YabotContainer extends ContainerBuilder
         /** @var Yabot $yabot */
         $yabot = $this->get(self::YABOT_ID);
 
-        $this->addTaggedPlugins($yabot, self::YABOT_PLUGIN_TAG);
+        $plugins = $this->getTaggedPlugins(self::YABOT_PLUGIN_TAG);
+
+        $yabot->init($plugins);
 
         return $yabot;
     }
 
-    public function addTaggedPlugins(Yabot $yabot, $pluginTag = self::YABOT_PLUGIN_TAG)
+    protected function getTaggedPlugins($tag) : array
     {
-        $pluginIds = $this->findTaggedServiceIds($pluginTag);
+        $plugins = [];
+
+        $pluginIds = $this->findTaggedServiceIds($tag);
         foreach ($pluginIds as $pluginId => $value) {
-            $this->addPluginById($yabot, $pluginId);
-        }
-    }
-
-    public function addPluginById(Yabot $yabot, $pluginId)
-    {
-        $logger = $this->get('logger');
-
-        $logger->info("loading $pluginId");
-
-        try {
-            /** @var PluginInterface $plugin */
             $plugin = $this->get($pluginId);
-            $this->addPlugin($yabot, $pluginId, $plugin);
-        } catch (Exception $e) {
-            $logger->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
-            $logger->warning($e->getTraceAsString());
+            if ($this->hasParameter($pluginId)) {
+                $config = $this->getParameter($pluginId);
+            } else {
+                $config = [];
+            }
+            $plugin->init($config);
+            $plugins[$pluginId] = $plugin;
         }
-    }
 
-    public function addPlugin(Yabot $yabot, $pluginId, PluginInterface $plugin)
-    {
-        $yabot->addPlugin($pluginId, $plugin);
+        return $plugins;
     }
 }

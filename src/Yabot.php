@@ -32,7 +32,7 @@ class Yabot
     protected $plugins;
 
     /** @var array */
-    protected $listeners;
+    protected $prefixes;
 
     public function __construct(
         LoggerInterface $logger,
@@ -46,7 +46,23 @@ class Yabot
         $this->messageFactory = $messageFactory;
 
         $this->plugins = [];
-        $this->listeners = [];
+        $this->prefixes = [];
+    }
+
+    public function init(array $plugins)
+    {
+        foreach ($plugins as $pluginId => $plugin) {
+            /** @var PluginInterface $plugin */
+
+            $this->logger->info("loading $pluginId");
+
+            try {
+                $this->addPlugin($pluginId, $plugin);
+            } catch (Exception $e) {
+                $this->logger->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
+                $this->logger->warning($e->getTraceAsString());
+            }
+        }
     }
 
     public function run()
@@ -78,35 +94,41 @@ class Yabot
 
         $message = $this->messageFactory->create($this->slackClient, $data);
 
-        $this->emit('message', [$message]);
+        foreach ($this->prefixes as $prefix => $plugins) {
+            if (!($matches = $message->matchesPrefix($prefix))) {
+                continue;
+            }
+
+            $this->logger->debug('Matched prefix', ['prefix' => $prefix]);
+
+            $text = ltrim($matches[1]);
+
+            foreach ($plugins as $pluginId => $plugin) {
+                /** @var PluginInterface $plugin */
+                try {
+                    $this->logger->debug('dispatch', ['pluginId' => $pluginId]);
+
+                    $plugin->dispatch($message, $text);
+                } catch (Exception $e) {
+                    $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
+                    $this->logger->warning($e->getTraceAsString());
+                }
+
+                if ($message->isHandled()) {
+                    return;
+                }
+            }
+
+            if ($message->isHandled()) {
+                return;
+            }
+        }
     }
 
     public function quit()
     {
         $this->logger->info('Quitting');
         $this->slackClient->disconnect();
-    }
-
-    public function addPlugin($pluginId, PluginInterface $plugin)
-    {
-        if (isset($this->plugins[$pluginId])) {
-            $this->logger->warning("$pluginId already added, ignoring duplicate.");
-            return;
-        }
-
-        $this->plugins[$pluginId] = $plugin;
-        $this->listeners[$pluginId] = $this->callOnMessage($pluginId, $plugin);
-
-        $this->on('message', $this->listeners[$pluginId]);
-    }
-
-    public function removePlugin($pluginId)
-    {
-        if (isset($this->plugins[$pluginId])) {
-            $this->removeListener('message', $this->listeners[$pluginId]);
-            unset($this->plugins[$pluginId]);
-            unset($this->listeners[$pluginId]);
-        }
     }
 
     public function getHelp() : string
@@ -134,15 +156,21 @@ class Yabot
         return implode("\n", $statuses);
     }
 
-    protected function callOnMessage($pluginId, PluginInterface $plugin)
+    public function addPlugin($pluginId, PluginInterface $plugin)
     {
-        return function(MessageInterface $message) use ($pluginId, $plugin) {
-            try {
-                $plugin->onMessage($message);
-            } catch (Exception $e) {
-                $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
-                $this->logger->warning($e->getTraceAsString());
-            }
-        };
+        if (isset($this->plugins[$pluginId])) {
+            $this->logger->warning("$pluginId already added, ignoring duplicate.");
+            return;
+        }
+
+        $this->plugins[$pluginId] = $plugin;
+
+        $prefix = $plugin->getPrefix();
+
+        if (!isset($this->prefixes[$prefix])) {
+            $this->prefixes[$prefix] = [];
+        }
+
+        $this->prefixes[$prefix][$pluginId] = $plugin;
     }
 }
