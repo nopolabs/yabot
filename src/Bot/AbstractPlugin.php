@@ -11,12 +11,8 @@ class AbstractPlugin implements PluginInterface
 
     private $yabot;
 
-    public function __construct(
-        MessageDispatcher $dispatcher,
-        LoggerInterface $logger,
-        Yabot $yabot)
+    public function __construct(LoggerInterface $logger, Yabot $yabot)
     {
-        $this->setDispatcher($dispatcher);
         $this->setLog($logger);
         $this->yabot = $yabot;
     }

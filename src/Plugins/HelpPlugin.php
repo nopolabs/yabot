@@ -2,6 +2,7 @@
 namespace Nopolabs\Yabot\Plugins;
 
 use Nopolabs\Yabot\Bot\AbstractPlugin;
+use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageDispatcher;
 use Nopolabs\Yabot\Bot\MessageInterface;
 use Nopolabs\Yabot\Yabot;
@@ -9,14 +10,12 @@ use Psr\Log\LoggerInterface;
 
 class HelpPlugin extends AbstractPlugin
 {
-    public function __construct(
-        MessageDispatcher $dispatcher,
-        LoggerInterface $logger,
-        Yabot $yabot)
+    public function __construct(LoggerInterface $logger, Yabot $yabot)
     {
-        parent::__construct($dispatcher, $logger, $yabot);
+        parent::__construct($logger, $yabot);
 
         $this->setConfig([
+            'prefix' => Message::AUTHED_USER,
             'matchers' => ['yabotHelp' => "/^help\\b/"],
         ]);
     }

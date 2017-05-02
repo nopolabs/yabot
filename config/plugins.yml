@@ -1,15 +1,9 @@
 parameters:
-    plugin.help:
-        prefix: '@@npbot'
-
-    plugin.status:
-        prefix: '@@npbot'
 
 services:
     plugin.help:
         class: Nopolabs\Yabot\Plugins\HelpPlugin
         arguments:
-            - '@message.dispatcher'
             - '@logger'
             - '@yabot'
         tags:
@@ -18,7 +12,6 @@ services:
     plugin.status:
         class: Nopolabs\Yabot\Plugins\StatusPlugin
         arguments:
-            - '@message.dispatcher'
             - '@logger'
             - '@yabot'
         tags:

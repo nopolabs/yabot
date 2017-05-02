@@ -68,16 +68,18 @@ class YabotContainer extends ContainerBuilder
 
         $pluginIds = $this->findTaggedServiceIds($tag);
         foreach ($pluginIds as $pluginId => $value) {
+            /** @var PluginInterface $plugin */
             $plugin = $this->get($pluginId);
-            if ($this->hasParameter($pluginId)) {
-                $config = $this->getParameter($pluginId);
-            } else {
-                $config = [];
-            }
-            $plugin->init($config);
+            $config = $this->getParameterOrDefault($pluginId);
+            $plugin->init($pluginId, $config);
             $plugins[$pluginId] = $plugin;
         }
 
         return $plugins;
+    }
+
+    protected function getParameterOrDefault($name, array $default = []) : array
+    {
+        return $this->hasParameter($name)? $this->getParameter($name) : $default;
     }
 }

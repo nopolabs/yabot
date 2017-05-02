@@ -23,9 +23,9 @@ interface MessageInterface
 
     public function getAttachments();
 
-    public function reply($text, array $additionalParameters = []);
+    public function reply(string $text, array $additionalParameters = []);
 
-    public function thread($text, array $additionalParameters = []);
+    public function thread(string $text, array $additionalParameters = []);
 
     public function isHandled() : bool;
 
@@ -33,7 +33,7 @@ interface MessageInterface
 
     public function getUsername();
 
-    public function matchesPrefix($prefix) : array;
+    public function matchesPrefix(string $prefix) : array;
 
     public function matchesIsBot($isBot) : bool;
 
@@ -41,5 +41,5 @@ interface MessageInterface
 
     public function matchesUser($name) : bool;
 
-    public function matchPattern($pattern, string $text) : array;
+    public function matchPatterns(array $patterns, string $text) : array;
 }

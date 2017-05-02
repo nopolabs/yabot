@@ -86,24 +86,23 @@ Plugins declared in `plugins.yml` with the tag `yabot.plugin` will be
 loaded automatically: 
 
     services:
-        plugin.hey:
-            class: Nopolabs\Yabot\Examples\Hey
+        plugin.help:
+            class: Nopolabs\Yabot\Plugins\HelpPlugin
             arguments:
                 - '@message.dispatcher'
                 - '@logger'
+                - '@yabot'
             tags:
                 - { name: yabot.plugin }
 
-This discussion will focus on how to use the default Plugin 
-implementation provided by `Nopolabs\Yabot\Bot\PluginTrait`.
+### Plugin config
 
-`PluginTrait` configures a `MessageDispatcher` and calls `MessageDispatcher::dispatch()`
-with each received message:
-
-    public function onMessage(MessageInterface $message)
-    {
-        $this->dispatcher->dispatch($this, $message);
-    }
+    'plugin.help' => [
+        'prefix' => Message::AUTHED_USER,
+        'matchers' => [
+            'yabotHelp' => "/^help\\b/",
+        ],
+    ],
 
 `MessageDispatcher` is configured with a set of matchers which it applies to each message.
 

@@ -23,7 +23,11 @@ class Users
         }
     }
 
-    public function byId($id) : User
+    /**
+     * @param $id
+     * @return User|null
+     */
+    public function byId($id)
     {
         if (isset($this->usersById[$id])) {
             return $this->users[$this->usersById[$id]];
@@ -32,7 +36,11 @@ class Users
         }
     }
 
-    public function byName($name) : User
+    /**
+     * @param $name
+     * @return User|null
+     */
+    public function byName($name)
     {
         if (isset($this->usersByName[$name])) {
             return $this->users[$this->usersByName[$name]];

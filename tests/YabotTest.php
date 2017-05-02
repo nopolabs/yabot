@@ -11,7 +11,9 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
+use Slack\Channel;
 use Slack\Payload;
+use Slack\User;
 
 class YabotTest extends TestCase
 {
@@ -28,33 +30,30 @@ class YabotTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->eventLoop = $this->createMock(LoopInterface::class);
         $this->slackClient = $this->createMock(SlackClient::class);
-        $this->messageFactory = $this->createMock(MessageFactory::class);
+        $this->messageFactory = new MessageFactory();
     }
 
     public function testRun()
     {
         $slackClient = $this->newPartialMock(SlackClient::class, ['on', 'init', 'connect']);
 
-        $yabot = $this->newYabot();
+        $yabot = new Yabot(
+            $this->logger,
+            $this->eventLoop,
+            $slackClient,
+            $this->messageFactory
+        );
 
         $connectPromise = $this->newPartialMockWithExpectations(PromiseInterface::class, [
-            ['then', [
-                'params' => [$slackClient, 'update'],
-            ]],
+            ['then', ['params' => [(array)[$slackClient, 'update']]]],
         ]);
 
-        $this->setAtExpectations($this->eventLoop, [
-            ['run', []],
-        ]);
+        $this->setAtExpectations($this->eventLoop, [['run', []]]);
 
-        $this->setAtExpectations($this->slackClient, [
-            ['on', [
-                'params' => ['message', [$yabot, 'onMessage']],
-            ]],
+        $this->setAtExpectations($slackClient, [
+            ['on', ['params' => ['message', [$yabot, 'onMessage']]]],
             ['init', []],
-            ['connect', [
-                'result' => $connectPromise,
-            ]],
+            ['connect', ['result' => $connectPromise]],
         ]);
 
         $yabot->run();
@@ -62,94 +61,142 @@ class YabotTest extends TestCase
 
     public function onMessageDataProvider()
     {
-        return [
+        $data = [
             [
                 [
                     'text' => 'this is a test',
                     'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
                 ],
+                '',
+                'this is a test',
+            ],
+            [
                 [
-                    'text' => 'this is a test',
+                    'text' => '<@U0290RGRD> this is a test',
                     'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
                 ],
+                '',
+                '<@U0290RGRD> this is a test',
+            ],
+            [
+                [
+                    'text' => '<@USOMEUSER> this is a test',
+                    'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
+                ],
+                '@someUser',
+                'this is a test',
+            ],
+            [
+                [
+                    'text' => '<@UXXXXXXXX> this is a test',
+                    'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
+                ],
+                '@someUser',
+                null,
+            ],
+            [
+                [
+                    'text' => '<@UAUTHUSER> this is a test',
+                    'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
+                ],
+                Message::AUTHED_USER,
+                'this is a test',
+            ],
+            [
+                [
+                    'text' => '<@UXXXXXXXX> this is a test',
+                    'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
+                ],
+                Message::AUTHED_USER,
+                null,
             ],
             [
                 [
                     'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
                     'subtype' => 'message_changed',
                     'message' => [
                         'text' => 'this is a test',
                     ],
                 ],
-                [
-                    'text' => 'this is a test',
-                    'channel' => 'C0A2B3C4D',
-                ],
+                '',
+                'this is a test',
             ],
             [
                 [
                     'text' => 'this is a test',
                     'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
                     'subtype' => 'bot_message',
                 ],
-                [
-                    'text' => 'this is a test',
-                    'channel' => 'C0A2B3C4D',
-                    'subtype' => 'bot_message',
-                ],
+                '',
+                'this is a test',
             ],
             [
                 [
                     'text' => 'this is a test',
                     'channel' => 'C0A2B3C4D',
+                    'user' => 'U0290RGRD',
                     'subtype' => 'message_deleted',
                 ],
+                '',
                 null,
             ],
         ];
+
+        return array_slice($data, 0, 100);
     }
 
     /**
      * @dataProvider onMessageDataProvider
      */
-    public function testOnMessage($payloadData, $expectedData)
+    public function testOnMessage($payloadData, $prefix, $dispatched)
     {
         $payload = $this->newPartialMockWithExpectations(Payload::class, [
-            ['getData', [
-                'result' => $payloadData,
-            ]],
+            ['getData', ['result' => $payloadData]],
         ]);
 
-        if ($expectedData) {
-            $message = $this->createMock(Message::class);
-            $this->setAtExpectations($this->messageFactory, [
-                ['create', [
-                    'params' => [$this->slackClient, $expectedData],
-                    'result' => $message,
-                ]],
-            ]);
-            $emitExpectation = ['emit', ['params' => ['message', [$message]]]];
-        } else {
-            $this->setAtExpectations($this->messageFactory, [['create', 'never']]);
-            $emitExpectation = ['emit', 'never'];
-        }
+        $expectedDispatch = $dispatched === null
+            ? 'never'
+            : ['params' => [$this->isInstanceOf(Message::class), $dispatched]];
 
-        $yabot = $this->newYabot([$emitExpectation]);
+        $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['help', 'never'],
+            ['status', 'never'],
+            ['init', 'never'],
+            ['getPrefix', ['result' => $prefix]],
+            ['dispatch', $expectedDispatch],
+        ]);
+
+        $someUser = $this->newPartialMockWithExpectations(User::class, [
+            'getId' => ['invoked' => 'any', 'result' => 'USOMEUSER'],
+        ]);
+        $authedUser = $this->newPartialMockWithExpectations(User::class, [
+            'getId' => ['invoked' => 'any', 'result' => 'UAUTHUSER'],
+        ]);
+        $user = $this->createMock(User::class);
+        $channel = $this->createMock(Channel::class);
+
+        $this->setExpectations($this->slackClient, [
+            'userById' => ['invoked' => 'any', 'params' => [$payloadData['user']], 'result' => $user],
+            'channelById' => ['invoked' => 'any', 'params' => [$payloadData['channel']], 'result' => $channel],
+            'userByName' => ['invoked' => 'any', 'params' => ['someUser'], 'result' => $someUser],
+            'getAuthedUser' => ['invoked' => 'any', 'result' => $authedUser],
+        ]);
+
+        $plugins = [$plugin];
+
+        $yabot = $this->newYabot();
+
+        $yabot->init($plugins);
 
         $yabot->onMessage($payload);
-    }
-
-    public function testAddPlugin()
-    {
-        $plugin = $this->createMock(PluginInterface::class);
-        $wrapped = function() {};
-
-        $yabot = $this->newYabot([
-            ['wrapPlugin', ['params' => ['plugin-id', $plugin], 'result' => $wrapped]],
-            ['on', ['params' => ['message', $wrapped]]],
-        ]);
-
-        $yabot->addPlugin('plugin-id', $plugin);
     }
 
     private function newYabot(array $expectations = []) : Yabot
@@ -161,19 +208,19 @@ class YabotTest extends TestCase
                 $this->slackClient,
                 $this->messageFactory
             );
-        } else {
-            $constructorArgs = [
-                $this->logger,
-                $this->eventLoop,
-                $this->slackClient,
-                $this->messageFactory,
-            ];
-
-            return $this->newPartialMockWithExpectations(
-                Yabot::class,
-                $expectations,
-                $constructorArgs
-            );
         }
+
+        $constructorArgs = [
+            $this->logger,
+            $this->eventLoop,
+            $this->slackClient,
+            $this->messageFactory,
+        ];
+
+        return $this->newPartialMockWithExpectations(
+            Yabot::class,
+            $expectations,
+            $constructorArgs
+        );
     }
 }

@@ -2,6 +2,7 @@
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
     <parameters type="collection">
         <parameter key="storage.dir">storage</parameter>
         <parameter key="log.file">logs/yabot.log</parameter>
@@ -66,11 +67,6 @@
         <service id="channels" class="Nopolabs\Yabot\Bot\Channels" />
 
         <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory" />
-
-        <!-- message dispatchers are not shared, this returns a new instance for each reference -->
-        <service id="message.dispatcher" class="Nopolabs\Yabot\Bot\MessageDispatcher" shared="false">
-            <argument type="service" id="logger" />
-        </service>
-
     </services>
+
 </container>

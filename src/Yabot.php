@@ -57,7 +57,7 @@ class Yabot
             $this->logger->info("loading $pluginId");
 
             try {
-                $this->addPlugin($pluginId, $plugin);
+                $this->loadPlugin($pluginId, $plugin);
             } catch (Exception $e) {
                 $this->logger->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
                 $this->logger->warning($e->getTraceAsString());
@@ -81,10 +81,8 @@ class Yabot
         $data = $payload->getData();
 
         if (isset($data['subtype'])) {
-            if ($data['subtype'] === 'message_changed') {
-                $channel = $data['channel'];
-                $data = $data['message'];
-                $data['channel'] = $channel;
+            if ($data['subtype'] === 'message_changed' && isset($data['message']['text'])) {
+                $data['text'] = $data['message']['text'];
             } elseif ($data['subtype'] !== 'bot_message') {
                 return;
             }
@@ -93,6 +91,10 @@ class Yabot
         $this->logger->info('Received message', $data);
 
         $message = $this->messageFactory->create($this->slackClient, $data);
+
+        if ($message->isSelf()) {
+            return;
+        }
 
         foreach ($this->prefixes as $prefix => $plugins) {
             if (!($matches = $message->matchesPrefix($prefix))) {
@@ -106,7 +108,7 @@ class Yabot
             foreach ($plugins as $pluginId => $plugin) {
                 /** @var PluginInterface $plugin */
                 try {
-                    $this->logger->debug('dispatch', ['pluginId' => $pluginId]);
+                    $this->logger->debug('dispatch', ['pluginId' => $pluginId, 'text' => $text]);
 
                     $plugin->dispatch($message, $text);
                 } catch (Exception $e) {
@@ -134,9 +136,9 @@ class Yabot
     public function getHelp() : string
     {
         $help = [];
-        foreach ($this->plugins as $key => $plugin) {
+        foreach ($this->plugins as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
-            $help[] = "$key: " . $plugin->help();
+            $help[] = "$pluginId " . $plugin->help();
         }
 
         return implode("\n", $help);
@@ -148,18 +150,18 @@ class Yabot
 
         $statuses = [];
         $statuses[] = "Yabot has $count plugins.";
-        foreach ($this->plugins as $key => $plugin) {
+        foreach ($this->plugins as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
-            $statuses[] = "$key: " . $plugin->status();
+            $statuses[] = "$pluginId " . $plugin->status();
         }
 
         return implode("\n", $statuses);
     }
 
-    public function addPlugin($pluginId, PluginInterface $plugin)
+    protected function loadPlugin($pluginId, PluginInterface $plugin)
     {
         if (isset($this->plugins[$pluginId])) {
-            $this->logger->warning("$pluginId already added, ignoring duplicate.");
+            $this->logger->warning("$pluginId already loaded, ignoring duplicate.");
             return;
         }
 
@@ -172,5 +174,7 @@ class Yabot
         }
 
         $this->prefixes[$prefix][$pluginId] = $plugin;
+
+        $this->logger->info('loaded', ['pluginId' => $pluginId, 'prefix' => $prefix]);
     }
 }
