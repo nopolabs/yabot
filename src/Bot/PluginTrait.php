@@ -31,42 +31,9 @@ trait PluginTrait
         $this->getLog()->info("$pluginId config:", $this->config);
     }
 
-    public function setConfig(array $config)
-    {
-        $this->config = $config;
-    }
-
-    public function getConfig() : array
-    {
-        return $this->config;
-    }
-
     public function getPrefix() : string
     {
         return $this->config['prefix'];
-    }
-
-    public function getUser() : string
-    {
-        return $this->config['user'];
-    }
-
-    public function getChannel() : string
-    {
-        return $this->config['channel'];
-    }
-
-    /**
-     * @return bool|null
-     */
-    public function getIsBot()
-    {
-        return $this->config['isBot'];
-    }
-
-    public function getMatchers() : array
-    {
-        return $this->config['matchers'];
     }
 
     public function dispatch(MessageInterface $message, string $text)
@@ -135,6 +102,39 @@ trait PluginTrait
             $this->getLog()->warning($e->getMessage());
             $this->getLog()->warning($e->getTraceAsString());
         }
+    }
+
+    protected function setConfig(array $config)
+    {
+        $this->config = $config;
+    }
+
+    protected function getConfig() : array
+    {
+        return $this->config;
+    }
+
+    protected function getUser() : string
+    {
+        return $this->config['user'];
+    }
+
+    protected function getChannel() : string
+    {
+        return $this->config['channel'];
+    }
+
+    /**
+     * @return bool|null
+     */
+    protected function getIsBot()
+    {
+        return $this->config['isBot'];
+    }
+
+    protected function getMatchers() : array
+    {
+        return $this->config['matchers'];
     }
 
     protected function canonicalConfig(array $config) : array

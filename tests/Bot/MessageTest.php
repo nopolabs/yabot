@@ -1,6 +1,6 @@
 <?php
 
-namespace Bot;
+namespace Nopolabs\Yabot\Tests\Bot;
 
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Bot\Message;
