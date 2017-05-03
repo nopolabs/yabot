@@ -70,22 +70,19 @@ class SlackClient
 
     public function useWebSocket() : bool
     {
-        if (isset($this->config['use.websocket'])) {
-            return (bool) $this->config['use.websocket'];
-        } else {
-            return false;
-        }
+        return (bool) ($this->config['use.websocket'] ?? false);
     }
 
     public function say($text, $channel, array $additionalParameters = [])
     {
         if (!($channel instanceof ChannelInterface)) {
-            if (!($channel = $this->channelByName($channel))) {
+            $channel = $this->channelByName($channel);
+            if (!$channel) {
                 $channel = $this->channelById($channel);
             }
         }
 
-        if ($this->useWebSocket() && empty($additionalParameters)) {
+        if (empty($additionalParameters) && $this->useWebSocket()) {
             // WebSocket send does not support message formatting.
             $this->send($text, $channel);
         } else {
@@ -113,7 +110,7 @@ class SlackClient
     public function on($event, array $onMessage)
     {
         $this->slack->on($event, function (Payload $payload) use ($onMessage) {
-            call_user_func_array($onMessage, [$payload]);
+            call_user_func($onMessage, $payload);
         });
     }
 
