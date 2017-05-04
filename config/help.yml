@@ -1,0 +1,8 @@
+services:
+    plugin.help:
+        class: Nopolabs\Yabot\Bot\HelpPlugin
+        arguments:
+            - '@logger'
+            - '@yabot'
+        tags:
+            - { name: yabot.plugin }

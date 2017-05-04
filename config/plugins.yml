@@ -1,18 +1,3 @@
-parameters:
-
-services:
-    plugin.help:
-        class: Nopolabs\Yabot\Bot\HelpPlugin
-        arguments:
-            - '@logger'
-            - '@yabot'
-        tags:
-            - { name: yabot.plugin }
-
-    plugin.status:
-        class: Nopolabs\Yabot\Bot\StatusPlugin
-        arguments:
-            - '@logger'
-            - '@yabot'
-        tags:
-            - { name: yabot.plugin }
+imports:
+    - { resource: 'help.yml' }
+    - { resource: 'status.yml' }

@@ -1,0 +1,8 @@
+services:
+    plugin.status:
+        class: Nopolabs\Yabot\Bot\StatusPlugin
+        arguments:
+            - '@logger'
+            - '@yabot'
+        tags:
+            - { name: yabot.plugin }
