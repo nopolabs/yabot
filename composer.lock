@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "1de9e4c913964e059000633cc65adf7f",
+    "content-hash": "c23b8e2ffb59c903e1f8ae1fa9853877",
     "packages": [
         {
             "name": "coderstephen/slack-client",
@@ -2121,7 +2121,7 @@
                 "source": "https://github.com/nopolabs/mock-with-expectations/tree/master",
                 "issues": "https://github.com/nopolabs/mock-with-expectations/issues"
             },
-            "time": "2017-03-13T02:22:40+00:00"
+            "time": "2017-03-13 02:22:40"
         },
         {
             "name": "phpdocumentor/reflection-common",

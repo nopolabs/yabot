@@ -99,9 +99,8 @@ loaded automatically:
 
     services:
         plugin.help:
-            class: Nopolabs\Yabot\Plugins\HelpPlugin
+            class: Nopolabs\Yabot\Bot\HelpPlugin
             arguments:
-                - '@message.dispatcher'
                 - '@logger'
                 - '@yabot'
             tags:

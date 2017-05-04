@@ -70,6 +70,26 @@ class PluginTest extends TestCase
                 )
             ],
             [
+                ['matchers' => [
+                    'matcherName' => [
+                        'patterns' => ['/^test/'],
+                        'method' => 'testMethod',
+                    ],
+                ]],
+                array_merge(
+                    $base,
+                    ['matchers' => [
+                        'matcherName' => [
+                            'patterns' => ['/^test/'],
+                            'isBot' => null,
+                            'channel' => '',
+                            'user' => '',
+                            'method' => 'testMethod',
+                        ],
+                    ]]
+                )
+            ],
+            [
                 ['matchers' => ['testMethod' => '/^test /', 'test2Method' => '/^test2 /']],
                 array_merge(
                     $base,

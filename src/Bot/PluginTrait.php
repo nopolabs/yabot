@@ -91,9 +91,9 @@ trait PluginTrait
     {
         $replaced = [];
         foreach ($matchers as $name => $params) {
-            $pattern = $params['pattern'];
-            $pattern = str_replace($search, $replace, $pattern);
-            $params['pattern'] = $pattern;
+            $params['patterns'] = array_map(function($pattern) use ($search, $replace) {
+                return str_replace($search, $replace, $pattern);
+            }, $params['patterns']);
             $replaced[$name] = $params;
         }
         return $replaced;
@@ -166,6 +166,10 @@ trait PluginTrait
 
         foreach ($matchers as $name => $params) {
             $params = is_array($params) ? $params : ['patterns' => [$params]];
+            if (isset($params['pattern'])) {
+                $params['patterns'] = [$params['pattern']];
+                unset($params['pattern']);
+            }
             $params['isBot'] = $params['isBot'] ?? null;
             $params['channel'] = $params['channel'] ?? '';
             $params['user'] = $params['user'] ?? '';
