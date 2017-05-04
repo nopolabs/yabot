@@ -149,7 +149,7 @@ class Yabot
         $count = count($this->plugins);
 
         $statuses = [];
-        $statuses[] = "Yabot has $count plugins.";
+        $statuses[] = "There are $count plugins loaded.";
         foreach ($this->plugins as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
             $statuses[] = "$pluginId " . $plugin->status();

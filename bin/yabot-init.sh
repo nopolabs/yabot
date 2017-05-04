@@ -13,7 +13,25 @@ confirm() {
     esac
 }
 
+require() {
+    command -v "$1" >/dev/null 2>&1 || { echo >&2 "I require '$1' but it's not installed.  Aborting."; exit 1; }
+}
+
+check() {
+    require php
+    require composer
+
+    PHP_MAJOR_VERSION="$(php -v | awk '/^PHP / { split($2,v,"."); print v[1]; exit; }')"
+    if [ "$PHP_MAJOR_VERSION" -lt "7" ]; then
+        echo -n "Requires php 7+, found: "
+        php -v | grep '^PHP '
+        confirm || exit 1
+    fi
+}
+
 init() {
+    check
+
     DIR=${1:-.}
 
     if [ ! -d "$DIR" ]; then

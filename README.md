@@ -9,9 +9,14 @@ You will need php 7.* and [composer](https://getcomposer.org/download/).
 Use
 [yabot-init.sh](https://github.com/nopolabs/yabot/blob/master/bin/yabot-init.sh)
 to initialize a yabot project.
-You can download and run yabot-init.sh with this command:
+You can download and run yabot-init.sh with this command
+(take a [peek](https://github.com/nopolabs/yabot/blob/master/bin/yabot-init.sh) first):
 
     wget -O - https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
+
+or:
+
+    curl -L https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
 
 NOTE: yabot-init.sh uses nopolabs repositories for slack-client and phpws
 because it depends on updates to coderstephen/slack-client
@@ -34,10 +39,14 @@ if you are using a different VCS you will need to do something similar.
 If you do happen to commit the token to a public repo 
 Slack will revoke it (as I discovered).
 
-## Running yabot
+## Running yabot for development and testing
 
     php yabot.php
-    
+
+## Running yabot as a service
+
+TODO
+
 ## Configuration
 
 Yabot uses a [Symfony dependency-injection](http://symfony.com/doc/current/components/dependency_injection.html)
@@ -66,6 +75,9 @@ Logging is configured in config.php:
     'log.file' => 'logs/bot.log',
     'log.name' => 'bot',
     'log.level' => 'DEBUG',
+
+Setting 'log.file' to 'php://stdout' can be useful during development to
+direct logging information to the terminal where you have started yabot.
 
 ## Plugins <a name="plugins"></a>
 
