@@ -1,0 +1,3 @@
+imports:
+    - { resource: '../vendor/nopolabs/yabot/config/help.yml' }
+    - { resource: '../vendor/nopolabs/yabot/config/status.yml' }

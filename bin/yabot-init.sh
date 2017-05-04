@@ -53,7 +53,7 @@ init() {
     composer require nopolabs/yabot
     mkdir config
     cp -i vendor/nopolabs/yabot/yabot.php yabot.php
-    cp -i vendor/nopolabs/yabot/config/plugins.yml config/plugins.yml
+    cp -i vendor/nopolabs/yabot/config/plugins.example.yml config/plugins.yml
     cp -i vendor/nopolabs/yabot/config.example.php config.php
     cp -i vendor/nopolabs/yabot/.gitignore .gitignore
 }

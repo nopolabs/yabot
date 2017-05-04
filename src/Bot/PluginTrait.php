@@ -16,7 +16,7 @@ trait PluginTrait
 
     public function help(): string
     {
-        return 'no help available';
+        return $this->config['help'] ?? 'no help available';
     }
 
     public function status(): string

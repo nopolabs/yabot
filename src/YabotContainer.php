@@ -21,7 +21,7 @@ class YabotContainer extends ContainerBuilder
         $this->load($servicesPath);
     }
 
-    public function addConfig(array $parameters)
+    public function overrideParameters(array $parameters)
     {
         $this->getParameterBag()->add($parameters);
     }
