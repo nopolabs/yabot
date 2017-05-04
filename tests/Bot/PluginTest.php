@@ -200,6 +200,8 @@ class PluginTest extends TestCase
             ['matchesUser', 'never'],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(1))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -220,6 +222,8 @@ class PluginTest extends TestCase
             ['matchesUser', 'never'],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(1))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -240,6 +244,8 @@ class PluginTest extends TestCase
             ['matchesUser', ['params' => ['alice'], 'result' => false]],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(1))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -257,6 +263,13 @@ class PluginTest extends TestCase
                     'user' => '',
                     'method' => 'testMethod',
                 ],
+                'that' => [
+                    'patterns' => ['/^that (.*)/'],
+                    'isBot' => true,
+                    'channel' => '',
+                    'user' => '',
+                    'method' => 'thatMethod',
+                ],
             ],
         ]);
 
@@ -266,8 +279,11 @@ class PluginTest extends TestCase
             ['matchesChannel', ['params' => [''], 'result' => true]],
             ['matchesUser', ['params' => [''], 'result' => true]],
             ['matchesIsBot', ['params' => [true], 'result' => false]],
+            ['matchesIsBot', ['params' => [true], 'result' => false]],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(3))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -285,6 +301,13 @@ class PluginTest extends TestCase
                     'user' => '',
                     'method' => 'testMethod',
                 ],
+                'that' => [
+                    'patterns' => ['/^that (.*)/'],
+                    'isBot' => true,
+                    'channel' => '',
+                    'user' => '',
+                    'method' => 'thatMethod',
+                ],
             ],
         ]);
 
@@ -295,8 +318,11 @@ class PluginTest extends TestCase
             ['matchesUser', ['params' => [''], 'result' => true]],
             ['matchesIsBot', ['params' => [null], 'result' => true]],
             ['matchesChannel', ['params' => ['general'], 'result' => false]],
+            ['matchesIsBot', ['params' => [true], 'result' => false]],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(3))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -314,6 +340,13 @@ class PluginTest extends TestCase
                     'user' => 'alice',
                     'method' => 'testMethod',
                 ],
+                'that' => [
+                    'patterns' => ['/^that (.*)/'],
+                    'isBot' => true,
+                    'channel' => '',
+                    'user' => '',
+                    'method' => 'thatMethod',
+                ],
             ],
         ]);
 
@@ -325,8 +358,11 @@ class PluginTest extends TestCase
             ['matchesIsBot', ['params' => [null], 'result' => true]],
             ['matchesChannel', ['params' => [''], 'result' => true]],
             ['matchesUser', ['params' => ['alice'], 'result' => false]],
+            ['matchesIsBot', ['params' => [true], 'result' => false]],
             ['matchPatterns', 'never'],
         ]);
+        $message->expects($this->exactly(3))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -344,6 +380,13 @@ class PluginTest extends TestCase
                     'user' => '',
                     'method' => 'testMethod',
                 ],
+                'that' => [
+                    'patterns' => ['/^that (.*)/'],
+                    'isBot' => true,
+                    'channel' => '',
+                    'user' => '',
+                    'method' => 'thatMethod',
+                ],
             ],
         ]);
 
@@ -356,7 +399,10 @@ class PluginTest extends TestCase
             ['matchesChannel', ['params' => [''], 'result' => true]],
             ['matchesUser', ['params' => [''], 'result' => true]],
             ['matchPatterns', ['params' => [['/^test /']], 'result' => []]],
+            ['matchesIsBot', ['params' => [true], 'result' => false]],
         ]);
+        $message->expects($this->exactly(3))
+            ->method('matchesIsBot');
 
         $text = 'this is a test';
 
@@ -377,6 +423,8 @@ class PluginTest extends TestCase
             ['matchesUser', ['params' => [''], 'result' => true]],
             ['matchPatterns', ['params' => [['/^this (.*)/']], 'result' => $matches]],
         ]);
+        $message->expects($this->exactly(2))
+            ->method('matchesIsBot');
 
         $plugin = $this->newPartialMockWithExpectations(
             TestPlugin::class,
@@ -469,7 +517,7 @@ class PluginTest extends TestCase
             ['matchesIsBot', ['params' => [null], 'result' => true]],
             ['matchesChannel', ['params' => [''], 'result' => true]],
             ['matchesUser', ['params' => [''], 'result' => true]],
-            ['matchPatterns', ['params' => [['/^this (.*)/']], 'result' => $matches]],
+            ['matchPatterns', ['params' => [['/^that (.*)/']], 'result' => $matches]],
             ['isHandled', ['result' => true]],
         ]);
         $message->expects($this->exactly(3))

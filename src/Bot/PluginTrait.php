@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot\Bot;
 
 use Exception;
 use Nopolabs\Yabot\Helpers\LogTrait;
+use Throwable;
 
 trait PluginTrait
 {
@@ -13,12 +14,12 @@ trait PluginTrait
 
     private $config = [];
 
-    public function help() : string
+    public function help(): string
     {
         return 'no help available';
     }
 
-    public function status() : string
+    public function status(): string
     {
         return 'running';
     }
@@ -27,11 +28,12 @@ trait PluginTrait
     {
         $this->pluginId = $pluginId;
         $this->config = $this->canonicalConfig(array_merge($this->config, $params));
+        $this->checkMatchers($this->config['matchers']);
 
         $this->getLog()->info("$pluginId config:", $this->config);
     }
 
-    public function getPrefix() : string
+    public function getPrefix(): string
     {
         return $this->config['prefix'];
     }
@@ -60,21 +62,21 @@ trait PluginTrait
         foreach ($this->getMatchers() as $name => $params) {
             if (!$message->matchesIsBot($params['isBot'])) {
                 $this->getLog()->debug('matcher isBot');
-                return;
+                continue;
             }
 
             if (!$message->matchesChannel($params['channel'])) {
                 $this->getLog()->debug('matcher channel');
-                return;
+                continue;
             }
 
             if (!$message->matchesUser($params['user'])) {
                 $this->getLog()->debug('matcher user');
-                return;
+                continue;
             }
 
             if (!($matches = $message->matchPatterns($params['patterns'], $text))) {
-                return;
+                continue;
             }
 
             $this->getLog()->info("matched: $name", $params);
@@ -87,11 +89,11 @@ trait PluginTrait
         }
     }
 
-    public function replaceInPatterns($search, $replace, array $matchers) : array
+    public function replaceInPatterns($search, $replace, array $matchers): array
     {
         $replaced = [];
         foreach ($matchers as $name => $params) {
-            $params['patterns'] = array_map(function($pattern) use ($search, $replace) {
+            $params['patterns'] = array_map(function ($pattern) use ($search, $replace) {
                 return str_replace($search, $replace, $pattern);
             }, $params['patterns']);
             $replaced[$name] = $params;
@@ -110,7 +112,7 @@ trait PluginTrait
                 $this->getLog()->warning("{$this->pluginId} no method named: $method");
             }
         } catch (Exception $e) {
-            $this->getLog()->warning('Exception in '.static::class.'::'.$method);
+            $this->getLog()->warning('Exception in ' . static::class . '::' . $method);
             $this->getLog()->warning($e->getMessage());
             $this->getLog()->warning($e->getTraceAsString());
         }
@@ -121,17 +123,17 @@ trait PluginTrait
         $this->config = $config;
     }
 
-    protected function getConfig() : array
+    protected function getConfig(): array
     {
         return $this->config;
     }
 
-    protected function getUser() : string
+    protected function getUser(): string
     {
         return $this->config['user'];
     }
 
-    protected function getChannel() : string
+    protected function getChannel(): string
     {
         return $this->config['channel'];
     }
@@ -144,12 +146,12 @@ trait PluginTrait
         return $this->config['isBot'];
     }
 
-    protected function getMatchers() : array
+    protected function getMatchers(): array
     {
         return $this->config['matchers'];
     }
 
-    protected function canonicalConfig(array $config) : array
+    protected function canonicalConfig(array $config): array
     {
         $config['prefix'] = $config['prefix'] ?? '';
         $config['isBot'] = $config['isBot'] ?? null;
@@ -160,7 +162,7 @@ trait PluginTrait
         return $config;
     }
 
-    protected function canonicalMatchers(array $matchers) : array
+    protected function canonicalMatchers(array $matchers): array
     {
         $expanded = [];
 
@@ -187,5 +189,18 @@ trait PluginTrait
         }
 
         return $expanded;
+    }
+
+    protected function checkMatchers(array $matchers)
+    {
+        foreach ($matchers as $name => $params) {
+            foreach ($params['patterns'] as $pattern) {
+                try {
+                    preg_match($pattern, '', $matches);
+                } catch (Throwable $e) {
+                    $this->getLog()->warning("$name.pattern='$pattern' " . $e->getMessage());
+                }
+            }
+        }
     }
 }
