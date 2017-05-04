@@ -87,6 +87,18 @@ trait PluginTrait
         }
     }
 
+    public function replaceInPatterns($search, $replace, array $matchers) : array
+    {
+        $replaced = [];
+        foreach ($matchers as $name => $params) {
+            $pattern = $params['pattern'];
+            $pattern = str_replace($search, $replace, $pattern);
+            $params['pattern'] = $pattern;
+            $replaced[$name] = $params;
+        }
+        return $replaced;
+    }
+
     protected function dispatchMessage(MessageInterface $message, array $matched)
     {
         list($method, $matches) = $matched;
