@@ -1,5 +1,5 @@
 <?php
-namespace Nopolabs\Yabot\Plugins;
+namespace Nopolabs\Yabot\Bot;
 
 use Nopolabs\Yabot\Bot\AbstractPlugin;
 use Nopolabs\Yabot\Bot\Message;

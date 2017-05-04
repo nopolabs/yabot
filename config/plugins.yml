@@ -2,7 +2,7 @@ parameters:
 
 services:
     plugin.help:
-        class: Nopolabs\Yabot\Plugins\HelpPlugin
+        class: Nopolabs\Yabot\Bot\HelpPlugin
         arguments:
             - '@logger'
             - '@yabot'
@@ -10,7 +10,7 @@ services:
             - { name: yabot.plugin }
 
     plugin.status:
-        class: Nopolabs\Yabot\Plugins\StatusPlugin
+        class: Nopolabs\Yabot\Bot\StatusPlugin
         arguments:
             - '@logger'
             - '@yabot'
