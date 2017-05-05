@@ -30,12 +30,12 @@ class Guzzle
 
         $request = $this->client->getAsync($uri);
 
-        // Schedule the request to be force-resolved later
+        // Schedule the request to be resolved later
         $this->eventloop->futureTick(function () use ($request) {
             $request->wait();
         });
 
-        // Handle the response
+        // Use the response to resolve the promise
         $request->then(
             function (ResponseInterface $response) use ($promise) {
                 $promise->resolve($response);
