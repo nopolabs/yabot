@@ -24,7 +24,6 @@ class YabotTest extends TestCase
     protected $slackClient;
     protected $messageFactory;
 
-
     protected function setUp()
     {
         $this->logger = $this->createMock(LoggerInterface::class);

@@ -4,20 +4,22 @@ namespace Nopolabs\Yabot\Helpers;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
+use Nopolabs\Yabot\Guzzle\Guzzle;
 use Psr\Http\Message\ResponseInterface;
 
 trait GuzzleTrait
 {
-    /** @var Client */
+    /** @var Guzzle */
     private $guzzle;
 
-    public function setGuzzle(Client $guzzle)
+    public function setGuzzle(Guzzle $guzzle)
     {
         $this->guzzle = $guzzle;
     }
 
-    public function getGuzzle() : Client
+    public function getGuzzle() : Guzzle
     {
         return $this->guzzle;
     }
