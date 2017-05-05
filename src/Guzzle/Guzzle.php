@@ -44,6 +44,8 @@ class Guzzle
                 $promise->reject($e);
             }
         );
+
+        return $promise;
     }
 
     public function post($uri, $options) : ResponseInterface
