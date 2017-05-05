@@ -5,11 +5,11 @@ namespace Nopolabs\Yabot;
 use Evenement\EventEmitterTrait;
 use Exception;
 use Nopolabs\Yabot\Bot\MessageFactory;
-use Nopolabs\Yabot\Bot\MessageInterface;
 use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\SlackClient;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
+use React\EventLoop\Timer\TimerInterface;
 use Slack\Payload;
 
 class Yabot
@@ -33,6 +33,9 @@ class Yabot
 
     /** @var array */
     protected $prefixes;
+
+    /** @var TimerInterface */
+    private $timer;
 
     public function __construct(
         LoggerInterface $logger,
@@ -83,6 +86,7 @@ class Yabot
         if (isset($data['subtype'])) {
             if ($data['subtype'] === 'message_changed' && isset($data['message']['text'])) {
                 $data['text'] = $data['message']['text'];
+                $data['user'] = $data['message']['user'];
             } elseif ($data['subtype'] !== 'bot_message') {
                 return;
             }
@@ -90,7 +94,13 @@ class Yabot
 
         $this->logger->info('Received message', $data);
 
-        $message = $this->messageFactory->create($this->slackClient, $data);
+        try {
+            $message = $this->messageFactory->create($this->slackClient, $data);
+        } catch (Exception $e) {
+            $this->logger->warning($e->getMessage());
+            $this->logger->warning($e->getTraceAsString());
+            return;
+        }
 
         if ($message->isSelf()) {
             return;

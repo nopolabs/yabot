@@ -119,10 +119,10 @@ class YabotTest extends TestCase
             [
                 [
                     'channel' => 'C0A2B3C4D',
-                    'user' => 'U0290RGRD',
                     'subtype' => 'message_changed',
                     'message' => [
                         'text' => 'this is a test',
+                        'user' => 'U0290RGRD',
                     ],
                 ],
                 '',
@@ -184,7 +184,7 @@ class YabotTest extends TestCase
         $channel = $this->createMock(Channel::class);
 
         $this->setExpectations($this->slackClient, [
-            'userById' => ['invoked' => 'any', 'params' => [$payloadData['user']], 'result' => $user],
+            'userById' => ['invoked' => 'any', 'params' => [$payloadData['user'] ?? $payloadData['message']['user']], 'result' => $user],
             'channelById' => ['invoked' => 'any', 'params' => [$payloadData['channel']], 'result' => $channel],
             'userByName' => ['invoked' => 'any', 'params' => ['someUser'], 'result' => $someUser],
             'getAuthedUser' => ['invoked' => 'any', 'result' => $authedUser],

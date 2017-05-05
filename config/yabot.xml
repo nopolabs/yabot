@@ -43,7 +43,13 @@
             <factory class="React\EventLoop\Factory" method="create" />
         </service>
 
+        <service id="guzzle.factory" class="Nopolabs\Yabot\Guzzle\GuzzleFactory">
+            <argument>%guzzle.config%</argument>
+            <argument type="service" id="event.loop" />
+        </service>
+
         <service id="guzzle" class="GuzzleHttp\Client">
+            <factory service="guzzle.factory" method="createClient"/>
             <argument>%guzzle.config%</argument>
         </service>
 
