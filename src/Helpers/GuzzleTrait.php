@@ -3,8 +3,6 @@
 namespace Nopolabs\Yabot\Helpers;
 
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
 use Nopolabs\Yabot\Guzzle\Guzzle;
 use Psr\Http\Message\ResponseInterface;
