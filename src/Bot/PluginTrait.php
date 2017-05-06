@@ -45,33 +45,45 @@ trait PluginTrait
         }
 
         if (!$message->matchesIsBot($this->getIsBot())) {
-            $this->getLog()->debug('plugin isBot');
+            $data = [
+                'message' => $message->isBot(),
+                'plugin' => $this->getIsBot(),
+            ];
+            $this->getLog()->debug('isBot match failed: '.json_encode($data));
             return;
         }
 
         if (!$message->matchesChannel($this->getChannel())) {
-            $this->getLog()->debug('plugin channel');
+            $data = [
+                'message' => $message->getChannel(),
+                'plugin' => $this->getChannel(),
+            ];
+            $this->getLog()->debug('channel match failed: '.json_encode($data));
             return;
         }
 
         if (!$message->matchesUser($this->getUser())) {
-            $this->getLog()->debug('plugin user');
+            $data = [
+                'message' => $message->getUser(),
+                'plugin' => $this->getUser(),
+            ];
+            $this->getLog()->debug('user match failed: '.json_encode($data));
             return;
         }
 
         foreach ($this->getMatchers() as $name => $params) {
             if (!$message->matchesIsBot($params['isBot'])) {
-                $this->getLog()->debug('matcher isBot');
+                $this->getLog()->debug('!matchesIsBot');
                 continue;
             }
 
             if (!$message->matchesChannel($params['channel'])) {
-                $this->getLog()->debug('matcher channel');
+                $this->getLog()->debug('!matchesChannel');
                 continue;
             }
 
             if (!$message->matchesUser($params['user'])) {
-                $this->getLog()->debug('matcher user');
+                $this->getLog()->debug('!matchesUser');
                 continue;
             }
 
@@ -128,12 +140,12 @@ trait PluginTrait
         return $this->config;
     }
 
-    protected function getUser(): string
+    protected function getUser()
     {
         return $this->config['user'];
     }
 
-    protected function getChannel(): string
+    protected function getChannel()
     {
         return $this->config['channel'];
     }
