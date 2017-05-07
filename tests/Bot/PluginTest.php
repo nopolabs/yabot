@@ -419,6 +419,51 @@ class PluginTest extends TestCase
         $this->plugin->dispatch($message, $text);
     }
 
+    public function testInvalidMatchShortcut()
+    {
+        $matches = ['this is a test', 'is a test'];
+
+        $message = $this->newPartialMockWithExpectations(Message::class, [
+            ['isHandled', ['result' => false]],
+            ['matchesIsBot', ['params' => [null], 'result' => true]],
+            ['matchesChannel', ['params' => [''], 'result' => true]],
+            ['matchesUser', ['params' => [''], 'result' => true]],
+            ['matchesIsBot', ['params' => [null], 'result' => true]],
+            ['matchesChannel', ['params' => [''], 'result' => true]],
+            ['matchesUser', ['params' => [''], 'result' => true]],
+            ['matchPatterns', ['params' => [['/^this (.*)/']], 'result' => $matches]],
+        ]);
+        $message->expects($this->exactly(2))
+            ->method('matchesIsBot');
+
+        $params = [
+            'patterns' => ['/^this (.*)/'],
+            'isBot' => null,
+            'channel' => '',
+            'user' => '',
+            'method' => 'testMethod',
+        ];
+
+        $plugin = $this->newPartialMockWithExpectations(
+            TestPlugin::class,
+            [
+                ['validMatch', ['params' => [$message, $params, $matches], 'result' => false]],
+                ['dispatchMessage', 'never'],
+            ],
+            [$this->logger]
+        );
+
+        $plugin->init('plugin.test', [
+            'matchers' => [
+                'testing' => $params,
+            ],
+        ]);
+
+        $text = 'this is a test';
+
+        $plugin->dispatch($message, $text);
+    }
+
     public function testDispatchMessage()
     {
         $matches = ['this is a test', 'is a test'];

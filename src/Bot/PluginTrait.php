@@ -91,14 +91,16 @@ trait PluginTrait
                 continue;
             }
 
-            if ($this->validMatch($message, $params, $matches)) {
-                $this->getLog()->info("matched: $name", $params);
+            if (!$this->validMatch($message, $params, $matches)) {
+                continue;
+            }
 
-                $this->dispatchMessage($message, [$params['method'], $matches]);
+            $this->getLog()->info("matched: $name", $params);
 
-                if ($message->isHandled()) {
-                    return;
-                }
+            $this->dispatchMessage($message, [$params['method'], $matches]);
+
+            if ($message->isHandled()) {
+                return;
             }
         }
     }
