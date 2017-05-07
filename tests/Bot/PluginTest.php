@@ -6,6 +6,8 @@ use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Bot\Message;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Slack\Channel;
+use Slack\User;
 
 class PluginTest extends TestCase
 {
@@ -16,10 +18,16 @@ class PluginTest extends TestCase
 
     private $logger;
 
+    private $channel;
+
+    private $user;
+
     protected function setUp()
     {
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->plugin = new TestPlugin($this->logger);
+        $this->channel = $this->createMock(Channel::class);
+        $this->user = $this->createMock(User::class);
     }
 
     public function testHelp()
@@ -219,6 +227,7 @@ class PluginTest extends TestCase
             ['isHandled', ['result' => false]],
             ['matchesIsBot', ['params' => [null], 'result' => true]],
             ['matchesChannel', ['params' => ['general'], 'result' => false]],
+            ['getChannel', ['result' => $this->channel]],
             ['matchesUser', 'never'],
             ['matchPatterns', 'never'],
         ]);
@@ -242,6 +251,7 @@ class PluginTest extends TestCase
             ['matchesIsBot', ['params' => [null], 'result' => true]],
             ['matchesChannel', ['params' => [''], 'result' => true]],
             ['matchesUser', ['params' => ['alice'], 'result' => false]],
+            ['getUser', ['result' => $this->user]],
             ['matchPatterns', 'never'],
         ]);
         $message->expects($this->exactly(1))

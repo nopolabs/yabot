@@ -91,12 +91,14 @@ trait PluginTrait
                 continue;
             }
 
-            $this->getLog()->info("matched: $name", $params);
+            if ($this->validMatch($message, $params, $matches)) {
+                $this->getLog()->info("matched: $name", $params);
 
-            $this->dispatchMessage($message, [$params['method'], $matches]);
+                $this->dispatchMessage($message, [$params['method'], $matches]);
 
-            if ($message->isHandled()) {
-                return;
+                if ($message->isHandled()) {
+                    return;
+                }
             }
         }
     }
@@ -111,6 +113,12 @@ trait PluginTrait
             $replaced[$name] = $params;
         }
         return $replaced;
+    }
+
+    protected function validMatch(MessageInterface $message, array $params, array $matches) : bool
+    {
+        // plugins may override this method to have final say on dispatching
+        return true;
     }
 
     protected function dispatchMessage(MessageInterface $message, array $matched)
