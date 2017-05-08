@@ -95,7 +95,7 @@ trait PluginTrait
                 continue;
             }
 
-            $this->getLog()->info("matched: $name", $params);
+            $this->getLog()->info("matched: $name", ['params' => $params, 'matches' =>$matches]);
 
             $this->dispatchMessage($message, [$params['method'], $matches]);
 
