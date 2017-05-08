@@ -11,7 +11,7 @@ interface MessageInterface
 
     public function getChannel() : Channel;
 
-    public function getUser() : User;
+    public function getUser();
 
     public function getThreadTs();
 

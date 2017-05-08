@@ -26,11 +26,11 @@ trait PluginTrait
 
     public function init(string $pluginId, array $params)
     {
-        $this->pluginId = $pluginId;
-        $this->config = $this->canonicalConfig(array_merge($this->config, $params));
+        $this->setPluginId($pluginId);
+        $this->overrideConfig($params);
         $this->checkMatchers($this->config['matchers']);
 
-        $this->getLog()->info("$pluginId config:", $this->config);
+        $this->getLog()->info("inited $pluginId config:", $this->config);
     }
 
     public function getPrefix(): string
@@ -140,6 +140,13 @@ trait PluginTrait
         }
     }
 
+    protected function overrideConfig(array $params)
+    {
+        $config = $this->canonicalConfig(array_merge($this->config, $params));
+
+        $this->setConfig($config);
+    }
+
     protected function setConfig(array $config)
     {
         $this->config = $config;
@@ -148,6 +155,16 @@ trait PluginTrait
     protected function getConfig(): array
     {
         return $this->config;
+    }
+
+    protected function setPluginId($pluginId)
+    {
+        $this->pluginId = $pluginId;
+    }
+
+    protected function getPluginId()
+    {
+        return $this->pluginId;
     }
 
     protected function getUser()

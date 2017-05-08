@@ -27,7 +27,7 @@ class Message implements MessageInterface
     {
         $this->data = $data;
         $this->setSlack($slack);
-        $this->user = $slack->userById($data['user']);
+        $this->user = isset($data['user']) ? $slack->userById($data['user']) : null;
         $this->channel = $slack->channelById($data['channel']);
         $this->handled = false;
     }
@@ -42,7 +42,7 @@ class Message implements MessageInterface
         return $this->channel;
     }
 
-    public function getUser() : User
+    public function getUser()
     {
         return $this->user;
     }
@@ -99,7 +99,9 @@ class Message implements MessageInterface
 
     public function getUsername()
     {
-        return $this->getUser()->getUsername();
+        $user = $this->getUser();
+
+        return $user ? $user->getUsername() : null;
     }
 
     public function getChannelName()
