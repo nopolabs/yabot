@@ -26,8 +26,6 @@ class Guzzle
 
     public function getAsync($uri) : PromiseInterface
     {
-        $promise = new Promise();
-
         $request = $this->client->getAsync($uri);
 
         // Schedule the request to be resolved later
@@ -35,17 +33,7 @@ class Guzzle
             $request->wait();
         });
 
-        // Use the response to resolve the promise
-        $request->then(
-            function (ResponseInterface $response) use ($promise) {
-                $promise->resolve($response);
-            },
-            function (RequestException $e) use ($promise) {
-                $promise->reject($e);
-            }
-        );
-
-        return $promise;
+        return $request;
     }
 
     public function post($uri, $options) : ResponseInterface
