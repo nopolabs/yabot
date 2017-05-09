@@ -9,7 +9,6 @@ use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\SlackClient;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
-use React\EventLoop\Timer\TimerInterface;
 use Slack\Payload;
 
 class Yabot
@@ -33,9 +32,6 @@ class Yabot
 
     /** @var array */
     protected $prefixes;
-
-    /** @var TimerInterface */
-    private $timer;
 
     public function __construct(
         LoggerInterface $logger,

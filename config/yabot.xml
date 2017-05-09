@@ -43,13 +43,13 @@
             <factory class="React\EventLoop\Factory" method="create" />
         </service>
 
-        <service id="guzzle.client" class="GuzzleHttp\Client">
+        <service id="guzzle" class="Nopolabs\Yabot\Guzzle\Guzzle">
+            <argument type="service" id="event.loop" />
             <argument>%guzzle.config%</argument>
         </service>
 
-        <service id="guzzle" class="Nopolabs\Yabot\Guzzle\Guzzle">
-            <argument type="service" id="guzzle.client" />
-            <argument type="service" id="event.loop" />
+        <service id="guzzle.client" class="GuzzleHttp\Client">
+            <argument>%guzzle.config%</argument>
         </service>
 
         <service id="slack.realTimeClient" class="Slack\RealTimeClient">
