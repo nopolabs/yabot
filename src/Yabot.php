@@ -72,6 +72,8 @@ class Yabot
 
         $this->slackClient->connect()->then([$this->slackClient, 'update']);
 
+        $this->addMemoryReporting();
+
         $this->eventLoop->run();
     }
 
@@ -182,5 +184,14 @@ class Yabot
         $this->prefixes[$prefix][$pluginId] = $plugin;
 
         $this->logger->info('loaded', ['pluginId' => $pluginId, 'prefix' => $prefix]);
+    }
+
+    protected function addMemoryReporting()
+    {
+        $this->eventLoop->addPeriodicTimer(300, function () {
+            $memory = memory_get_usage() / 1024;
+            $formatted = number_format($memory, 3).'K';
+            echo "Current memory usage: {$formatted}\n";
+        });
     }
 }
