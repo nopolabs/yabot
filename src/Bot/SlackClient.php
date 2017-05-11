@@ -27,9 +27,6 @@ class SlackClient
     /** @var User */
     protected $authedUser;
 
-    /** @var array */
-    protected $config;
-
     public function __construct(RealTimeClient $slack, Users $users, Channels $channels, array $config = [])
     {
         $this->slack = $slack;
