@@ -47,7 +47,9 @@ class YabotTest extends TestCase
             ['then', ['params' => [(array)[$slackClient, 'update']]]],
         ]);
 
-        $this->setAtExpectations($this->eventLoop, [['run', []]]);
+        $this->setExpectations($this->eventLoop, [
+            'run' => [],
+        ]);
 
         $this->setAtExpectations($slackClient, [
             ['on', ['params' => ['message', [$yabot, 'onMessage']]]],
