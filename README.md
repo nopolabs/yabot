@@ -6,7 +6,7 @@ yabot is a slack chat bot written in php.
 
 You will need php 7.* and [composer](https://getcomposer.org/download/).
 
-Use
+You can use
 [yabot-init.sh](https://github.com/nopolabs/yabot/blob/master/bin/yabot-init.sh)
 to initialize a yabot project.
 You can download and run yabot-init.sh with this command
@@ -17,6 +17,20 @@ You can download and run yabot-init.sh with this command
 or:
 
     curl -L https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
+
+or manually:
+
+    composer init \
+        --no-interaction \
+        --stability dev \
+        --repository '{"type":"vcs","url":"https://github.com/nopolabs/slack-client"}' \
+        --repository '{"type":"vcs","url":"https://github.com/nopolabs/phpws.git"}'
+    composer require nopolabs/yabot
+    mkdir config
+    cp -i vendor/nopolabs/yabot/yabot.php yabot.php
+    cp -i vendor/nopolabs/yabot/config/plugins.example.yml config/plugins.yml
+    cp -i vendor/nopolabs/yabot/config.example.php config.php
+    cp -i vendor/nopolabs/yabot/.gitignore .gitignore
 
 NOTE: yabot-init.sh uses nopolabs repositories for slack-client and phpws
 because it depends on updates to coderstephen/slack-client
@@ -122,8 +136,8 @@ Matcher syntax:
     // canonical:
     'matcherName' => [
         'pattern' => "/^help (?'topic'\\w+)\\b/", // optional, pattern applied by preg_match()
-        'channel' => 'general',                   // optional, may be string or aray of strings
-        'user' => 'dan',                          // optional, may be string or aray of strings
+        'channel' => 'general',                   // optional, may be string or array of strings
+        'user' => 'dan',                          // optional, may be string or array of strings
         'method' => 'help',                       // optional, will use matcherName if not set
     ],
 
@@ -135,25 +149,16 @@ Matcher syntax:
     // shorthand:
     'help' => "/^help (?'topic'\\w+)\\b/",
     
-    // expanded to:
+    // expands to:
     'help' => [
         'pattern => "/^help (?'topic'\\w+)\\b/",
+        'channel => '',
+        'user' => '',
         'method' => 'help',
     ],
 
-`addToMatchers` will add a key/value pair to each matcher, e.g. to set 'channel':
-
-    $matchers = $this->addToMatchers('channel', $channel, $matchers);
-
-`replaceInPatterns` will perform string replacement on patterns 
-(e.g. replaces ' ' with '\s+'):
-
-    $matchers = $this->replaceInPatterns(' ', "\\s+", $matchers);
-
-If the matcher matches `MessageDispatcher` calls the method on the plugin object 
-with the message and any fields captured by the matcher pattern:
-
-    call_user_func([$plugin, $method], $message, $matches);
+If the matcher matches the method on the plugin object gets called
+with the message and any fields captured by the matcher pattern.
 
 ## Responding to a Message
 
