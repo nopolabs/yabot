@@ -3,6 +3,7 @@
 namespace Nopolabs\Yabot\Bot;
 
 
+use Nopolabs\Yabot\Helpers\ConfigTrait;
 use React\Promise\PromiseInterface;
 use Slack\Channel;
 use Slack\ChannelInterface;
@@ -12,6 +13,8 @@ use Slack\User;
 
 class SlackClient
 {
+    use ConfigTrait;
+
     /** @var RealTimeClient */
     private $slack;
 
@@ -32,7 +35,7 @@ class SlackClient
         $this->slack = $slack;
         $this->users = $users;
         $this->channels = $channels;
-        $this->config = $config;
+        $this->setConfig($config);
     }
 
     public function getRealTimeClient()
@@ -70,7 +73,7 @@ class SlackClient
 
     public function useWebSocket() : bool
     {
-        return (bool) ($this->config['use.websocket'] ?? false);
+        return (bool) $this->get('use.websocket', false);
     }
 
     public function say($text, $channel, array $additionalParameters = [])

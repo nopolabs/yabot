@@ -3,20 +3,20 @@
 namespace Nopolabs\Yabot\Bot;
 
 use Exception;
+use Nopolabs\Yabot\Helpers\ConfigTrait;
 use Nopolabs\Yabot\Helpers\LogTrait;
 use Throwable;
 
 trait PluginTrait
 {
     use LogTrait;
+    use ConfigTrait;
 
     private $pluginId;
 
-    private $config = [];
-
     public function help(): string
     {
-        return $this->config['help'] ?? 'no help available';
+        return $this->get('help', 'no help available');
     }
 
     public function status(): string
@@ -28,14 +28,14 @@ trait PluginTrait
     {
         $this->setPluginId($pluginId);
         $this->overrideConfig($params);
-        $this->checkMatchers($this->config['matchers']);
+        $this->checkMatchers($this->get('matchers'));
 
-        $this->getLog()->info("inited $pluginId config:", $this->config);
+        $this->getLog()->info("inited $pluginId config:", $this->getConfig());
     }
 
     public function getPrefix(): string
     {
-        return $this->config['prefix'];
+        return $this->get('prefix');
     }
 
     public function dispatch(MessageInterface $message, string $text)
@@ -142,19 +142,9 @@ trait PluginTrait
 
     protected function overrideConfig(array $params)
     {
-        $config = $this->canonicalConfig(array_merge($this->config, $params));
+        $config = $this->canonicalConfig(array_merge($this->getConfig(), $params));
 
         $this->setConfig($config);
-    }
-
-    protected function setConfig(array $config)
-    {
-        $this->config = $config;
-    }
-
-    protected function getConfig(): array
-    {
-        return $this->config;
     }
 
     protected function setPluginId($pluginId)
@@ -169,12 +159,12 @@ trait PluginTrait
 
     protected function getUser()
     {
-        return $this->config['user'];
+        return $this->get('user');
     }
 
     protected function getChannel()
     {
-        return $this->config['channel'];
+        return $this->get('channel');
     }
 
     /**
@@ -182,12 +172,12 @@ trait PluginTrait
      */
     protected function getIsBot()
     {
-        return $this->config['isBot'];
+        return $this->get('isBot');
     }
 
     protected function getMatchers(): array
     {
-        return $this->config['matchers'];
+        return $this->get('matchers');
     }
 
     protected function canonicalConfig(array $config): array
