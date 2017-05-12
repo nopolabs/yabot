@@ -10,6 +10,7 @@ use Nopolabs\Yabot\Bot\SlackClient;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Slack\Payload;
+use Slack\User;
 
 class Yabot
 {
@@ -145,8 +146,16 @@ class Yabot
     {
         $help = [];
         foreach ($this->plugins as $pluginId => $plugin) {
+            $prefix = $plugin->getPrefix();
+            if ($prefix === Message::AUTHED_USER) {
+                /** @var User $user */
+                $user = $this->slack->getAuthedUser();
+                $prefix = '@' . $user->getUsername();
+            }
             /** @var PluginInterface $plugin */
-            $help[] = "$pluginId " . $plugin->help();
+            $help[] = $pluginId;
+            $help[] = '  prefix: ' . $prefix;
+            $help[] = $plugin->help();
         }
 
         return implode("\n", $help);

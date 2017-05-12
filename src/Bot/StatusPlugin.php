@@ -15,6 +15,7 @@ class StatusPlugin extends AbstractPlugin
         parent::__construct($logger, $yabot);
 
         $this->setConfig([
+            'help' => '  status',
             'prefix' => Message::AUTHED_USER,
             'matchers' => ['yabotStatus' => "/^status\\b/"],
         ]);

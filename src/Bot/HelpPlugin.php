@@ -15,6 +15,7 @@ class HelpPlugin extends AbstractPlugin
         parent::__construct($logger, $yabot);
 
         $this->setConfig([
+            'help' => '  help',
             'prefix' => Message::AUTHED_USER,
             'matchers' => ['yabotHelp' => "/^help\\b/"],
         ]);
