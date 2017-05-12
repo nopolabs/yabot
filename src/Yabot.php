@@ -157,6 +157,7 @@ class Yabot
         $count = count($this->plugins);
 
         $statuses = [];
+        $statuses[] = $this->getFormattedMemoryUsage();
         $statuses[] = "There are $count plugins loaded.";
         foreach ($this->plugins as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
@@ -188,10 +189,15 @@ class Yabot
 
     protected function addMemoryReporting()
     {
-        $this->eventLoop->addPeriodicTimer(300, function () {
-            $memory = memory_get_usage() / 1024;
-            $formatted = number_format($memory, 3).'K';
-            echo "Current memory usage: {$formatted}\n";
+        $this->eventLoop->addPeriodicTimer(600, function () {
+            $this->logger->info($this->getFormattedMemoryUsage());
         });
+    }
+
+    protected function getFormattedMemoryUsage() : string
+    {
+        $memory = memory_get_usage() / 1024;
+        $formatted = number_format($memory, 3).'K';
+        return "Current memory usage: {$formatted}";
     }
 }
