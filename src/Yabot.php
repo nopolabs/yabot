@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot;
 
 use Evenement\EventEmitterTrait;
 use Exception;
+use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\MessageFactory;
 use Nopolabs\Yabot\Bot\PluginInterface;
 use Nopolabs\Yabot\Bot\SlackClient;
@@ -151,11 +152,15 @@ class Yabot
                 /** @var User $user */
                 $user = $this->slack->getAuthedUser();
                 $prefix = '@' . $user->getUsername();
+            } elseif (!$prefix) {
+                $prefix = '<none>';
             }
             /** @var PluginInterface $plugin */
             $help[] = $pluginId;
             $help[] = '  prefix: ' . $prefix;
-            $help[] = $plugin->help();
+            foreach (explode("\n", $plugin->help()) as $line) {
+                $help[] = '    ' . $line;
+            }
         }
 
         return implode("\n", $help);
