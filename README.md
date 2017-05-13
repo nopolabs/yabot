@@ -50,16 +50,12 @@ The slack.token is *not* meant to be shared publicly.
 yabot-init.sh creates a .gitignore file containing config.php,
 if you are using a different VCS you will need to do something similar.
 
-If you do happen to commit the token to a public repo 
+If you do accidentally commit the token to a public repo 
 Slack will revoke it (as I discovered).
 
-## Running yabot for development and testing
+## Running yabot
 
     php yabot.php
-
-## Running yabot as a service
-
-TODO
 
 ## Configuration
 
@@ -101,12 +97,7 @@ Yabot uses plugins to know what to listen for and how to respond.
 
 There are examples in `src/Examples`, `src/Reservations`, and `src/Queue`.
 
-Minimally a plugin must implement `Nopolabs\Yabot\Bot\PluginInterface`:
-
-    interface PluginInterface
-    {
-        public function onMessage(MessageInterface $message);
-    }
+Minimally a plugin must implement `Nopolabs\Yabot\Bot\PluginInterface`.
 
 Plugins declared in `plugins.yml` with the tag `yabot.plugin` will be
 loaded automatically: 
@@ -120,44 +111,53 @@ loaded automatically:
             tags:
                 - { name: yabot.plugin }
 
+### Theory of operation
+
+Yabot uses Slack's [Real Time Messaging API](https://api.slack.com/rtm).
+
+Message events are dispatched to each plugin in the order in which they were loaded.
+
+Plugins have an opportunity to react to the messages they receive, e.g. by replying,
+and may optionally mark a message as handled to interrupt further dispatching.
+
+Plugin configuration is used to select which messages a plugin will react to 
+and how it will react.
+
 ### Plugin config
 
+Plugins built using `PluginTrait` provide a default configuration which may be overridden in `config.php`, e.g.:
+
     'plugin.help' => [
-        'prefix' => Message::AUTHED_USER,
+        'prefix' => Message::AUTHED_USER, // optional, string
+        'isBot' => false,                 // optional, true, false, or null             
+        'channel' => '',                  // optional, may be string or array of strings
+        'user' => '',                     // optional, may be string or array of strings
         'matchers' => [
-            'yabotHelp' => "/^help\\b/",
+            'yabotHelp' => [
+                'isBot' => null,                          // optional, true, false, or null
+                'channel' => '',                          // optional, may be string or array of strings
+                'user' => '',                             // optional, may be string or array of strings
+                'pattern' => "/^help (?'topic'\\w+)\\b/", // pattern applied by preg_match()
+                'method' => 'help',                       // method called to handle accepted messages
+            ],
         ],
     ],
 
-`MessageDispatcher` is configured with a set of matchers which it applies to each message.
-
-Matcher syntax:
-
-    // canonical:
-    'matcherName' => [
-        'pattern' => "/^help (?'topic'\\w+)\\b/", // optional, pattern applied by preg_match()
-        'channel' => 'general',                   // optional, may be string or array of strings
-        'user' => 'dan',                          // optional, may be string or array of strings
-        'method' => 'help',                       // optional, will use matcherName if not set
-    ],
-
-
-`PluginTrait` provides some functions to help build matchers.
-
-`expandMatchers` will expand shorthand notation:
+Matcher shorthand syntax:
 
     // shorthand:
     'help' => "/^help (?'topic'\\w+)\\b/",
     
     // expands to:
     'help' => [
-        'pattern => "/^help (?'topic'\\w+)\\b/",
+        'isBot' => null,
         'channel => '',
         'user' => '',
+        'pattern => "/^help (?'topic'\\w+)\\b/",
         'method' => 'help',
     ],
 
-If the matcher matches the method on the plugin object gets called
+If the pattern matches the method on the plugin object gets called
 with the message and any fields captured by the matcher pattern.
 
 ## Responding to a Message
