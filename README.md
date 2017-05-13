@@ -183,9 +183,10 @@ with the message and any fields captured by the matcher pattern.
 
 Slack messages use ids to reference users and channels, e.g.:
 
-    Why not join <#C024BE7LR>?
-
-    Hey <@U024BE7LH>, did you see my file?
+| Displayed | Message text |
+| ------------- | ------------- |
+| Why not join #tech-chat? | Why not join <#C024BE7LR>? |
+| Hey @alice, did you see my file? | Hey <@U024BE7LH>, did you see my file? |
 
 `SlackClient` manages Users and Channels objects and provides methods to help 
 map user and channel names to ids and ids to names.
