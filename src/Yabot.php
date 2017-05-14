@@ -150,7 +150,7 @@ class Yabot
             $prefix = $plugin->getPrefix();
             if ($prefix === Message::AUTHED_USER) {
                 /** @var User $user */
-                $user = $this->slack->getAuthedUser();
+                $user = $this->slackClient->getAuthedUser();
                 $prefix = '@' . $user->getUsername();
             } elseif (!$prefix) {
                 $prefix = '<none>';
