@@ -8,12 +8,15 @@ use GuzzleHttp\Handler\CurlMultiHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
 use function GuzzleHttp\Promise\queue;
+use Nopolabs\Yabot\Helpers\ConfigTrait;
 use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\TimerInterface;
 
 class Guzzle
 {
+    use ConfigTrait;
+
     /** @var Client */
     private $client;
 
@@ -32,18 +35,19 @@ class Guzzle
         $config['handler'] = HandlerStack::create($this->handler);
         $this->client = new Client($config);
         $this->eventloop = $eventLoop;
+        $this->setConfig($config);
     }
 
-    public function getAsync($uri) : PromiseInterface
+    public function getAsync(string $uri, array $options = []) : PromiseInterface
     {
-        $request = $this->client->getAsync($uri);
+        $request = $this->client->getAsync($uri, $options);
 
         $this->schedule();
 
         return $request;
     }
 
-    public function post($uri, $options) : ResponseInterface
+    public function post(string $uri, array $options = []) : ResponseInterface
     {
         return $this->client->post($uri, $options);
     }

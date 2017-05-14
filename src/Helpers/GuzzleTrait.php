@@ -12,6 +12,9 @@ trait GuzzleTrait
     /** @var Guzzle */
     private $guzzle;
 
+    /** @var array */
+    private $options = [];
+
     public function setGuzzle(Guzzle $guzzle)
     {
         $this->guzzle = $guzzle;
@@ -22,13 +25,32 @@ trait GuzzleTrait
         return $this->guzzle;
     }
 
-    public function getAsync($uri) : PromiseInterface
+    public function setOptions(array $options)
     {
-        return $this->getGuzzle()->getAsync($uri);
+        $this->options = $options;
     }
 
-    public function post($uri, $options = []) : ResponseInterface
+    public function getOptions() : array
     {
+        return $this->options;
+    }
+
+    public function getAsync(string $uri, array $options = []) : PromiseInterface
+    {
+        $options = $this->addOptions($options);
+
+        return $this->getGuzzle()->getAsync($uri, $options);
+    }
+
+    public function post(string $uri, array $options = []) : ResponseInterface
+    {
+        $options = $this->addOptions($options);
+
         return $this->getGuzzle()->post($uri, $options);
+    }
+
+    private function addOptions(array $options) : array
+    {
+        return array_merge($options, $this->getOptions());
     }
 }
