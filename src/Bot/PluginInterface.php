@@ -7,6 +7,7 @@ interface PluginInterface
     public function help() : string;
     public function status() : string;
     public function init(string $pluginId, array $params);
+    public function getPluginId() : string;
     public function getPrefix() : string;
     public function dispatch(MessageInterface $message, string $text);
 }

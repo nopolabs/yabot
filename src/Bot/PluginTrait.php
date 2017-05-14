@@ -49,7 +49,7 @@ trait PluginTrait
                 'message' => $message->isBot(),
                 'plugin' => $this->getIsBot(),
             ];
-            $this->getLog()->debug('isBot match failed: '.json_encode($data));
+            $this->getLog()->debug($this->getPluginId().' isBot match failed: '.json_encode($data));
             return;
         }
 
@@ -58,7 +58,7 @@ trait PluginTrait
                 'message' => $message->getChannel(),
                 'plugin' => $this->getChannel(),
             ];
-            $this->getLog()->debug('channel match failed: '.json_encode($data));
+            $this->getLog()->debug($this->getPluginId().' channel match failed: '.json_encode($data));
             return;
         }
 
@@ -67,23 +67,23 @@ trait PluginTrait
                 'message' => $message->getUser(),
                 'plugin' => $this->getUser(),
             ];
-            $this->getLog()->debug('user match failed: '.json_encode($data));
+            $this->getLog()->debug($this->getPluginId().' user match failed: '.json_encode($data));
             return;
         }
 
         foreach ($this->getMatchers() as $name => $params) {
             if (!$message->matchesIsBot($params['isBot'])) {
-                $this->getLog()->debug('!matchesIsBot');
+                $this->getLog()->debug($this->getPluginId().":$name !matchesIsBot");
                 continue;
             }
 
             if (!$message->matchesChannel($params['channel'])) {
-                $this->getLog()->debug('!matchesChannel');
+                $this->getLog()->debug($this->getPluginId().":$name !matchesChannel");
                 continue;
             }
 
             if (!$message->matchesUser($params['user'])) {
-                $this->getLog()->debug('!matchesUser');
+                $this->getLog()->debug($this->getPluginId().":$name !matchesUser");
                 continue;
             }
 
@@ -95,7 +95,7 @@ trait PluginTrait
                 continue;
             }
 
-            $this->getLog()->info("matched: $name", ['params' => $params, 'matches' =>$matches]);
+            $this->getLog()->info($this->getPluginId().":$name matched", ['params' => $params, 'matches' => $matches]);
 
             $this->dispatchMessage($message, [$params['method'], $matches]);
 
