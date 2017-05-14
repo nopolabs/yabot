@@ -2085,12 +2085,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nopolabs/mock-with-expectations.git",
-                "reference": "745fde09273c22ec4ae43bc49119ad88524c2bbc"
+                "reference": "7ede7cdd07598839069fc6a2017fa45549c40e5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nopolabs/mock-with-expectations/zipball/745fde09273c22ec4ae43bc49119ad88524c2bbc",
-                "reference": "745fde09273c22ec4ae43bc49119ad88524c2bbc",
+                "url": "https://api.github.com/repos/nopolabs/mock-with-expectations/zipball/7ede7cdd07598839069fc6a2017fa45549c40e5b",
+                "reference": "7ede7cdd07598839069fc6a2017fa45549c40e5b",
                 "shasum": ""
             },
             "require-dev": {
@@ -2102,11 +2102,7 @@
                     "Nopolabs\\Test\\": "src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Nopolabs\\Test\\Tests\\": "tests"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2117,11 +2113,7 @@
                 }
             ],
             "description": "Helper trait for phpunit testing",
-            "support": {
-                "source": "https://github.com/nopolabs/mock-with-expectations/tree/master",
-                "issues": "https://github.com/nopolabs/mock-with-expectations/issues"
-            },
-            "time": "2017-03-13 02:22:40"
+            "time": "2017-05-14T04:23:05+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

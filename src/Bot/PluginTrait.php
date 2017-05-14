@@ -33,6 +33,11 @@ trait PluginTrait
         $this->getLog()->info("inited $pluginId config:", $this->getConfig());
     }
 
+    public function getPluginId() : string
+    {
+        return $this->pluginId;
+    }
+
     public function getPrefix(): string
     {
         return $this->get('prefix');
@@ -150,11 +155,6 @@ trait PluginTrait
     protected function setPluginId($pluginId)
     {
         $this->pluginId = $pluginId;
-    }
-
-    protected function getPluginId()
-    {
-        return $this->pluginId;
     }
 
     protected function getUser()

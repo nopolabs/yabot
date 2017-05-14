@@ -168,9 +168,6 @@ class YabotTest extends TestCase
             : ['params' => [$this->isInstanceOf(Message::class), $dispatched]];
 
         $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
-            ['help', 'never'],
-            ['status', 'never'],
-            ['init', 'never'],
             ['getPrefix', ['result' => $prefix]],
             ['dispatch', $expectedDispatch],
         ]);
