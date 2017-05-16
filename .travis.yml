@@ -5,4 +5,4 @@ php:
   - hhvm
   - nightly
 install: composer install
-script: vendor/bin/phpunit --configuration phpuint.xml
+script: vendor/bin/phpunit --configuration phpunit.xml
