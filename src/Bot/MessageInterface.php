@@ -9,7 +9,7 @@ interface MessageInterface
 {
     public function getText();
 
-    public function formattedText(string $text);
+    public function formatText(string $text);
 
     public function setPluginText(string $text);
 

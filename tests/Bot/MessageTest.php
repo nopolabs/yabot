@@ -383,7 +383,7 @@ class MessageTest extends TestCase
         $this->assertSame($expected, $message->matchPatterns($patterns));
     }
 
-    public function formattedTextDataProvider() : array
+    public function formatTextDataProvider() : array
     {
         $data = [
             ['', ''],
@@ -403,13 +403,13 @@ class MessageTest extends TestCase
     }
 
     /**
-     * @dataProvider formattedTextDataProvider
+     * @dataProvider formatTextDataProvider
      */
-    public function testFormattedText($text, $expected)
+    public function testFormatText($text, $expected)
     {
         $message = new Message($this->newSlackClient(), $this->data);
 
-        $formatted = $message->formattedText($text);
+        $formatted = $message->formatText($text);
 
         $this->assertSame($expected, $formatted);
     }

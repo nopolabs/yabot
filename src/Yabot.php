@@ -93,7 +93,7 @@ class Yabot
             }
         }
 
-        $this->logger->info('Received message', $data);
+        $this->logger->debug('Received message', $data);
 
         try {
             $message = $this->messageFactory->create($this->slackClient, $data);
@@ -106,6 +106,8 @@ class Yabot
         if ($message->isSelf()) {
             return;
         }
+
+        $this->logger->info('Message: ', ['formattedText' => $message->getFormattedText()]);
 
         foreach ($this->prefixes as $prefix => $plugins) {
             if (!($matches = $message->matchesPrefix($prefix))) {

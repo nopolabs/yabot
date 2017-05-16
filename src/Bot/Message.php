@@ -24,6 +24,9 @@ class Message implements MessageInterface
     protected $handled;
 
     /** @var string */
+    protected $formattedText;
+
+    /** @var string */
     protected $pluginText;
 
     public function __construct(SlackClient $slack, array $data)
@@ -33,6 +36,7 @@ class Message implements MessageInterface
         $this->user = isset($data['user']) ? $slack->userById($data['user']) : null;
         $this->channel = $slack->channelById($data['channel']);
         $this->handled = false;
+        $this->formattedText = $this->formatText($this->getText());
     }
 
     public function getText()
@@ -40,7 +44,12 @@ class Message implements MessageInterface
         return $this->data['text'];
     }
 
-    public function formattedText(string $text) : string
+    public function getFormattedText()
+    {
+        return $this->formattedText;
+    }
+
+    public function formatText(string $text) : string
     {
         $pattern = '/<([^>]*)>/';
 
@@ -169,7 +178,7 @@ class Message implements MessageInterface
 
     public function matchesPrefix(string $prefix) : array
     {
-        $text = ltrim($this->formattedText($this->getText()));
+        $text = ltrim($this->formatText($this->getText()));
 
         if ($prefix === '') {
             return [$text, $text];
