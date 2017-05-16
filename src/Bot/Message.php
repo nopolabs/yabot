@@ -23,6 +23,9 @@ class Message implements MessageInterface
     /** @var bool */
     protected $handled;
 
+    /** @var string */
+    protected $pluginText;
+
     public function __construct(SlackClient $slack, array $data)
     {
         $this->data = $data;
@@ -35,6 +38,61 @@ class Message implements MessageInterface
     public function getText()
     {
         return $this->data['text'];
+    }
+
+    public function formattedText(string $text) : string
+    {
+        $pattern = '/<([^>]*)>/';
+
+        preg_match_all($pattern, $text, $matches);
+
+        $split = preg_split($pattern, $text);
+
+        $i = 0;
+        $formatted = [];
+
+        foreach ($matches[1] as $match) {
+            $formatted[] = $split[$i++];
+            if ($pipe = strrpos($match, '|')) {
+                $fallback = substr($match, $pipe + 1);
+                if ($match[0] === '@') {
+                    $formatted[] = '@'.$fallback;
+                } else if ($match[0] === '#') {
+                    $formatted[] = '#'.$fallback;
+                } else {
+                    $formatted[] = $fallback;
+                }
+            } else {
+                if ($match[0] === '@') {
+                    $userId = substr($match, 1);
+                    if ($user = $this->getSlack()->userById($userId)) {
+                        $formatted[] = '@'.$user->getUsername();
+                    } else {
+                        $formatted[] = '@'.$userId;
+                    }
+                } elseif ($match[0] === '#') {
+                    $channelId = substr($match, 1);
+                    if ($channel = $this->getSlack()->channelById($channelId)) {
+                        $formatted[] = '#'.$channel->getName();
+                    } else {
+                        $formatted[] = '#'.$channelId;
+                    }
+                } else {
+                    $formatted[] = $match;
+                }
+            }
+        }
+
+        if ($i < count($split)) {
+            $formatted[] = $split[$i];
+        }
+
+        return implode('', $formatted);
+    }
+
+    public function setPluginText(string $text)
+    {
+        $this->pluginText = $text;
     }
 
     public function getChannel() : Channel
@@ -54,7 +112,7 @@ class Message implements MessageInterface
 
     public function isSelf() : bool
     {
-        return $this->slack->getAuthedUser() === $this->getUser();
+        return $this->getSlack()->getAuthedUser() === $this->getUser();
     }
 
     public function isBot() : bool
@@ -111,7 +169,7 @@ class Message implements MessageInterface
 
     public function matchesPrefix(string $prefix) : array
     {
-        $text = ltrim($this->getText());
+        $text = ltrim($this->formattedText($this->getText()));
 
         if ($prefix === '') {
             return [$text, $text];
@@ -119,10 +177,7 @@ class Message implements MessageInterface
 
         if ($prefix === Message::AUTHED_USER) {
             $user = $this->slack->getAuthedUser();
-            $prefix = "<@{$user->getId()}>";
-        } else if ($prefix[0] === '@') {
-            $user = $this->getSlack()->userByName(substr($prefix, 1));
-            $prefix = "<@{$user->getId()}>";
+            $prefix = '@'.$user->getUsername();
         }
 
         preg_match("/^$prefix\\s+(.*)/", $text, $matches);
@@ -169,12 +224,12 @@ class Message implements MessageInterface
         return $username === $name;
     }
 
-    public function matchPatterns(array $patterns, string $text) : array
+    public function matchPatterns(array $patterns) : array
     {
         $matches = [];
 
         foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $text, $matches)) {
+            if (preg_match($pattern, $this->pluginText, $matches)) {
                 break;
             }
         }

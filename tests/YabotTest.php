@@ -29,7 +29,7 @@ class YabotTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->eventLoop = $this->createMock(LoopInterface::class);
         $this->slackClient = $this->createMock(SlackClient::class);
-        $this->messageFactory = new MessageFactory();
+        $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
     public function testRun()
@@ -151,26 +151,37 @@ class YabotTest extends TestCase
             ],
         ];
 
-        return array_slice($data, 0, 100);
+        return array_slice($data, 8, 100);
     }
 
     /**
      * @dataProvider onMessageDataProvider
      */
-    public function testOnMessage($payloadData, $prefix, $dispatched)
+    public function testOnMessage($payloadData, $prefix, $pluginText)
     {
         $payload = $this->newPartialMockWithExpectations(Payload::class, [
             ['getData', ['result' => $payloadData]],
         ]);
 
-        $expectedDispatch = $dispatched === null
-            ? 'never'
-            : ['params' => [$this->isInstanceOf(Message::class), $dispatched]];
+        if ($pluginText === null) {
+            $message = $this->newPartialMockWithExpectations(Message::class, [
+                ['setPluginText', 'never'],
+            ], [$this->slackClient, $payloadData]);
 
-        $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
-            ['getPrefix', ['result' => $prefix]],
-            ['dispatch', $expectedDispatch],
-        ]);
+            $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
+                ['getPrefix', ['result' => $prefix]],
+                ['dispatch', 'never'],
+            ]);
+        } else {
+            $message = $this->newPartialMockWithExpectations(Message::class, [
+                ['setPluginText', ['params' => [$pluginText]]],
+            ], [$this->slackClient, $payloadData]);
+
+            $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
+                ['getPrefix', ['result' => $prefix]],
+                ['dispatch', ['params' => [$this->isInstanceOf(Message::class)]]],
+            ]);
+        }
 
         $someUser = $this->newPartialMockWithExpectations(User::class, [
             'getId' => ['invoked' => 'any', 'result' => 'USOMEUSER'],
@@ -187,6 +198,16 @@ class YabotTest extends TestCase
             'userByName' => ['invoked' => 'any', 'params' => ['someUser'], 'result' => $someUser],
             'getAuthedUser' => ['invoked' => 'any', 'result' => $authedUser],
         ]);
+
+        if ($payloadData['subtype'] === 'message_deleted') {
+            $this->setAtExpectations($this->messageFactory, [
+                ['create', 'never'],
+            ]);
+        } else {
+            $this->setAtExpectations($this->messageFactory, [
+                ['create', ['params' => [$this->slackClient, $payloadData], 'result' => $message]],
+            ]);
+        }
 
         $plugins = [$plugin];
 

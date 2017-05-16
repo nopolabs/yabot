@@ -115,12 +115,13 @@ class Yabot
 
             $text = ltrim($matches[1]);
 
+            $message->setPluginText($text);
+
             foreach ($plugins as $pluginId => $plugin) {
                 /** @var PluginInterface $plugin */
                 try {
                     $this->logger->debug('dispatch', ['pluginId' => $pluginId, 'text' => $text]);
-
-                    $plugin->dispatch($message, $text);
+                    $plugin->dispatch($message);
                 } catch (Exception $e) {
                     $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
                     $this->logger->warning($e->getTraceAsString());
