@@ -9,5 +9,5 @@ interface PluginInterface
     public function init(string $pluginId, array $params);
     public function getPluginId() : string;
     public function getPrefix() : string;
-    public function dispatch(MessageInterface $message, string $text);
+    public function dispatch(MessageInterface $message);
 }

@@ -23,7 +23,11 @@ class Channels
         }
     }
 
-    public function byId($id) : Channel
+    /**
+     * @param $id
+     * @return Channel|null
+     */
+    public function byId($id)
     {
         if (isset($this->channelsById[$id])) {
             return $this->channels[$this->channelsById[$id]];
@@ -32,7 +36,11 @@ class Channels
         }
     }
 
-    public function byName($name) : Channel
+    /**
+     * @param $name
+     * @return Channel|null
+     */
+    public function byName($name)
     {
         if (isset($this->channelsByName[$name])) {
             return $this->channels[$this->channelsByName[$name]];

@@ -9,6 +9,10 @@ interface MessageInterface
 {
     public function getText();
 
+    public function formattedText(string $text);
+
+    public function setPluginText(string $text);
+
     public function getChannel() : Channel;
 
     public function getUser();
@@ -41,5 +45,5 @@ interface MessageInterface
 
     public function matchesUser($name) : bool;
 
-    public function matchPatterns(array $patterns, string $text) : array;
+    public function matchPatterns(array $patterns) : array;
 }

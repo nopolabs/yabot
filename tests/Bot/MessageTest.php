@@ -3,11 +3,14 @@
 namespace Nopolabs\Yabot\Tests\Bot;
 
 use Nopolabs\Test\MockWithExpectationsTrait;
+use Nopolabs\Yabot\Bot\Channels;
 use Nopolabs\Yabot\Bot\Message;
 use Nopolabs\Yabot\Bot\SlackClient;
+use Nopolabs\Yabot\Bot\Users;
 use PHPUnit\Framework\TestCase;
 use Slack\ApiClient;
 use Slack\Channel;
+use Slack\RealTimeClient;
 use Slack\User;
 
 class MessageTest extends TestCase
@@ -18,17 +21,21 @@ class MessageTest extends TestCase
     protected $user;
     protected $channel;
     protected $data;
+    protected $realTimeClient;
+    protected $users;
+    protected $channels;
 
     protected function setUp()
     {
         $this->data = [
             'text' => 'this is a test',
-            'user' => 'U0290RGRD',
-            'channel' => 'C029E9SF9',
+            'user' => 'U00USER00',
+            'channel' => 'C00CHAN00',
             'ts' => '1493671362.792940',
         ];
 
         $this->authedUser = $this->newPartialMockWithExpectations(User::class, [
+            'getUsername' => ['invoked' => 'any', 'result' => 'authed-user'],
             'getId' => ['invoked' => 'any', 'result' => 'U0AUTHED0'],
         ]);
         $this->user = $this->newPartialMockWithExpectations(User::class, [
@@ -37,19 +44,29 @@ class MessageTest extends TestCase
         ]);
         $this->channel = $this->newPartialMockWithExpectations(Channel::class, [
             'getName' => ['invoked' => 'any', 'result' => 'channel-name'],
+            'getId' => ['invoked' => 'any', 'result' => 'C00CHAN00'],
         ]);
+
+        $this->users = new Users();
+        $this->users->update([$this->authedUser, $this->user]);
+
+        $this->channels = new Channels();
+        $this->channels->update([$this->channel]);
+
+        $this->realTimeClient = $this->createMock(RealTimeClient::class);
     }
 
-    private function newSlackClient(array $extraExpectations = []) : SlackClient
+    private function newSlackClient(array $newExpectations = []) : SlackClient
     {
         $expectations = array_merge([
-            'userById' => ['invoked' => 'any', 'params' => [$this->data['user']], 'result' => $this->user],
-            'channelById' => ['invoked' => 'any', 'params' => [$this->data['channel']], 'result' => $this->channel],
             'getAuthedUser' => ['invoked' => 'any', 'result' => $this->authedUser],
-            'userByName' => ['invoked' => 'any', 'params' => ['user-name'], 'result' => $this->user],
-        ], $extraExpectations);
+        ], $newExpectations);
 
-        return $this->newPartialMockWithExpectations(SlackCLient::class, $expectations);
+        return $this->newPartialMockWithExpectations(
+            SlackCLient::class,
+            $expectations,
+            [$this->realTimeClient, $this->users, $this->channels]
+        );
     }
 
     public function testGetText()
@@ -89,11 +106,9 @@ class MessageTest extends TestCase
 
     public function testGetIsSelf()
     {
-        $slackClient = $this->newSlackClient([
-            'userById' => ['invoked' => 'any', 'params' => [$this->data['user']], 'result' => $this->authedUser],
-        ]);
+        $data = array_merge($this->data, ['user' => 'U0AUTHED0']);
 
-        $message = new Message($slackClient, $this->data);
+        $message = new Message($this->newSlackClient(), $data);
 
         $this->assertTrue($message->isSelf());
     }
@@ -231,18 +246,20 @@ class MessageTest extends TestCase
 
     public function prefixDataProvider() : array
     {
-        return [
+        $data = [
             ['', 'this is a test', ['this is a test', 'this is a test']],
             ['hey', 'this is a test', []],
             ['hey', 'not hey this is a test', []],
             ['hey', 'hey this is a test', ['hey this is a test', 'this is a test']],
             [Message::AUTHED_USER, 'this is a test', []],
             [Message::AUTHED_USER, '<@U00USER00> this is a test', []],
-            [Message::AUTHED_USER, '<@U0AUTHED0> this is a test', ['<@U0AUTHED0> this is a test', 'this is a test']],
+            [Message::AUTHED_USER, '<@U0AUTHED0> this is a test', ['@authed-user this is a test', 'this is a test']],
             ['@user-name', 'this is a test', []],
             ['@user-name', '<@U0AUTHED0> this is a test', []],
-            ['@user-name', '<@U00USER00> this is a test', ['<@U00USER00> this is a test', 'this is a test']],
+            ['@user-name', '<@U00USER00> this is a test', ['@user-name this is a test', 'this is a test']],
         ];
+
+        return array_slice($data, 0, 100);
     }
 
     /**
@@ -361,6 +378,39 @@ class MessageTest extends TestCase
     {
         $message = new Message($this->newSlackClient(), $this->data);
 
-        $this->assertSame($expected, $message->matchPatterns($patterns, 'this is a test'));
+        $message->setPluginText('this is a test');
+
+        $this->assertSame($expected, $message->matchPatterns($patterns));
+    }
+
+    public function formattedTextDataProvider() : array
+    {
+        $data = [
+            ['', ''],
+            ['test', 'test'],
+            ['<@U00UNKN00>', '@U00UNKN00'], // unknown user
+            ['<@U00UNKN00|alice>', '@alice'], // unknown user w/fallback
+            ['<@U00USER00>', '@user-name'], // known user
+            ['<@U00USER00|nick>', '@nick'], // known user w/fallback
+            ['<#C00UNKN00>', '#C00UNKN00'], // unknown channel
+            ['<#C00UNKN00|channel-x>', '#channel-x'], // unknown channel w/fallback
+            ['<#C00CHAN00>', '#channel-name'], // known channel
+            ['<#C00CHAN00|good-times>', '#good-times'], // known channel w/fallback
+            ['choose <@U00USER00> or <@U00USER00|nick>', 'choose @user-name or @nick'],
+        ];
+
+        return array_slice($data, 10, 100);
+    }
+
+    /**
+     * @dataProvider formattedTextDataProvider
+     */
+    public function testFormattedText($text, $expected)
+    {
+        $message = new Message($this->newSlackClient(), $this->data);
+
+        $formatted = $message->formattedText($text);
+
+        $this->assertSame($expected, $formatted);
     }
 }

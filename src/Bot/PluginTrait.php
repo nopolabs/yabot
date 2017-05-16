@@ -43,7 +43,7 @@ trait PluginTrait
         return $this->get('prefix');
     }
 
-    public function dispatch(MessageInterface $message, string $text)
+    public function dispatch(MessageInterface $message)
     {
         if ($message->isHandled()) {
             return;
@@ -83,7 +83,7 @@ trait PluginTrait
                 continue;
             }
 
-            if (!($matches = $message->matchPatterns($params['patterns'], $text))) {
+            if (!($matches = $message->matchPatterns($params['patterns']))) {
                 continue;
             }
 

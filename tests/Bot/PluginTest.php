@@ -191,7 +191,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchIsBotShortCut()
@@ -213,7 +213,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchChannelShortCut()
@@ -236,7 +236,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchUserShortCut()
@@ -259,7 +259,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchMatcherIsBotShortCut()
@@ -297,7 +297,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchMatcherChannelShortCut()
@@ -336,7 +336,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchMatcherUserShortCut()
@@ -376,7 +376,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testDispatchMatcherPatternsShortCut()
@@ -416,7 +416,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $this->plugin->dispatch($message, $text);
+        $this->plugin->dispatch($message);
     }
 
     public function testInvalidMatchShortcut()
@@ -461,7 +461,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $plugin->dispatch($message, $text);
+        $plugin->dispatch($message);
     }
 
     public function testDispatchMessage()
@@ -503,7 +503,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $plugin->dispatch($message, $text);
+        $plugin->dispatch($message);
     }
 
     public function testDispatchMessageIsHandledShortCut()
@@ -553,7 +553,7 @@ class PluginTest extends TestCase
 
         $text = 'this is a test';
 
-        $plugin->dispatch($message, $text);
+        $plugin->dispatch($message);
     }
 
     public function testDispatchMessageMatchesSecondMatcher()
@@ -607,6 +607,6 @@ class PluginTest extends TestCase
 
         $text = 'that is a test';
 
-        $plugin->dispatch($message, $text);
+        $plugin->dispatch($message);
     }
 }

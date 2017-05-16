@@ -114,22 +114,38 @@ class SlackClient
         });
     }
 
-    public function userById($id) : User
+    /**
+     * @param $id
+     * @return null|User
+     */
+    public function userById($id)
     {
         return $this->users->byId($id);
     }
 
-    public function userByName($name) : User
+    /**
+     * @param $name
+     * @return null|User
+     */
+    public function userByName($name)
     {
         return $this->users->byName($name);
     }
 
-    public function channelById($id) : Channel
+    /**
+     * @param $id
+     * @return null|Channel
+     */
+    public function channelById($id)
     {
         return $this->channels->byId($id);
     }
 
-    public function channelByName($name) : Channel
+    /**
+     * @param $name
+     * @return null|Channel
+     */
+    public function channelByName($name)
     {
         return $this->channels->byName($name);
     }
