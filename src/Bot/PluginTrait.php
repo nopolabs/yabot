@@ -50,28 +50,19 @@ trait PluginTrait
         }
 
         if (!$message->matchesIsBot($this->getIsBot())) {
-            $data = [
-                'message' => $message->isBot(),
-                'plugin' => $this->getIsBot(),
-            ];
+            $data = ['message' => $message->isBot(), 'plugin' => $this->getIsBot()];
             $this->getLog()->debug($this->getPluginId().' isBot match failed: '.json_encode($data));
             return;
         }
 
         if (!$message->matchesChannel($this->getChannel())) {
-            $data = [
-                'message' => $message->getChannel(),
-                'plugin' => $this->getChannel(),
-            ];
+            $data = ['message' => $message->getChannel()->getName(), 'plugin' => $this->getChannel()];
             $this->getLog()->debug($this->getPluginId().' channel match failed: '.json_encode($data));
             return;
         }
 
         if (!$message->matchesUser($this->getUser())) {
-            $data = [
-                'message' => $message->getUser(),
-                'plugin' => $this->getUser(),
-            ];
+            $data = ['message' => $message->getUsername(), 'plugin' => $this->getUser()];
             $this->getLog()->debug($this->getPluginId().' user match failed: '.json_encode($data));
             return;
         }
