@@ -2,7 +2,7 @@
 
 yabot is a slack chat bot written in php.
 
-[nopolabs/yabot](https://travis-ci.org/nopolabs/yabot) Travis CI builds.
+[![Build Status](https://travis-ci.org/nopolabs/yabot.svg?branch=master)](https://travis-ci.org/nopolabs/yabot)
 
 ## Quick start
 
