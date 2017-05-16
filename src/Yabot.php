@@ -2,6 +2,7 @@
 
 namespace Nopolabs\Yabot;
 
+use DateTime;
 use Evenement\EventEmitterTrait;
 use Exception;
 use Nopolabs\Yabot\Bot\Message;
@@ -181,6 +182,11 @@ class Yabot
         return implode("\n", $statuses);
     }
 
+    public function addTimer($interval, callable $callback)
+    {
+        $this->eventLoop->addTimer($interval, $callback);
+    }
+
     public function addPeriodicTimer($interval, callable $callback)
     {
         $this->eventLoop->addPeriodicTimer($interval, $callback);
@@ -208,8 +214,16 @@ class Yabot
 
     protected function addMemoryReporting()
     {
-        $this->addPeriodicTimer(600, function () {
+        $now = new DateTime();
+        $then = new DateTime('+1 hour');
+        $then->setTime($then->format('H'), 0, 0);
+        $delay = $then->getTimestamp() - $now->getTimestamp();
+
+        $this->addTimer($delay, function() {
             $this->logger->info($this->getFormattedMemoryUsage());
+            $this->addPeriodicTimer(3600, function () {
+                $this->logger->info($this->getFormattedMemoryUsage());
+            });
         });
     }
 
