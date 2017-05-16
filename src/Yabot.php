@@ -181,6 +181,11 @@ class Yabot
         return implode("\n", $statuses);
     }
 
+    public function addPeriodicTimer($interval, callable $callback)
+    {
+        $this->eventLoop->addPeriodicTimer($interval, $callback);
+    }
+
     protected function loadPlugin($pluginId, PluginInterface $plugin)
     {
         if (isset($this->plugins[$pluginId])) {
@@ -203,7 +208,7 @@ class Yabot
 
     protected function addMemoryReporting()
     {
-        $this->eventLoop->addPeriodicTimer(600, function () {
+        $this->addPeriodicTimer(600, function () {
             $this->logger->info($this->getFormattedMemoryUsage());
         });
     }
