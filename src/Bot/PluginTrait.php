@@ -56,7 +56,7 @@ trait PluginTrait
         }
 
         if (!$message->matchesChannel($this->getChannel())) {
-            $data = ['message' => $message->getChannel()->getName(), 'plugin' => $this->getChannel()];
+            $data = ['message' => $message->getChannelName(), 'plugin' => $this->getChannel()];
             $this->getLog()->debug($this->getPluginId().' channel match failed: '.json_encode($data));
             return;
         }

@@ -104,7 +104,7 @@ class Message implements MessageInterface
         $this->pluginText = $text;
     }
 
-    public function getChannel() : Channel
+    public function getChannel()
     {
         return $this->channel;
     }

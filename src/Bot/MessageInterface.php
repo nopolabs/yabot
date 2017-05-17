@@ -13,7 +13,7 @@ interface MessageInterface
 
     public function setPluginText(string $text);
 
-    public function getChannel() : Channel;
+    public function getChannel();
 
     public function getUser();
 
@@ -36,6 +36,8 @@ interface MessageInterface
     public function setHandled(bool $handled);
 
     public function getUsername();
+
+    public function getChannelName();
 
     public function matchesPrefix(string $prefix) : array;
 
