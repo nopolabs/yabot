@@ -2,5 +2,13 @@ language: php
 php:
   - '7.0'
   - '7.1'
+
 install: composer install
-script: vendor/bin/phpunit --configuration phpunit.xml
+
+script:
+  - vendor/bin/phpunit --configuration phpunit.xml
+  - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+# CODECLIMATE_REPO_TOKEN is set in https://travis-ci.org/nopolabs/yabot/settings
+after_success:
+  - vendor/bin/test-reporter
