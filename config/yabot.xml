@@ -21,6 +21,11 @@
             <argument type="service" id="event.loop" />
             <argument type="service" id="slack.client" />
             <argument type="service" id="message.factory" />
+            <argument type="service" id="plugin.manager" />
+        </service>
+
+        <service id="plugin.manager" class="Nopolabs\Yabot\Plugin\PluginManager">
+            <argument type="service" id="logger" />
         </service>
 
         <service id="storage" class="Nopolabs\Yabot\Storage\FileStorage">
@@ -55,23 +60,26 @@
         <service id="slack.realTimeClient" class="Slack\RealTimeClient">
             <argument type="service" id="event.loop" />
             <argument type="service" id="guzzle.client" />
+            <argument type="service" id="logger" />
             <call method="setToken">
                 <argument>%slack.token%</argument>
             </call>
         </service>
 
-        <service id="slack.client" class="Nopolabs\Yabot\Bot\SlackClient">
+        <service id="slack.client" class="Nopolabs\Yabot\Slack\Client">
             <argument type="service" id="slack.realTimeClient" />
             <argument type="service" id="users" />
             <argument type="service" id="channels" />
             <argument>%slack.client.config%</argument>
         </service>
 
-        <service id="users" class="Nopolabs\Yabot\Bot\Users" />
+        <service id="users" class="Nopolabs\Yabot\Slack\Users" />
 
-        <service id="channels" class="Nopolabs\Yabot\Bot\Channels" />
+        <service id="channels" class="Nopolabs\Yabot\Slack\Channels" />
 
-        <service id="message.factory" class="Nopolabs\Yabot\Bot\MessageFactory" />
+        <service id="message.factory" class="Nopolabs\Yabot\Message\MessageFactory">
+            <argument type="service" id="slack.client" />
+        </service>
     </services>
 
 </container>

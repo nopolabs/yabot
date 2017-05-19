@@ -1,3 +1,4 @@
 imports:
     - { resource: 'plugin.help.yml' }
     - { resource: 'plugin.status.yml' }
+    - { resource: 'plugin.messagelog.yml' }

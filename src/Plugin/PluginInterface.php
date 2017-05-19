@@ -1,13 +1,14 @@
 <?php
 
-namespace Nopolabs\Yabot\Bot;
+namespace Nopolabs\Yabot\Plugin;
+
+use Nopolabs\Yabot\Message\Message;
 
 interface PluginInterface
 {
     public function help() : string;
     public function status() : string;
     public function init(string $pluginId, array $params);
-    public function getPluginId() : string;
     public function getPrefix() : string;
-    public function dispatch(MessageInterface $message);
+    public function handle(Message $message);
 }

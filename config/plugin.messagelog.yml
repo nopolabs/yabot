@@ -1,6 +1,6 @@
 services:
-    plugin.status:
-        class: Nopolabs\Yabot\Plugin\StatusPlugin
+    plugin.messagelog:
+        class: Nopolabs\Yabot\Plugin\MessageLogPlugin
         arguments:
             - '@logger'
             - '@yabot'

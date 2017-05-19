@@ -1,8 +1,9 @@
 <?php
 
-namespace Nopolabs\Yabot\Bot;
+namespace Nopolabs\Yabot\Slack;
 
 
+use Closure;
 use Nopolabs\Yabot\Helpers\ConfigTrait;
 use React\Promise\PromiseInterface;
 use Slack\Channel;
@@ -11,12 +12,12 @@ use Slack\Payload;
 use Slack\RealTimeClient;
 use Slack\User;
 
-class SlackClient
+class Client
 {
     use ConfigTrait;
 
     /** @var RealTimeClient */
-    private $slack;
+    private $realTimeClient;
 
     /** @var Users */
     private $users;
@@ -27,9 +28,9 @@ class SlackClient
     /** @var User */
     protected $authedUser;
 
-    public function __construct(RealTimeClient $slack, Users $users, Channels $channels, array $config = [])
+    public function __construct(RealTimeClient $realTimeClient, Users $users, Channels $channels, array $config = [])
     {
-        $this->slack = $slack;
+        $this->realTimeClient = $realTimeClient;
         $this->users = $users;
         $this->channels = $channels;
         $this->setConfig($config);
@@ -37,20 +38,22 @@ class SlackClient
 
     public function getRealTimeClient()
     {
-        return $this->slack;
+        return $this->realTimeClient;
     }
 
-    public function init()
+    public function init() : Client
     {
         $this->initChannelUpdateHandlers();
         $this->initUserUpdateHandlers();
+
+        return $this;
     }
 
-    public function update()
+    public function update(Closure $authedUserUpdated)
     {
-        $this->updateAuthedUser();
         $this->updateUsers();
         $this->updateChannels();
+        $this->updateAuthedUser($authedUserUpdated);
     }
 
     public function getAuthedUser()
@@ -58,14 +61,19 @@ class SlackClient
         return $this->authedUser;
     }
 
+    public function getAuthedUsername()
+    {
+        return $this->authedUser->getUsername();
+    }
+
     public function connect() : PromiseInterface
     {
-        return $this->slack->connect();
+        return $this->realTimeClient->connect();
     }
 
     public function disconnect()
     {
-        return $this->slack->disconnect();
+        return $this->realTimeClient->disconnect();
     }
 
     public function useWebSocket() : bool
@@ -76,9 +84,9 @@ class SlackClient
     public function say($text, $channel, array $additionalParameters = [])
     {
         if (!($channel instanceof ChannelInterface)) {
-            $channel = $this->channelByName($channel);
+            $channel = $this->getChannelByName($channel);
             if (!$channel) {
-                $channel = $this->channelById($channel);
+                $channel = $this->getChannelById($channel);
             }
         }
 
@@ -93,7 +101,7 @@ class SlackClient
 
     public function send($text, ChannelInterface $channel)
     {
-        $this->slack->send($text, $channel);
+        $this->realTimeClient->send($text, $channel);
     }
 
     public function post($text, ChannelInterface $channel, array $additionalParameters = [])
@@ -104,12 +112,12 @@ class SlackClient
             'as_user' => true,
         ], $additionalParameters);
 
-        $this->slack->apiCall('chat.postMessage', $parameters);
+        $this->realTimeClient->apiCall('chat.postMessage', $parameters);
     }
 
     public function on($event, array $onMessage)
     {
-        $this->slack->on($event, function (Payload $payload) use ($onMessage) {
+        $this->realTimeClient->on($event, function (Payload $payload) use ($onMessage) {
             call_user_func($onMessage, $payload);
         });
     }
@@ -118,7 +126,7 @@ class SlackClient
      * @param $id
      * @return null|User
      */
-    public function userById($id)
+    public function getUserById($id)
     {
         return $this->users->byId($id);
     }
@@ -127,7 +135,7 @@ class SlackClient
      * @param $name
      * @return null|User
      */
-    public function userByName($name)
+    public function getUserByName($name)
     {
         return $this->users->byName($name);
     }
@@ -136,7 +144,7 @@ class SlackClient
      * @param $id
      * @return null|Channel
      */
-    public function channelById($id)
+    public function getChannelById($id)
     {
         return $this->channels->byId($id);
     }
@@ -145,29 +153,30 @@ class SlackClient
      * @param $name
      * @return null|Channel
      */
-    public function channelByName($name)
+    public function getChannelByName($name)
     {
         return $this->channels->byName($name);
     }
 
     public function updateUsers()
     {
-        $this->slack->getUsers()->then(function(array $users) {
+        $this->realTimeClient->getUsers()->then(function(array $users) {
             $this->users->update($users);
         });
     }
 
     public function updateChannels()
     {
-        $this->slack->getChannels()->then(function(array $channels) {
+        $this->realTimeClient->getChannels()->then(function(array $channels) {
             $this->channels->update($channels);
         });
     }
 
-    public function updateAuthedUser()
+    public function updateAuthedUser(Closure $authedUserUpdated)
     {
-        $this->slack->getAuthedUser()->then(function (User $user) {
+        $this->realTimeClient->getAuthedUser()->then(function (User $user) use ($authedUserUpdated) {
             $this->authedUser = $user;
+            $authedUserUpdated($user);
         });
     }
 

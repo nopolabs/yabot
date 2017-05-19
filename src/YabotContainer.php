@@ -3,7 +3,7 @@
 namespace Nopolabs\Yabot;
 
 use Exception;
-use Nopolabs\Yabot\Bot\PluginInterface;
+use Nopolabs\Yabot\Plugin\PluginInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -13,7 +13,6 @@ class YabotContainer extends ContainerBuilder
 {
     const YABOT_ID = 'yabot';
     const YABOT_PLUGIN_TAG = 'yabot.plugin';
-    const SLACK_TOKEN_KEY = 'slack.token';
 
     public function __construct($servicesPath = __DIR__.'/../config/yabot.xml')
     {
@@ -21,33 +20,24 @@ class YabotContainer extends ContainerBuilder
         $this->load($servicesPath);
     }
 
-    public function overrideParameters(array $parameters)
+    public function load($file, $type = null)
     {
-        $this->getParameterBag()->add($parameters);
-    }
+        $type = $type ?? pathinfo($file)['extension'];
 
-    public function load($file)
-    {
-        $extension = pathinfo($file)['extension'];
-        if ($extension === 'xml') {
-            $this->loadXml($file);
-        } elseif ($extension === 'yml') {
-            $this->loadYml($file);
+        if ($type === 'xml') {
+            $loader = new XmlFileLoader($this, new FileLocator());
+        } elseif ($type === 'yml') {
+            $loader = new YamlFileLoader($this, new FileLocator());
         } else {
             throw new Exception("Do not know how to load $file");
         }
-    }
 
-    public function loadXml($file)
-    {
-        $loader = new XmlFileLoader($this, new FileLocator());
         $loader->load($file);
     }
 
-    public function loadYml($file)
+    public function overrideParameters(array $parameters)
     {
-        $loader = new YamlFileLoader($this, new FileLocator());
-        $loader->load($file);
+        $this->getParameterBag()->add($parameters);
     }
 
     public function getYabot() : Yabot
@@ -57,29 +47,38 @@ class YabotContainer extends ContainerBuilder
 
         $plugins = $this->getTaggedPlugins(self::YABOT_PLUGIN_TAG);
 
+        $this->initPlugins($plugins);
+
         $yabot->init($plugins);
 
         return $yabot;
     }
 
-    protected function getTaggedPlugins($tag) : array
-    {
-        $plugins = [];
-
-        $pluginIds = $this->findTaggedServiceIds($tag);
-        foreach ($pluginIds as $pluginId => $value) {
-            /** @var PluginInterface $plugin */
-            $plugin = $this->get($pluginId);
-            $config = $this->getParameterOrDefault($pluginId);
-            $plugin->init($pluginId, $config);
-            $plugins[$pluginId] = $plugin;
-        }
-
-        return $plugins;
-    }
-
-    protected function getParameterOrDefault($name, array $default = []) : array
+    public function getParameterOrDefault($name, array $default = []) : array
     {
         return $this->hasParameter($name)? $this->getParameter($name) : $default;
+    }
+
+    private function getTaggedPlugins($tag) : array
+    {
+        return array_reduce(
+            array_keys($this->findTaggedServiceIds($tag)),
+            function(array $plugins, string $pluginId) {
+                $plugins[$pluginId] = $this->get($pluginId);
+                return $plugins;
+            },
+            []
+        );
+    }
+
+    private function initPlugins(array $plugins)
+    {
+        array_map(
+            function(string $pluginId, PluginInterface $plugin) {
+                $config = $this->getParameterOrDefault($pluginId);
+                $plugin->init($pluginId, $config);
+            },
+            array_keys($plugins), $plugins
+        );
     }
 }

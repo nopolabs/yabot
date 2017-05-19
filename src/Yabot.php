@@ -3,52 +3,60 @@
 namespace Nopolabs\Yabot;
 
 use DateTime;
-use Evenement\EventEmitterTrait;
 use Exception;
-use Nopolabs\Yabot\Bot\Message;
-use Nopolabs\Yabot\Bot\MessageFactory;
-use Nopolabs\Yabot\Bot\PluginInterface;
-use Nopolabs\Yabot\Bot\SlackClient;
+use Nopolabs\Yabot\Helpers\LogTrait;
+use Nopolabs\Yabot\Helpers\SlackTrait;
+use Nopolabs\Yabot\Message\MessageFactory;
+use Nopolabs\Yabot\Plugin\PluginInterface;
+use Nopolabs\Yabot\Plugin\PluginManager;
+use Nopolabs\Yabot\Slack\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Slack\Payload;
 use Slack\User;
+use Throwable;
 
 class Yabot
 {
-    use EventEmitterTrait;
+    use LogTrait;
+    use SlackTrait;
 
-    /** @var LoggerInterface */
-    protected $logger;
+    const AUTHED_USER = 'AUTHED_USER';
 
     /** @var LoopInterface */
-    protected $eventLoop;
-
-    /** @var SlackClient */
-    protected $slackClient;
+    private $eventLoop;
 
     /** @var MessageFactory */
-    protected $messageFactory;
+    private $messageFactory;
 
-    /** @var array */
-    protected $plugins;
+    /** @var PluginManager */
+    private $pluginManager;
 
-    /** @var array */
-    protected $prefixes;
+    private $messageLog;
 
     public function __construct(
         LoggerInterface $logger,
         LoopInterface $eventLoop,
-        SlackClient $slackClient,
-        MessageFactory $messageFactory
+        Client $slackClient,
+        MessageFactory $messageFactory,
+        PluginManager $pluginManager
     ) {
-        $this->logger = $logger;
+        $this->setLog($logger);
+        $this->setSlack($slackClient);
         $this->eventLoop = $eventLoop;
-        $this->slackClient = $slackClient;
         $this->messageFactory = $messageFactory;
+        $this->pluginManager = $pluginManager;
+        $this->messageLog = null;
+    }
 
-        $this->plugins = [];
-        $this->prefixes = [];
+    public function getMessageLog()
+    {
+        return $this->messageLog;
+    }
+
+    public function setMessageLog(string $messageLog = null)
+    {
+        $this->messageLog = $messageLog;
     }
 
     public function init(array $plugins)
@@ -56,50 +64,55 @@ class Yabot
         foreach ($plugins as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
 
-            $this->logger->info("loading $pluginId");
+            $this->info("loading $pluginId");
 
             try {
-                $this->loadPlugin($pluginId, $plugin);
+                $this->pluginManager->loadPlugin($pluginId, $plugin);
             } catch (Exception $e) {
-                $this->logger->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
-                $this->logger->warning($e->getTraceAsString());
+                $this->warning("Unhandled Exception while loading $pluginId: ".$e->getMessage());
+                $this->warning($e->getTraceAsString());
             }
         }
     }
 
     public function run()
     {
-        $this->slackClient->on('message', [$this, 'onMessage']);
+        $slack = $this->getSlack();
 
-        $this->slackClient->init();
+        $slack->init();
 
-        $this->slackClient->connect()->then([$this->slackClient, 'update']);
+        $slack->connect()->then([$this, 'connected']);
 
         $this->addMemoryReporting();
 
         $this->eventLoop->run();
     }
 
+    public function connected()
+    {
+        $slack = $this->getSlack();
+
+        $slack->update(function (User $authedUser) {
+            $this->pluginManager->updatePrefixes($authedUser->getUsername());
+        });
+
+        $slack->on('message', [$this, 'onMessage']);
+    }
+
     public function onMessage(Payload $payload)
     {
         $data = $payload->getData();
 
-        if (isset($data['subtype'])) {
-            if ($data['subtype'] === 'message_changed' && isset($data['message']['text'])) {
-                $data['text'] = $data['message']['text'];
-                $data['user'] = $data['message']['user'];
-            } elseif ($data['subtype'] !== 'bot_message') {
-                return;
-            }
-        }
-
-        $this->logger->debug('Received message', $data);
+        $this->debug('Received message', $data);
 
         try {
-            $message = $this->messageFactory->create($this->slackClient, $data);
-        } catch (Exception $e) {
-            $this->logger->warning($e->getMessage());
-            $this->logger->warning($e->getTraceAsString());
+            if ($this->messageLog) {
+                $this->logMessage($data);
+            }
+            $message = $this->messageFactory->create($data);
+        } catch (Throwable $throwable) {
+            $this->warning($throwable->getMessage());
+            $this->warning($throwable->getTraceAsString());
             return;
         }
 
@@ -107,80 +120,19 @@ class Yabot
             return;
         }
 
-        $this->logger->info('Message: ', ['formattedText' => $message->getFormattedText()]);
-
-        foreach ($this->prefixes as $prefix => $plugins) {
-            if (!($matches = $message->matchesPrefix($prefix))) {
-                continue;
-            }
-
-            $this->logger->debug('Matched prefix', ['prefix' => $prefix]);
-
-            $text = ltrim($matches[1]);
-
-            $message->setPluginText($text);
-
-            foreach ($plugins as $pluginId => $plugin) {
-                /** @var PluginInterface $plugin */
-                try {
-                    $this->logger->debug('dispatch', ['pluginId' => $pluginId, 'text' => $text]);
-                    $plugin->dispatch($message);
-                } catch (Exception $e) {
-                    $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
-                    $this->logger->warning($e->getTraceAsString());
-                }
-
-                if ($message->isHandled()) {
-                    return;
-                }
-            }
-
-            if ($message->isHandled()) {
-                return;
-            }
-        }
-    }
-
-    public function quit()
-    {
-        $this->logger->info('Quitting');
-        $this->slackClient->disconnect();
+        $this->pluginManager->dispatchMessage($message);
     }
 
     public function getHelp() : string
     {
-        $help = [];
-        foreach ($this->plugins as $pluginId => $plugin) {
-            $prefix = $plugin->getPrefix();
-            if ($prefix === Message::AUTHED_USER) {
-                /** @var User $user */
-                $user = $this->slackClient->getAuthedUser();
-                $prefix = '@' . $user->getUsername();
-            } elseif (!$prefix) {
-                $prefix = '<none>';
-            }
-            /** @var PluginInterface $plugin */
-            $help[] = $pluginId;
-            $help[] = '  prefix: ' . $prefix;
-            foreach (explode("\n", $plugin->help()) as $line) {
-                $help[] = '    ' . $line;
-            }
-        }
-
-        return implode("\n", $help);
+        return implode("\n", $this->pluginManager->getHelp());
     }
 
     public function getStatus() : string
     {
-        $count = count($this->plugins);
+        $statuses = $this->pluginManager->getStatuses();
 
-        $statuses = [];
-        $statuses[] = $this->getFormattedMemoryUsage();
-        $statuses[] = "There are $count plugins loaded.";
-        foreach ($this->plugins as $pluginId => $plugin) {
-            /** @var PluginInterface $plugin */
-            $statuses[] = "$pluginId " . $plugin->status();
-        }
+        array_unshift($statuses, $this->getFormattedMemoryUsage());
 
         return implode("\n", $statuses);
     }
@@ -195,26 +147,6 @@ class Yabot
         $this->eventLoop->addPeriodicTimer($interval, $callback);
     }
 
-    protected function loadPlugin($pluginId, PluginInterface $plugin)
-    {
-        if (isset($this->plugins[$pluginId])) {
-            $this->logger->warning("$pluginId already loaded, ignoring duplicate.");
-            return;
-        }
-
-        $this->plugins[$pluginId] = $plugin;
-
-        $prefix = $plugin->getPrefix();
-
-        if (!isset($this->prefixes[$prefix])) {
-            $this->prefixes[$prefix] = [];
-        }
-
-        $this->prefixes[$prefix][$pluginId] = $plugin;
-
-        $this->logger->info('loaded', ['pluginId' => $pluginId, 'prefix' => $prefix]);
-    }
-
     protected function addMemoryReporting()
     {
         $now = new DateTime();
@@ -223,9 +155,9 @@ class Yabot
         $delay = $then->getTimestamp() - $now->getTimestamp();
 
         $this->addTimer($delay, function() {
-            $this->logger->info($this->getFormattedMemoryUsage());
+            $this->info($this->getFormattedMemoryUsage());
             $this->addPeriodicTimer(3600, function () {
-                $this->logger->info($this->getFormattedMemoryUsage());
+                $this->info($this->getFormattedMemoryUsage());
             });
         });
     }
@@ -235,5 +167,10 @@ class Yabot
         $memory = memory_get_usage() / 1024;
         $formatted = number_format($memory, 3).'K';
         return "Current memory usage: {$formatted}";
+    }
+
+    private function logMessage($data)
+    {
+        file_put_contents($this->messageLog, json_encode($data)."\n", FILE_APPEND);
     }
 }

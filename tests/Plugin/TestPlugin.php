@@ -1,8 +1,8 @@
 <?php
 
-namespace Nopolabs\Yabot\Tests\Bot;
+namespace Nopolabs\Yabot\Tests\Plugin;
 
-use Nopolabs\Yabot\Bot\PluginTrait;
+use Nopolabs\Yabot\Plugin\PluginTrait;
 use Psr\Log\LoggerInterface;
 
 class TestPlugin

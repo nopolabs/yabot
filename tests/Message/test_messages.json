@@ -1,0 +1,118 @@
+{
+  "0": {
+    "type": "message",
+    "channel": "C00000000",
+    "user": "U00000000",
+    "text": "pip giphy victory",
+    "ts": "1234387583.733781",
+    "source_team": "T00000000",
+    "team": "T00000000"
+  },
+  "1": {
+    "type": "message",
+    "user": "U00000001",
+    "text": "<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif>",
+    "bot_id": "B00000000",
+    "team": "T00000000",
+    "channel": "C00000000",
+    "event_ts": "1234387583.733829",
+    "ts": "1234387583.733829"
+  },
+  "2": {
+    "type": "message",
+    "message": {
+      "type": "message",
+      "user": "U00000001",
+      "text": "<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif>",
+      "bot_id": "B00000000",
+      "attachments": [
+        {
+          "fallback": "100x135px image",
+          "image_url": "http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif",
+          "image_width": 100,
+          "image_height": 135,
+          "image_bytes": 113232,
+          "is_animated": true,
+          "from_url": "http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif",
+          "id": 1
+        }
+      ],
+      "ts": "1234387583.733829"
+    },
+    "subtype": "message_changed",
+    "hidden": true,
+    "channel": "C00000000",
+    "previous_message": {
+      "type": "message",
+      "user": "U00000001",
+      "text": "<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif>",
+      "bot_id": "B00000000",
+      "ts": "1234387583.733829"
+    },
+    "event_ts": "1234387583.733849",
+    "ts": "1234387583.733849",
+    "text": "<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif>",
+    "user": "U00000001"
+  },
+  "3": {
+    "type": "message",
+    "channel": "C00000000",
+    "user": "U00000000",
+    "text": "pip status",
+    "ts": "1234387666.742379",
+    "source_team": "T00000000",
+    "team": "T00000000"
+  },
+  "4": {
+    "type": "message",
+    "user": "U00000001",
+    "text": "There are 3 plugins loaded.\n<http://plugin.help|plugin.help> running\nplugin.status running\nplugin.giphy running",
+    "bot_id": "B00000000",
+    "team": "T00000000",
+    "channel": "C00000000",
+    "event_ts": "1234387666.742398",
+    "ts": "1234387666.742398"
+  },
+  "5": {
+    "text": "",
+    "bot_id": "B00000001",
+    "attachments": [
+      {
+        "fallback": "Deploy Latest Tag to Production - #1337 Success after 14 min (<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif|Open>)",
+        "id": 1,
+        "color": "36a64f",
+        "fields": [
+          {
+            "title": "",
+            "value": "Deploy Latest Tag to Production - #1337 Success after 14 min (<http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif|Open>)",
+            "short": false
+          }
+        ]
+      }
+    ],
+    "type": "message",
+    "subtype": "bot_message",
+    "team": "T00000000",
+    "channel": "C00000001",
+    "event_ts": "1234876661.389941",
+    "ts": "1234876661.389941"
+  },
+  "6": {
+    "text": "",
+    "bot_id": "B00000002",
+    "attachments": [
+      {
+        "pretext": "DEVO deployed by deploybot",
+        "title": "v1.1337",
+        "id": 1,
+        "title_link": "http://media1.giphy.com/media/uTuLngvL9p0Xe/100w.gif"
+      }
+    ],
+    "type": "message",
+    "subtype": "bot_message",
+    "team": "T00000000",
+    "channel": "C00000002",
+    "event_ts": "1234876661.842544",
+    "ts": "1234876661.842544"
+  }
+}

@@ -42,7 +42,7 @@ class Guzzle
     {
         $request = $this->client->getAsync($uri, $options);
 
-        $this->schedule();
+        $this->scheduleProcessing();
 
         return $request;
     }
@@ -54,14 +54,17 @@ class Guzzle
 
     /**
      * @see http://stephencoakley.com/2015/06/11/integrating-guzzle-6-asynchronous-requests-with-reactphp
+     *
+     * Jiggerery with Closure::bind to get access to CurlMultiHandler::handles private member.
      */
-    private function schedule()
+    private function scheduleProcessing()
     {
         if ($this->timer === null) {
             $self =& $this;
             $this->timer = $this->eventloop->addPeriodicTimer(0, \Closure::bind(function () use (&$self) {
-                // Do a smidgen of request processing
+
                 $this->tick();
+
                 // Stop the timer when there are no more requests
                 if (empty($this->handles) && queue()->isEmpty()) {
                     $self->timer->cancel();
@@ -69,13 +72,5 @@ class Guzzle
                 }
             }, $this->handler, $this->handler));
         }
-    }
-
-    private function naiveSchedule($request)
-    {
-        // Schedule the request to be resolved later
-        $this->eventloop->futureTick(function () use ($request) {
-            $request->wait();
-        });
     }
 }

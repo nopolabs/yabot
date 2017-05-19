@@ -2,19 +2,19 @@
 
 namespace Nopolabs\Yabot\Helpers;
 
-use Nopolabs\Yabot\Bot\SlackClient;
+use Nopolabs\Yabot\Slack\Client;
 
 trait SlackTrait
 {
-    /** @var SlackClient */
+    /** @var Client */
     private $slack;
 
-    public function setSlack(SlackClient $slack)
+    public function setSlack(Client $slack)
     {
         $this->slack = $slack;
     }
 
-    public function getSlack() : SlackClient
+    public function getSlack() : Client
     {
         return $this->slack;
     }
@@ -22,5 +22,20 @@ trait SlackTrait
     public function say($text, $channel, array $additionalParameters = [])
     {
         $this->getSlack()->say($text, $channel, $additionalParameters);
+    }
+
+    public function getUserById($userId)
+    {
+        return $this->getSlack()->getUserById($userId);
+    }
+
+    public function getChannelById($channelId)
+    {
+        return $this->getSlack()->getChannelById($channelId);
+    }
+
+    public function getAuthedUser()
+    {
+        return $this->getSlack()->getAuthedUser();
     }
 }
