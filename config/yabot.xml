@@ -55,6 +55,7 @@
         <service id="slack.realTimeClient" class="Slack\RealTimeClient">
             <argument type="service" id="event.loop" />
             <argument type="service" id="guzzle.client" />
+            <argument type="service" id="logger" />
             <call method="setToken">
                 <argument>%slack.token%</argument>
             </call>
