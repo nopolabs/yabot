@@ -98,8 +98,7 @@ class Yabot
         try {
             $message = $this->messageFactory->create($this->slackClient, $data);
         } catch (Exception $e) {
-            $this->logger->warning($e->getMessage());
-            $this->logger->warning($e->getTraceAsString());
+            $this->logger->error($e->getMessage(), $e->getTrace());
             return;
         }
 
@@ -126,8 +125,7 @@ class Yabot
                     $this->logger->debug('dispatch', ['pluginId' => $pluginId, 'text' => $text]);
                     $plugin->dispatch($message);
                 } catch (Exception $e) {
-                    $this->logger->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
-                    $this->logger->warning($e->getTraceAsString());
+                    $this->logger->error("Unhandled Exception in $pluginId: ".$e->getMessage(), $e->getTrace());
                 }
 
                 if ($message->isHandled()) {
