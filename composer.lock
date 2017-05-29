@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nopolabs/slack-client.git",
-                "reference": "b97b558ec546fa4f5e8c5f1e39d6c6253d0b1d72"
+                "reference": "6e9b1ff60743539093d6c8b908589d07950e37c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nopolabs/slack-client/zipball/b97b558ec546fa4f5e8c5f1e39d6c6253d0b1d72",
-                "reference": "b97b558ec546fa4f5e8c5f1e39d6c6253d0b1d72",
+                "url": "https://api.github.com/repos/nopolabs/slack-client/zipball/6e9b1ff60743539093d6c8b908589d07950e37c4",
+                "reference": "6e9b1ff60743539093d6c8b908589d07950e37c4",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +62,7 @@
             "support": {
                 "source": "https://github.com/nopolabs/slack-client/tree/master"
             },
-            "time": "2017-05-24 05:12:41"
+            "time": "2017-05-25 18:30:10"
         },
         {
             "name": "container-interop/container-interop",
