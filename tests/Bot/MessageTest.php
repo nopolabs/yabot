@@ -19,6 +19,7 @@ class MessageTest extends TestCase
 
     protected $authedUser;
     protected $user;
+    protected $groot;
     protected $channel;
     protected $data;
     protected $realTimeClient;
@@ -42,13 +43,17 @@ class MessageTest extends TestCase
             'getUsername' => ['invoked' => 'any', 'result' => 'user-name'],
             'getId' => ['invoked' => 'any', 'result' => 'U00USER00'],
         ]);
+        $this->groot = $this->newPartialMockWithExpectations(User::class, [
+            'getUsername' => ['invoked' => 'any', 'result' => 'groot'],
+            'getId' => ['invoked' => 'any', 'result' => 'U00GROOT0'],
+        ]);
         $this->channel = $this->newPartialMockWithExpectations(Channel::class, [
             'getName' => ['invoked' => 'any', 'result' => 'channel-name'],
             'getId' => ['invoked' => 'any', 'result' => 'C00CHAN00'],
         ]);
 
         $this->users = new Users();
-        $this->users->update([$this->authedUser, $this->user]);
+        $this->users->update([$this->authedUser, $this->user, $this->groot]);
 
         $this->channels = new Channels();
         $this->channels->update([$this->channel]);
@@ -71,9 +76,20 @@ class MessageTest extends TestCase
 
     public function testGetText()
     {
-        $message = new Message($this->newSlackClient(), $this->data);
+        $data = array_merge($this->data, ['text' => 'I am <@U00GROOT0>']);
 
-        $this->assertSame('this is a test', $message->getText());
+        $message = new Message($this->newSlackClient(), $data);
+
+        $this->assertSame('I am <@U00GROOT0>', $message->getText());
+    }
+
+    public function testGetFormattedText()
+    {
+        $data = array_merge($this->data, ['text' => 'I am <@U00GROOT0>']);
+
+        $message = new Message($this->newSlackClient(), $data);
+
+        $this->assertSame('I am @groot', $message->getFormattedText());
     }
 
     public function testGetChannel()
@@ -381,36 +397,5 @@ class MessageTest extends TestCase
         $message->setPluginText('this is a test');
 
         $this->assertSame($expected, $message->matchPatterns($patterns));
-    }
-
-    public function formatTextDataProvider() : array
-    {
-        $data = [
-            ['', ''],
-            ['test', 'test'],
-            ['<@U00UNKN00>', '@U00UNKN00'], // unknown user
-            ['<@U00UNKN00|alice>', '@alice'], // unknown user w/fallback
-            ['<@U00USER00>', '@user-name'], // known user
-            ['<@U00USER00|nick>', '@nick'], // known user w/fallback
-            ['<#C00UNKN00>', '#C00UNKN00'], // unknown channel
-            ['<#C00UNKN00|channel-x>', '#channel-x'], // unknown channel w/fallback
-            ['<#C00CHAN00>', '#channel-name'], // known channel
-            ['<#C00CHAN00|good-times>', '#good-times'], // known channel w/fallback
-            ['choose <@U00USER00> or <@U00USER00|nick>', 'choose @user-name or @nick'],
-        ];
-
-        return array_slice($data, 10, 100);
-    }
-
-    /**
-     * @dataProvider formatTextDataProvider
-     */
-    public function testFormatText($text, $expected)
-    {
-        $message = new Message($this->newSlackClient(), $this->data);
-
-        $formatted = $message->formatText($text);
-
-        $this->assertSame($expected, $formatted);
     }
 }

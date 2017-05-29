@@ -208,9 +208,14 @@ class Yabot
             $this->prefixes[$prefix] = [];
         }
 
-        $this->prefixes[$prefix][$pluginId] = $plugin;
+        $this->addPluginToPrefixMap($prefix, $pluginId, $plugin);
 
         $this->logger->info('loaded', ['pluginId' => $pluginId, 'prefix' => $prefix]);
+    }
+
+    protected function addPluginToPrefixMap($prefix, $pluginId, PluginInterface $plugin)
+    {
+        $this->prefixes[$prefix][$pluginId] = $plugin;
     }
 
     protected function addMemoryReporting()

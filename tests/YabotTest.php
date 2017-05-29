@@ -32,26 +32,34 @@ class YabotTest extends TestCase
         $this->messageFactory = $this->createMock(MessageFactory::class);
     }
 
+    public function testInit()
+    {
+        $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['getPrefix', ['result' => 'pre']],
+        ]);
+
+        $plugins = ['plugin-1' => $plugin];
+
+        $yabot = $this->newYabot([
+            ['addPluginToPrefixMap', ['params' => ['pre', 'plugin-1', $plugin]]],
+        ]);
+
+        $yabot->init($plugins);
+    }
+
     public function testRun()
     {
-        $slackClient = $this->newPartialMock(SlackClient::class, ['on', 'init', 'connect']);
-
-        $yabot = new Yabot(
-            $this->logger,
-            $this->eventLoop,
-            $slackClient,
-            $this->messageFactory
-        );
+        $yabot = $this->newYabot();
 
         $connectPromise = $this->newPartialMockWithExpectations(PromiseInterface::class, [
-            ['then', ['params' => [(array)[$slackClient, 'update']]]],
+            ['then', ['params' => [(array)[$this->slackClient, 'update']]]],
         ]);
 
         $this->setExpectations($this->eventLoop, [
             'run' => [],
         ]);
 
-        $this->setAtExpectations($slackClient, [
+        $this->setAtExpectations($this->slackClient, [
             ['on', ['params' => ['message', [$yabot, 'onMessage']]]],
             ['init', []],
             ['connect', ['result' => $connectPromise]],
@@ -164,24 +172,21 @@ class YabotTest extends TestCase
         ]);
 
         if ($pluginText === null) {
-            $message = $this->newPartialMockWithExpectations(Message::class, [
-                ['setPluginText', 'never'],
-            ], [$this->slackClient, $payloadData]);
-
-            $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
-                ['getPrefix', ['result' => $prefix]],
-                ['dispatch', 'never'],
-            ]);
+            $setPluginText = 'never';
+            $dispatch = 'never';
         } else {
-            $message = $this->newPartialMockWithExpectations(Message::class, [
-                ['setPluginText', ['params' => [$pluginText]]],
-            ], [$this->slackClient, $payloadData]);
-
-            $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
-                ['getPrefix', ['result' => $prefix]],
-                ['dispatch', ['params' => [$this->isInstanceOf(Message::class)]]],
-            ]);
+            $setPluginText = ['params' => [$pluginText]];
+            $dispatch = ['params' => [$this->isInstanceOf(Message::class)]];
         }
+
+        $message = $this->newPartialMockWithExpectations(Message::class, [
+            ['setPluginText', $setPluginText],
+        ], [$this->slackClient, $payloadData]);
+
+        $plugin = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['getPrefix', ['result' => $prefix]],
+            ['dispatch', $dispatch],
+        ]);
 
         $someUser = $this->newPartialMockWithExpectations(User::class, [
             'getId' => ['invoked' => 'any', 'result' => 'USOMEUSER'],

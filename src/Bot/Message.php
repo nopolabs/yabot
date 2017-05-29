@@ -36,7 +36,9 @@ class Message implements MessageInterface
         $this->user = isset($data['user']) ? $slack->userById($data['user']) : null;
         $this->channel = $slack->channelById($data['channel']);
         $this->handled = false;
-        $this->formattedText = $this->formatText($this->getText());
+
+        $formatter = new TextFormatter($slack);
+        $this->formattedText = $formatter->formatText($this->getText());
     }
 
     public function getText()
@@ -47,56 +49,6 @@ class Message implements MessageInterface
     public function getFormattedText()
     {
         return $this->formattedText;
-    }
-
-    public function formatText(string $text) : string
-    {
-        $pattern = '/<([^>]*)>/';
-
-        preg_match_all($pattern, $text, $matches);
-
-        $split = preg_split($pattern, $text);
-
-        $i = 0;
-        $formatted = [];
-
-        foreach ($matches[1] as $match) {
-            $formatted[] = $split[$i++];
-            if ($pipe = strrpos($match, '|')) {
-                $fallback = substr($match, $pipe + 1);
-                if ($match[0] === '@') {
-                    $formatted[] = '@'.$fallback;
-                } else if ($match[0] === '#') {
-                    $formatted[] = '#'.$fallback;
-                } else {
-                    $formatted[] = $fallback;
-                }
-            } else {
-                if ($match[0] === '@') {
-                    $userId = substr($match, 1);
-                    if ($user = $this->getSlack()->userById($userId)) {
-                        $formatted[] = '@'.$user->getUsername();
-                    } else {
-                        $formatted[] = '@'.$userId;
-                    }
-                } elseif ($match[0] === '#') {
-                    $channelId = substr($match, 1);
-                    if ($channel = $this->getSlack()->channelById($channelId)) {
-                        $formatted[] = '#'.$channel->getName();
-                    } else {
-                        $formatted[] = '#'.$channelId;
-                    }
-                } else {
-                    $formatted[] = $match;
-                }
-            }
-        }
-
-        if ($i < count($split)) {
-            $formatted[] = $split[$i];
-        }
-
-        return implode('', $formatted);
     }
 
     public function setPluginText(string $text)
@@ -178,7 +130,7 @@ class Message implements MessageInterface
 
     public function matchesPrefix(string $prefix) : array
     {
-        $text = ltrim($this->formatText($this->getText()));
+        $text = $this->getFormattedText();
 
         if ($prefix === '') {
             return [$text, $text];

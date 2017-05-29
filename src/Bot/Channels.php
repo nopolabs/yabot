@@ -3,49 +3,15 @@
 namespace Nopolabs\Yabot\Bot;
 
 
-use Slack\Channel;
-
-class Channels
+class Channels extends AbstractIdNameMap
 {
-    private $channels = [];
-    private $channelsById = [];
-    private $channelsByName = [];
-
-    /**
-     * @param Channel[] $channels
-     */
-    public function update(array $channels)
+    protected function getId($thing): string
     {
-        $this->channels = $channels;
-        foreach ($channels as $index => $channel) {
-            $this->channelsById[$channel->getId()] = $index;
-            $this->channelsByName[$channel->getName()] = $index;
-        }
+        return $thing->getId();
     }
 
-    /**
-     * @param $id
-     * @return Channel|null
-     */
-    public function byId($id)
+    protected function getName($thing): string
     {
-        if (isset($this->channelsById[$id])) {
-            return $this->channels[$this->channelsById[$id]];
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param $name
-     * @return Channel|null
-     */
-    public function byName($name)
-    {
-        if (isset($this->channelsByName[$name])) {
-            return $this->channels[$this->channelsByName[$name]];
-        } else {
-            return null;
-        }
+        return $thing->getName();
     }
 }

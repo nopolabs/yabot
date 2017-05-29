@@ -9,8 +9,6 @@ interface MessageInterface
 {
     public function getText();
 
-    public function formatText(string $text);
-
     public function setPluginText(string $text);
 
     public function getChannel();
