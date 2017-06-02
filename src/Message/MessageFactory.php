@@ -27,7 +27,7 @@ class MessageFactory
 
     public function getUser(array $data)
     {
-        if (isset($data['subtype']) && $data['subtype'] === 'message_changed' && isset($data['message']['user'])) {
+        if ($this->isMessageChanged($data) && isset($data['message']['user'])) {
             return $this->getUserById($data['message']['user'] ?? null);
         }
 
@@ -56,7 +56,7 @@ class MessageFactory
 
     public function formatMessageText(array $data) : string
     {
-        if (isset($data['subtype']) && $data['subtype'] === 'message_changed' && isset($data['message']['text'])) {
+        if ($this->isMessageChanged($data) && isset($data['message']['text'])) {
             return $this->formatText($data['message']['text']);
         }
 
@@ -152,5 +152,10 @@ class MessageFactory
     public function formatReadable(string $match, string $readable = '') : string
     {
         return $readable ?? $match;
+    }
+
+    protected function isMessageChanged(array $data): bool
+    {
+        return isset($data['subtype']) && $data['subtype'] === 'message_changed';
     }
 }
