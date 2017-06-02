@@ -56,7 +56,7 @@ class YabotContainer extends ContainerBuilder
 
     public function getParameterOrDefault($name, array $default = []) : array
     {
-        return $this->hasParameter($name)? $this->getParameter($name) : $default;
+        return $this->hasParameter($name) ? $this->getParameter($name) : $default;
     }
 
     private function getTaggedPlugins($tag) : array

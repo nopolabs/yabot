@@ -92,7 +92,7 @@ class Yabot
     {
         $slack = $this->getSlack();
 
-        $slack->update(function (User $authedUser) {
+        $slack->update(function(User $authedUser) {
             $this->pluginManager->updatePrefixes($authedUser->getUsername());
         });
 
@@ -156,7 +156,7 @@ class Yabot
 
         $this->addTimer($delay, function() {
             $this->info($this->getFormattedMemoryUsage());
-            $this->addPeriodicTimer(3600, function () {
+            $this->addPeriodicTimer(3600, function() {
                 $this->info($this->getFormattedMemoryUsage());
             });
         });
