@@ -61,9 +61,9 @@ class MessageFactoryTest extends TestCase
      */
     public function testGetUser(array $data, $userId)
     {
-        $user = $this->createMock(User::class);
+        $user = $userId ? $this->createMock(User::class) : null;
 
-        $getUserById = $userId ? ['params' => [$userId], 'result' => $user] : 'never';
+        $getUserById = ['params' => [$userId], 'result' => $user];
 
         $factory = $this->newMessageFactory([
             ['getUserById', $getUserById],
@@ -104,7 +104,21 @@ class MessageFactoryTest extends TestCase
         $factory->getChannel(['channel' => 'channel-id']);
     }
 
-    public function assembleFormattedTestDataProvider()
+    public function testAssembleFormattedText()
+    {
+        $data = ['dummy' => 'data'];
+
+        $factory = $this->newMessageFactory([
+            ['formatMessageText', ['params' => [$data], 'result' => 'formatted message text']],
+            ['formatAttachmentsText', ['params' => [$data], 'result' => ['A', '', 'B']]],
+        ]);
+
+        $formattedText = $factory->assembleFormattedText($data);
+
+        $this->assertEquals("formatted message text\nA\nB", $formattedText);
+    }
+
+    public function messageDataProvider()
     {
         return [
             [[], [], ''],
@@ -130,8 +144,8 @@ class MessageFactoryTest extends TestCase
             ],
             [
                 ['text' => 'neopolitan', 'attachments' => [['pretext' => 'tasty']]],
-                ['neopolitan', 'tasty'],
-                "[neopolitan]\n[tasty]"
+                ['neopolitan'],
+                '[neopolitan]'
             ],
             [
                 ['text' => 'neopolitan', 'attachments' => [
@@ -139,16 +153,16 @@ class MessageFactoryTest extends TestCase
                     ['fallback' => 'chocolate'],
                     ['fallback' => 'strawberry'],
                 ]],
-                ['neopolitan', 'vanilla', 'chocolate', 'strawberry'],
-                "[neopolitan]\n[vanilla]\n[chocolate]\n[strawberry]"
+                ['neopolitan'],
+                '[neopolitan]'
             ],
         ];
     }
 
     /**
-     * @dataProvider assembleFormattedTestDataProvider
+     * @dataProvider messageDataProvider
      */
-    public function testAssembleFormattedText(array $data, array $texts, $expected)
+    public function testFormatMessageText(array $data, array $texts, $expected)
     {
         $expectations = array_map(function ($text) {
             return ['formatText', ['params' => [$text], 'result' => "[$text]"]];
@@ -161,7 +175,61 @@ class MessageFactoryTest extends TestCase
             $factory = $this->newMessageFactory();
         }
 
-        $formattedText = $factory->assembleFormattedText($data);
+        $formattedText = $factory->formatMessageText($data);
+
+        $this->assertEquals($expected, $formattedText);
+   }
+
+    public function attachmentsDataProvider()
+    {
+        return [
+            [[], [], []],
+            [
+                ['text' => 'vanilla'], [], [],
+            ],
+            [
+                ['subtype' => 'bot_message', 'text' => 'vanilla'], [], [],
+            ],
+            [
+                ['subtype' => 'message_changed', 'message' => ['text' => 'chocolate']], [], [],
+            ],
+            [
+                ['text' => 'neopolitan', 'attachments' => []], [], [],
+            ],
+            [
+                ['text' => 'neopolitan', 'attachments' => [['pretext' => 'tasty']]],
+                ['tasty'],
+                ['[tasty]'],
+            ],
+            [
+                ['text' => 'neopolitan', 'attachments' => [
+                    ['fallback' => 'vanilla'],
+                    ['fallback' => 'chocolate'],
+                    ['fallback' => 'strawberry'],
+                ]],
+                ['vanilla', 'chocolate', 'strawberry'],
+                ['[vanilla]', '[chocolate]', '[strawberry]'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider attachmentsDataProvider
+     */
+    public function testFormatAttachmentsText(array $data, array $texts, $expected)
+    {
+        $expectations = array_map(function ($text) {
+            return ['formatText', ['params' => [$text], 'result' => "[$text]"]];
+        }, $texts);
+
+        if ($expectations) {
+            $factory = $this->newMessageFactory($expectations);
+            $factory->expects($this->exactly(count($expectations)))->method('formatText');
+        } else {
+            $factory = $this->newMessageFactory();
+        }
+
+        $formattedText = $factory->formatAttachmentsText($data);
 
         $this->assertEquals($expected, $formattedText);
     }

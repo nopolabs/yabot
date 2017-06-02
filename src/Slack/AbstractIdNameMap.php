@@ -24,19 +24,19 @@ abstract class AbstractIdNameMap
 
     public function byId($id)
     {
-        if (isset($this->thingsById[$id])) {
+        if ($id && isset($this->thingsById[$id])) {
             return $this->things[$this->thingsById[$id]];
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function byName($name)
     {
-        if (isset($this->thingsByName[$name])) {
+        if ($name && isset($this->thingsByName[$name])) {
             return $this->things[$this->thingsByName[$name]];
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

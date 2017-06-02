@@ -28,12 +28,10 @@ class MessageFactory
     public function getUser(array $data)
     {
         if (isset($data['subtype']) && $data['subtype'] === 'message_changed' && isset($data['message']['user'])) {
-            $userId = $data['message']['user'];
-        } else {
-            $userId = $data['user'] ?? null;
+            return $this->getUserById($data['message']['user'] ?? null);
         }
 
-        return $userId ? $this->getUserById($userId) : null;
+        return $this->getUserById($data['user'] ?? null);
     }
 
     public function getChannel(array $data) : Channel
@@ -49,14 +47,29 @@ class MessageFactory
 
     public function assembleFormattedText(array $data) : string
     {
+        $formatted = [$this->formatMessageText($data)];
+
+        $formatted = array_merge($formatted, $this->formatAttachmentsText($data));
+
+        return trim(implode("\n", array_filter($formatted)));
+    }
+
+    public function formatMessageText(array $data) : string
+    {
         if (isset($data['subtype']) && $data['subtype'] === 'message_changed' && isset($data['message']['text'])) {
-            $formatted = [$this->formatText($data['message']['text'])];
-        } elseif (isset($data['text'])) {
-            $formatted = [$this->formatText($data['text'])];
-        } else {
-            $formatted = [];
+            return $this->formatText($data['message']['text']);
         }
 
+        if (isset($data['text'])) {
+            return $this->formatText($data['text']);
+        }
+
+        return '';
+    }
+
+    public function formatAttachmentsText(array $data) : array
+    {
+        $formatted = [];
         if (isset($data['attachments'])) {
             foreach ($data['attachments'] as $attachment) {
                 if (isset($attachment['pretext'])) {
@@ -67,8 +80,7 @@ class MessageFactory
                 }
             }
         }
-
-        return trim(implode("\n", array_filter($formatted)));
+        return $formatted;
     }
 
     public function formatText(string $text) : string
