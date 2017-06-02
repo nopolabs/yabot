@@ -11,7 +11,7 @@ if (isset($options['h'])) {
     exit('Usage: php yabot.php [-h] [-f configFile]'.PHP_EOL);
 }
 
-$configFile = $options['f'] ?? __DIR__ . '/config.php';
+$configFile = $options['f'] ?? __DIR__.'/config.php';
 $config = require $configFile;
 echo "Using $configFile\n";
 

@@ -38,7 +38,7 @@ trait LoopTrait
 
     private function callable($function) : callable
     {
-        return function () use ($function) {
+        return function() use ($function) {
             call_user_func($function);
         };
     }

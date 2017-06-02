@@ -109,6 +109,9 @@ class MessageFactory
         return $this->formatReadable($entity, $readable);
     }
 
+    /**
+     * @param string|false $readable
+     */
     public function formatUser(string $entity, $readable) : string
     {
         if ($readable) {
@@ -123,6 +126,9 @@ class MessageFactory
         return $entity;
     }
 
+    /**
+     * @param string|false $readable
+     */
     public function formatChannel(string $entity, $readable) : string
     {
         if ($readable) {
@@ -137,6 +143,9 @@ class MessageFactory
         return $entity;
     }
 
+    /**
+     * @param string|false $readable
+     */
     public function formatReadable(string $match, $readable) : string
     {
         return $readable ?? $match;

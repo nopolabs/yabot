@@ -59,7 +59,7 @@ class PluginManager
                     } else {
                         $line = str_replace('<prefix>', $prefix, $line);
                     }
-                    $help[] = '    ' . $line;
+                    $help[] = '    '.$line;
                 }
             }
         }
@@ -76,7 +76,7 @@ class PluginManager
         foreach ($this->getPrefixMap() as $prefix => $plugins) {
             /** @var PluginInterface $plugin */
             foreach ($plugins as $pluginId => $plugin) {
-                $statuses[] = "$pluginId " . $plugin->status();
+                $statuses[] = "$pluginId ".$plugin->status();
             }
         }
 
@@ -127,7 +127,7 @@ class PluginManager
 
         foreach ($this->getPrefixMap() as $prefix => $plugins) {
             if ($prefix === Yabot::AUTHED_USER) {
-                $prefix = '@' . $authedUsername;
+                $prefix = '@'.$authedUsername;
             } elseif (!$prefix) {
                 $prefix = self::NO_PREFIX;
             }

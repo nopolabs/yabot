@@ -132,7 +132,7 @@ class Client
 
     public function on($event, array $onMessage)
     {
-        $this->realTimeClient->on($event, function (Payload $payload) use ($onMessage) {
+        $this->realTimeClient->on($event, function(Payload $payload) use ($onMessage) {
             call_user_func($onMessage, $payload);
         });
     }
@@ -189,7 +189,7 @@ class Client
 
     public function updateAuthedUser(Closure $authedUserUpdated)
     {
-        $this->realTimeClient->getAuthedUser()->then(function (User $user) use ($authedUserUpdated) {
+        $this->realTimeClient->getAuthedUser()->then(function(User $user) use ($authedUserUpdated) {
             $this->authedUser = $user;
             $authedUserUpdated($user);
         });

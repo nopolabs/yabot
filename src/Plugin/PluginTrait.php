@@ -45,7 +45,7 @@ trait PluginTrait
     {
         $replaced = [];
         foreach ($matchers as $name => $params) {
-            $params['patterns'] = array_map(function ($pattern) use ($search, $replace) {
+            $params['patterns'] = array_map(function($pattern) use ($search, $replace) {
                 return str_replace($search, $replace, $pattern);
             }, $params['patterns']);
             $replaced[$name] = $params;
@@ -102,7 +102,7 @@ trait PluginTrait
                 $this->warning("{$this->pluginId} no method named: $method");
             }
         } catch (Exception $e) {
-            $this->warning('Exception in ' . static::class . '::' . $method);
+            $this->warning('Exception in '.static::class.'::'.$method);
             $this->warning($e->getMessage());
             $this->warning($e->getTraceAsString());
         }
@@ -194,7 +194,7 @@ trait PluginTrait
                     preg_match($pattern, '', $matches);
                     $patterns[] = $pattern;
                 } catch (Throwable $e) {
-                    $this->warning("$name.pattern='$pattern' " . $e->getMessage());
+                    $this->warning("$name.pattern='$pattern' ".$e->getMessage());
                 }
             }
             $params['patterns'] = $patterns;

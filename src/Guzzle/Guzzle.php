@@ -60,8 +60,8 @@ class Guzzle
     private function scheduleProcessing()
     {
         if ($this->timer === null) {
-            $self =& $this;
-            $this->timer = $this->eventloop->addPeriodicTimer(0, \Closure::bind(function () use (&$self) {
+            $self = & $this;
+            $this->timer = $this->eventloop->addPeriodicTimer(0, \Closure::bind(function() use (&$self) {
 
                 $this->tick();
 
