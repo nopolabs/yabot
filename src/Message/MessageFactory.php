@@ -91,13 +91,13 @@ class MessageFactory
             $formatted[] = $split[$index];
         }
 
-        return trim(implode('', $formatted));
+        return trim(implode('', array_filter($formatted)));
     }
 
     public function formatEntity(string $entity) : string
     {
         $pipe = strrpos($entity, '|');
-        $readable = ($pipe !== false) ? substr($entity, $pipe + 1) : false;
+        $readable = ($pipe !== false) ? substr($entity, $pipe + 1) : '';
 
         if ($entity && $entity[0] === '@') {
             return $this->formatUser($entity, $readable);
@@ -109,12 +109,9 @@ class MessageFactory
         return $this->formatReadable($entity, $readable);
     }
 
-    /**
-     * @param string|false $readable
-     */
-    public function formatUser(string $entity, $readable) : string
+    public function formatUser(string $entity, string $readable = '') : string
     {
-        if ($readable) {
+        if ($readable !== '') {
             return $readable;
         }
 
@@ -126,12 +123,9 @@ class MessageFactory
         return $entity;
     }
 
-    /**
-     * @param string|false $readable
-     */
-    public function formatChannel(string $entity, $readable) : string
+    public function formatChannel(string $entity, string $readable = '') : string
     {
-        if ($readable) {
+        if ($readable !== '') {
             return $readable;
         }
 
@@ -143,10 +137,7 @@ class MessageFactory
         return $entity;
     }
 
-    /**
-     * @param string|false $readable
-     */
-    public function formatReadable(string $match, $readable) : string
+    public function formatReadable(string $match, string $readable = '') : string
     {
         return $readable ?? $match;
     }
