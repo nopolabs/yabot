@@ -9,12 +9,15 @@ trait LogTrait
 {
     private $log;
 
-    protected function setLog(LoggerInterface $log)
+    protected function setLog(LoggerInterface $log = null)
     {
         $this->log = $log;
     }
 
-    protected function getLog() : LoggerInterface
+    /**
+     * @return LoggerInterface|null
+     */
+    protected function getLog()
     {
         return $this->log;
     }
