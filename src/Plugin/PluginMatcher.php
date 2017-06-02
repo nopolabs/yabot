@@ -19,7 +19,7 @@ class PluginMatcher
         bool $isBot = null,
         array $channels,
         array $users,
-        LoggerInterface $logger)
+        LoggerInterface $logger = null)
     {
         $this->setName($pluginId);
         $this->setIsBot($isBot);

@@ -22,7 +22,7 @@ class MethodMatcher
         array $users,
         array $patterns,
         string $method,
-        LoggerInterface $logger)
+        LoggerInterface $logger = null)
     {
         $this->setName($name);
         $this->setIsBot($isBot);
