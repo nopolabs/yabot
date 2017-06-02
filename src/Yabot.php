@@ -56,7 +56,7 @@ class Yabot
 
     public function setMessageLog(string $messageLog = null)
     {
-        $this->messageLog = $messageLog;
+        $this->messageLog = $messageLog ?? null;
     }
 
     public function init(array $plugins)
@@ -106,7 +106,7 @@ class Yabot
         $this->debug('Received message', $data);
 
         try {
-            if ($this->messageLog) {
+            if ($this->messageLog !== null) {
                 $this->logMessage($data);
             }
             $message = $this->messageFactory->create($data);

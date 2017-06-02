@@ -2,8 +2,10 @@
 
 namespace Nopolabs\Yabot\Message;
 
+use Exception;
 use Nopolabs\Yabot\Helpers\SlackTrait;
 use Nopolabs\Yabot\Slack\Client;
+use Slack\Channel;
 
 class MessageFactory
 {
@@ -34,9 +36,15 @@ class MessageFactory
         return $userId ? $this->getUserById($userId) : null;
     }
 
-    public function getChannel(array $data)
+    public function getChannel(array $data) : Channel
     {
-        return $this->getChannelById($data['channel']);
+        $channel = $this->getChannelById($data['channel']);
+
+        if ($channel instanceof Channel) {
+            return $channel;
+        }
+
+        throw new Exception('Message data does not have a channel.');
     }
 
     public function assembleFormattedText(array $data) : string

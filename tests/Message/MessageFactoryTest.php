@@ -7,6 +7,7 @@ use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Message\MessageFactory;
 use Nopolabs\Yabot\Slack\Client;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\Exception;
 use Slack\Channel;
 use Slack\User;
 
@@ -88,6 +89,19 @@ class MessageFactoryTest extends TestCase
         $actual = $factory->getChannel(['channel' => 'channel-id']);
 
         $this->assertSame($channel, $actual);
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Message data does not have a channel.
+     */
+    public function testGetChannelException()
+    {
+        $factory = $this->newMessageFactory([
+            ['getChannelById', ['params' => ['channel-id'], 'result' => null]],
+        ]);
+
+        $factory->getChannel(['channel' => 'channel-id']);
     }
 
     public function assembleFormattedTestDataProvider()
