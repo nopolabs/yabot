@@ -17,23 +17,19 @@ trait MatcherTrait
 
     public function matches(Message $message)
     {
-        if ($message->isHandled()) {
-            $this->debug($this->name.': message already handled');
+        if (!$this->matchesIsHandled($message)) {
             return false;
         }
 
-        if ($this->isBot !== null && $this->isBot !== $message->isBot()) {
-            $this->debug($this->name.': isBot match failed');
+        if (!$this->matchesIsBot($message)) {
             return false;
         }
 
-        if (!empty($this->channels) && !in_array($message->getChannelName(), $this->channels)) {
-            $this->debug($this->name.': channels match failed '.json_encode($this->channels));
+        if (!$this->matchesChannels($message)) {
             return false;
         }
 
-        if (!empty($this->users) && !in_array($message->getUsername(), $this->users)) {
-            $this->debug($this->name.': users match failed '.json_encode($this->users));
+        if (!$this->matchesUsers($message)) {
             return false;
         }
 
@@ -41,6 +37,51 @@ trait MatcherTrait
             return true;
         }
 
+        return $this->matchPatterns($message);
+    }
+
+    protected function matchesIsHandled(Message $message) : bool
+    {
+        if ($message->isHandled()) {
+            $this->debug($this->name.': message already handled');
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function matchesIsBot(Message $message) : bool
+    {
+        if ($this->isBot !== null && $this->isBot !== $message->isBot()) {
+            $this->debug($this->name.': isBot match failed');
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function matchesChannels(Message $message) : bool
+    {
+        if (!empty($this->channels) && !in_array($message->getChannelName(), $this->channels)) {
+            $this->debug($this->name.': channels match failed '.json_encode($this->channels));
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function matchesUsers(Message $message) : bool
+    {
+        if (!empty($this->users) && !in_array($message->getUsername(), $this->users)) {
+            $this->debug($this->name.': users match failed '.json_encode($this->users));
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function matchPatterns(Message $message): array
+    {
         $matches = [];
         $text = $message->getPluginText();
         foreach ($this->patterns as $pattern) {
