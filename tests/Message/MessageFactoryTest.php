@@ -116,8 +116,8 @@ class MessageFactoryTest extends TestCase
             ],
             [
                 ['text' => 'neopolitan', 'attachments' => [['pretext' => 'tasty']]],
-                ['neopolitan'],
-                '[neopolitan]'
+                ['neopolitan', 'tasty'],
+                "[neopolitan]\n[tasty]"
             ],
             [
                 ['text' => 'neopolitan', 'attachments' => [

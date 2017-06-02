@@ -51,6 +51,9 @@ class MessageFactory
 
         if (isset($data['attachments'])) {
             foreach ($data['attachments'] as $attachment) {
+                if (isset($attachment['pretext'])) {
+                    $formatted[] = $this->formatText($attachment['pretext']);
+                }
                 if (isset($attachment['fallback'])) {
                     $formatted[] = $this->formatText($attachment['fallback']);
                 }
