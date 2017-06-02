@@ -6,6 +6,7 @@ yabot is a slack chat bot written in php.
 [![License](https://poser.pugx.org/nopolabs/yabot/license)](https://packagist.org/packages/nopolabs/yabot)
 [![Latest Stable Version](https://poser.pugx.org/nopolabs/yabot/v/stable)](https://packagist.org/packages/nopolabs/yabot)
 [![Code Climate](https://codeclimate.com/github/nopolabs/yabot/badges/gpa.svg)](https://codeclimate.com/github/nopolabs/yabot)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nopolabs/yabot/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nopolabs/yabot/?branch=master)
 
 ## Quick start
 
