@@ -13,6 +13,8 @@ trait MatcherTrait
     private $users;
     private $patterns;
 
+    abstract protected function debug($message, array $context = array());
+
     public function matches(Message $message)
     {
         if ($message->isHandled()) {

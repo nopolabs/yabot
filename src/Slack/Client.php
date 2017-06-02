@@ -5,6 +5,8 @@ namespace Nopolabs\Yabot\Slack;
 
 use Closure;
 use Nopolabs\Yabot\Helpers\ConfigTrait;
+use Nopolabs\Yabot\Helpers\LogTrait;
+use Psr\Log\LoggerInterface;
 use React\Promise\PromiseInterface;
 use Slack\Channel;
 use Slack\ChannelInterface;
@@ -15,6 +17,7 @@ use Slack\User;
 class Client
 {
     use ConfigTrait;
+    use LogTrait;
 
     /** @var RealTimeClient */
     private $realTimeClient;
@@ -28,12 +31,18 @@ class Client
     /** @var User */
     protected $authedUser;
 
-    public function __construct(RealTimeClient $realTimeClient, Users $users, Channels $channels, array $config = [])
+    public function __construct(
+        RealTimeClient $realTimeClient,
+        Users $users,
+        Channels $channels,
+        array $config = [],
+        LoggerInterface $log = null)
     {
         $this->realTimeClient = $realTimeClient;
         $this->users = $users;
         $this->channels = $channels;
         $this->setConfig($config);
+        $this->setLog($log);
     }
 
     public function getRealTimeClient()
@@ -81,13 +90,19 @@ class Client
         return (bool) $this->get('use.websocket', false);
     }
 
-    public function say($text, $channel, array $additionalParameters = [])
+    public function say($text, $channelOrName, array $additionalParameters = [])
     {
-        if (!($channel instanceof ChannelInterface)) {
-            $channel = $this->getChannelByName($channel);
-            if (!$channel) {
-                $channel = $this->getChannelById($channel);
+        if (!($channelOrName instanceof ChannelInterface)) {
+            $channel = $this->getChannelByName($channelOrName);
+            if (!($channel instanceof ChannelInterface)) {
+                $channel = $this->getChannelById($channelOrName);
+                if (!($channel instanceof ChannelInterface)) {
+                    $this->warning('No channel, trying to say: '.$text);
+                    return;
+                }
             }
+        } else {
+            $channel = $channelOrName;
         }
 
         if (empty($additionalParameters) && $this->useWebSocket()) {

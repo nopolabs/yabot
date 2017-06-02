@@ -71,7 +71,8 @@
             <argument type="service" id="users" />
             <argument type="service" id="channels" />
             <argument>%slack.client.config%</argument>
-        </service>
+            <argument type="service" id="logger" />
+       </service>
 
         <service id="users" class="Nopolabs\Yabot\Slack\Users" />
 

@@ -68,7 +68,7 @@ class Message
         return $this->pluginText;
     }
 
-    public function getChannel()
+    public function getChannel() : Channel
     {
         return $this->channel;
     }

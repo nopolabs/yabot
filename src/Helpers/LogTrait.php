@@ -21,46 +21,64 @@ trait LogTrait
 
     protected function emergency($message, array $context = array())
     {
-        $this->getLog()->emergency($message, $context);
+        if ($log = $this->getLog()) {
+            $log->emergency($message, $context);
+        }
     }
 
     protected function alert($message, array $context = array())
     {
-        $this->getLog()->alert($message, $context);
+        if ($log = $this->getLog()) {
+            $log->alert($message, $context);
+        }
     }
 
     protected function critical($message, array $context = array())
     {
-        $this->getLog()->critical($message, $context);
+        if ($log = $this->getLog()) {
+            $log->critical($message, $context);
+        }
     }
 
     protected function error($message, array $context = array())
     {
-        $this->getLog()->error($message, $context);
+        if ($log = $this->getLog()) {
+            $log->error($message, $context);
+        }
     }
 
     protected function warning($message, array $context = array())
     {
-        $this->getLog()->warning($message, $context);
+        if ($log = $this->getLog()) {
+            $log->warning($message, $context);
+        }
     }
 
     protected function notice($message, array $context = array())
     {
-        $this->getLog()->notice($message, $context);
+        if ($log = $this->getLog()) {
+            $log->notice($message, $context);
+        }
     }
 
     protected function info($message, array $context = array())
     {
-        $this->getLog()->info($message, $context);
+        if ($log = $this->getLog()) {
+            $log->info($message, $context);
+        }
     }
 
     protected function debug($message, array $context = array())
     {
-        $this->getLog()->debug($message, $context);
+        if ($log = $this->getLog()) {
+            $log->debug($message, $context);
+        }
     }
 
     protected function log($level, $message, array $context = array())
     {
-        $this->getLog()->log($level, $message, $context);
+        if ($log = $this->getLog()) {
+            $log->log($level, $message, $context);
+        }
     }
 }
