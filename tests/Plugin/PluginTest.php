@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot\Tests\Plugin;
 
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Message\Message;
+use Nopolabs\Yabot\Plugin\PluginManager;
 use Nopolabs\Yabot\Plugin\PluginTrait;
 use Nopolabs\Yabot\Yabot;
 use PHPUnit\Framework\TestCase;
@@ -54,7 +55,7 @@ class PluginTest extends TestCase
 
         $data = [
             [[], $base],
-            [['prefix' => Yabot::AUTHED_USER], array_merge($base, ['prefix' => Yabot::AUTHED_USER])],
+            [['prefix' => PluginManager::AUTHED_USER_PREFIX], array_merge($base, ['prefix' => PluginManager::AUTHED_USER_PREFIX])],
             [['isBot' => null], array_merge($base, ['isBot' => null])],
             [['isBot' => true], array_merge($base, ['isBot' => true])],
             [['isBot' => false], array_merge($base, ['isBot' => false])],

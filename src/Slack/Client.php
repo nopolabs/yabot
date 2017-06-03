@@ -85,14 +85,10 @@ class Client
         return $this->realTimeClient->disconnect();
     }
 
-    public function useWebSocket() : bool
-    {
-        return (bool) $this->get('use.websocket', false);
-    }
-
     public function say($text, $channelOrName, array $additionalParameters = [])
     {
-        if (!($channelOrName instanceof ChannelInterface)) {
+        $channel = $channelOrName;
+        if (!($channel instanceof ChannelInterface)) {
             $channel = $this->getChannelByName($channelOrName);
             if (!($channel instanceof ChannelInterface)) {
                 $channel = $this->getChannelById($channelOrName);
@@ -101,17 +97,16 @@ class Client
                     return;
                 }
             }
-        } else {
-            $channel = $channelOrName;
         }
 
         if (empty($additionalParameters) && $this->useWebSocket()) {
             // WebSocket send does not support message formatting.
             $this->send($text, $channel);
-        } else {
-            // Http post send supports message formatting.
-            $this->post($text, $channel, $additionalParameters);
+            return;
         }
+
+        // Http post send supports message formatting.
+        $this->post($text, $channel, $additionalParameters);
     }
 
     public function send($text, ChannelInterface $channel)
@@ -130,7 +125,7 @@ class Client
         $this->realTimeClient->apiCall('chat.postMessage', $parameters);
     }
 
-    public function on($event, array $onMessage)
+    public function onMessage($event, array $onMessage)
     {
         $this->realTimeClient->on($event, function(Payload $payload) use ($onMessage) {
             call_user_func($onMessage, $payload);
@@ -173,21 +168,26 @@ class Client
         return $this->channels->byName($name);
     }
 
-    public function updateUsers()
+    protected function useWebSocket() : bool
+    {
+        return (bool) $this->get('use.websocket', false);
+    }
+
+    protected function updateUsers()
     {
         $this->realTimeClient->getUsers()->then(function(array $users) {
             $this->users->update($users);
         });
     }
 
-    public function updateChannels()
+    protected function updateChannels()
     {
         $this->realTimeClient->getChannels()->then(function(array $channels) {
             $this->channels->update($channels);
         });
     }
 
-    public function updateAuthedUser(Closure $authedUserUpdated)
+    protected function updateAuthedUser(Closure $authedUserUpdated)
     {
         $this->realTimeClient->getAuthedUser()->then(function(User $user) use ($authedUserUpdated) {
             $this->authedUser = $user;
@@ -199,7 +199,7 @@ class Client
     {
         $events = ['channel_created', 'channel_deleted', 'channel_rename'];
         foreach ($events as $event) {
-            $this->on($event, [$this, 'updateChannels']);
+            $this->onMessage($event, [$this, 'updateChannels']);
         }
     }
 
@@ -207,7 +207,7 @@ class Client
     {
         $events = ['user_change'];
         foreach ($events as $event) {
-            $this->on($event, [$this, 'updateUsers']);
+            $this->onMessage($event, [$this, 'updateUsers']);
         }
     }
 }

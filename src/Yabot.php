@@ -21,8 +21,6 @@ class Yabot
     use LogTrait;
     use SlackTrait;
 
-    const AUTHED_USER = 'AUTHED_USER';
-
     /** @var LoopInterface */
     private $eventLoop;
 
@@ -96,7 +94,7 @@ class Yabot
             $this->pluginManager->updatePrefixes($authedUser->getUsername());
         });
 
-        $slack->on('message', [$this, 'onMessage']);
+        $slack->onMessage('message', [$this, 'onMessage']);
     }
 
     public function onMessage(Payload $payload)

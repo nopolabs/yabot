@@ -60,8 +60,8 @@ class FileStorage implements StorageInterface
     {
         if (file_exists($file)) {
             return json_decode(file_get_contents($file), true);
-        } else {
-            return [];
         }
+
+        return [];
     }
 }

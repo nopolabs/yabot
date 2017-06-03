@@ -18,7 +18,7 @@ class StatusPlugin implements PluginInterface
 
         $this->setConfig([
             'help' => '<prefix> status',
-            'prefix' => Yabot::AUTHED_USER,
+            'prefix' => PluginManager::AUTHED_USER_PREFIX,
             'matchers' => ['yabotStatus' => "/^status\\b/"],
         ]);
     }

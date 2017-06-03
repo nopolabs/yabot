@@ -95,12 +95,15 @@ trait PluginTrait
 
     protected function dispatch(string $method, Message $message, array $matches)
     {
+        if (!method_exists($this, $method)) {
+            $this->warning("{$this->pluginId} no method named: $method");
+            return;
+        }
+
         try {
-            if (method_exists($this, $method)) {
-                $this->$method($message, $matches);
-            } else {
-                $this->warning("{$this->pluginId} no method named: $method");
-            }
+
+            $this->$method($message, $matches);
+
         } catch (Exception $e) {
             $this->warning('Exception in '.static::class.'::'.$method);
             $this->warning($e->getMessage());

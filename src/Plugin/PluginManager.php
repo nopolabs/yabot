@@ -14,6 +14,7 @@ class PluginManager
     use LogTrait;
 
     const NO_PREFIX = '<none>';
+    const AUTHED_USER_PREFIX = 'AUTHED_USER';
 
     /** @var array */
     private $plugins;
@@ -54,12 +55,8 @@ class PluginManager
             foreach ($plugins as $pluginId => $plugin) {
                 $help[] = $pluginId;
                 foreach (explode("\n", $plugin->help()) as $line) {
-                    if ($prefix === self::NO_PREFIX) {
-                        $line = str_replace('<prefix> ', '', $line);
-                    } else {
-                        $line = str_replace('<prefix>', $prefix, $line);
-                    }
-                    $help[] = '    '.$line;
+                    $prefix = ($prefix === self::NO_PREFIX) ? '' : $prefix;
+                    $help[] = '    '.str_replace('<prefix>', $prefix, $line);
                 }
             }
         }
@@ -73,7 +70,7 @@ class PluginManager
 
         $statuses = [];
         $statuses[] = "There are $count plugins loaded.";
-        foreach ($this->getPrefixMap() as $prefix => $plugins) {
+        foreach (array_values($this->getPrefixMap()) as $plugins) {
             /** @var PluginInterface $plugin */
             foreach ($plugins as $pluginId => $plugin) {
                 $statuses[] = "$pluginId ".$plugin->status();
@@ -126,10 +123,8 @@ class PluginManager
         $updated = [];
 
         foreach ($this->getPrefixMap() as $prefix => $plugins) {
-            if ($prefix === Yabot::AUTHED_USER) {
+            if ($prefix === self::AUTHED_USER_PREFIX) {
                 $prefix = '@'.$authedUsername;
-            } elseif (!$prefix) {
-                $prefix = self::NO_PREFIX;
             }
 
             $updated[$prefix] = $plugins;
@@ -153,12 +148,23 @@ class PluginManager
     {
         $this->plugins[$pluginId] = $plugin;
 
-        $prefix = $plugin->getPrefix();
+        $prefix = $this->getPrefix($plugin);
 
         if (!isset($this->prefixMap[$prefix])) {
             $this->prefixMap[$prefix] = [];
         }
 
         $this->prefixMap[$prefix][$pluginId] = $plugin;
+    }
+
+    protected function getPrefix(PluginInterface $plugin) : string
+    {
+        $prefix = $plugin->getPrefix();
+
+        if ($prefix === '') {
+            return self::NO_PREFIX;
+        }
+
+        return $prefix;
     }
 }

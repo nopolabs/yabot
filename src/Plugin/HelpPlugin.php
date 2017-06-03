@@ -18,7 +18,7 @@ class HelpPlugin implements PluginInterface
 
         $this->setConfig([
             'help' => '<prefix> help',
-            'prefix' => Yabot::AUTHED_USER,
+            'prefix' => PluginManager::AUTHED_USER_PREFIX,
             'matchers' => ['yabotHelp' => "/^help\\b/"],
         ]);
     }
