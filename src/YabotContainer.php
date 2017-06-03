@@ -25,14 +25,15 @@ class YabotContainer extends ContainerBuilder
         $type = $type ?? pathinfo($file)['extension'];
 
         if ($type === 'xml') {
-            $loader = new XmlFileLoader($this, new FileLocator());
-        } elseif ($type === 'yml') {
-            $loader = new YamlFileLoader($this, new FileLocator());
-        } else {
-            throw new Exception("Do not know how to load $file");
+            $this->loadXmlFile($file);
+            return;
         }
 
-        $loader->load($file);
+        if ($type === 'yml') {
+            $this->loadYamlFile($file);
+        }
+
+        throw new Exception("Do not know how to load $file");
     }
 
     public function overrideParameters(array $parameters)
@@ -80,5 +81,17 @@ class YabotContainer extends ContainerBuilder
             },
             array_keys($plugins), $plugins
         );
+    }
+
+    protected function loadXmlFile($file)
+    {
+        $loader = new XmlFileLoader($this, new FileLocator());
+        $loader->load($file);
+    }
+
+    protected function loadYamlFile($file)
+    {
+        $loader = new YamlFileLoader($this, new FileLocator());
+        $loader->load($file);
     }
 }
