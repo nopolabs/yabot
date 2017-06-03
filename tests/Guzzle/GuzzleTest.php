@@ -1,10 +1,12 @@
 <?php
-
 namespace Nopolabs\Yabot\Tests\Guzzle;
 
 
+use Nopolabs\Yabot\Guzzle\GuzzleFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\CurlMultiHandler;
+use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Guzzle\Guzzle;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -13,6 +15,8 @@ use React\EventLoop\LoopInterface;
 
 class GuzzleTest extends TestCase
 {
+    use MockWithExpectationsTrait;
+
     /** @var LoopInterface */
     private $eventLoop;
 
@@ -22,7 +26,7 @@ class GuzzleTest extends TestCase
     protected function setUp()
     {
         $this->eventLoop = Factory::create();
-        $this->guzzle = new Guzzle($this->eventLoop, ['timeout' => 5]);
+        $this->guzzle = GuzzleFactory::newGuzzle($this->eventLoop, ['timeout' => 5]);
 
         $this->eventLoop->run();
     }
@@ -32,6 +36,10 @@ class GuzzleTest extends TestCase
         $this->eventLoop->stop();
     }
 
+    /**
+     * This is a 'functional' test.
+     * It makes an http get request to http://nopolabs.com.
+     */
     public function testGetAsync()
     {
         $status = null;
@@ -49,12 +57,38 @@ class GuzzleTest extends TestCase
         $timer = $this->eventLoop->addTimer(6, function() {});
 
         while ($this->eventLoop->isTimerActive($timer)) {
+
+            // tick() to allow periodic timer set by Guzzle::scheduleProcessing() to run.
             $this->eventLoop->tick();
+
             if ($status || $exception) {
                 break;
             }
         }
 
         $this->assertTrue($status || $exception);
+    }
+
+    public function testPost()
+    {
+        $response = $this->createMock(ResponseInterface::class);
+
+        /** @var Client $client */
+        $client = $this->newPartialMockWithExpectations(Client::class, [
+            ['post', [
+                'params' => ['http://nopolabs.com', ['body' => 'raw data']],
+                'result' => $response,
+            ]],
+        ]);
+
+        $handler = $this->createMock(CurlMultiHandler::class);
+
+        $eventLoop = $this->createMock(LoopInterface::class);
+
+        $guzzle = new Guzzle($client, $handler, $eventLoop);
+
+        $actual = $guzzle->post('http://nopolabs.com', ['body' => 'raw data']);
+
+        $this->assertSame($response, $actual);
     }
 }

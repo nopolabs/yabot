@@ -11,22 +11,23 @@ class Message
 {
     use SlackTrait;
 
-    public $data;
+    /** @var array */
+    private $data;
 
     /** @var User */
-    protected $user;
+    private $user;
 
     /** @var Channel */
-    protected $channel;
+    private $channel;
 
     /** @var bool */
-    protected $handled;
+    private $handled;
 
     /** @var string */
-    protected $formattedText;
+    private $formattedText;
 
     /** @var string */
-    protected $pluginText;
+    private $pluginText;
 
     public function __construct(
         Client $slackClient,

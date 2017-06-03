@@ -38,13 +38,13 @@ class MessageLogPlugin implements PluginInterface
         return 'not logging messages';
     }
 
-    public function start(Message $msg, array $matches)
+    public function start(Message $msg)
     {
         $this->yabot->setMessageLog($this->get('messageLogFile'));
         $msg->setHandled(true);
     }
 
-    public function stop(Message $msg, array $matches)
+    public function stop(Message $msg)
     {
         $this->yabot->setMessageLog(null);
         $msg->setHandled(true);

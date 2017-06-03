@@ -1,22 +1,17 @@
 <?php
-
 namespace Nopolabs\Yabot\Guzzle;
 
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlMultiHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
 use function GuzzleHttp\Promise\queue;
-use Nopolabs\Yabot\Helpers\ConfigTrait;
 use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\TimerInterface;
 
 class Guzzle
 {
-    use ConfigTrait;
-
     /** @var Client */
     private $client;
 
@@ -29,13 +24,11 @@ class Guzzle
     /** @var TimerInterface */
     public $timer;
 
-    public function __construct(LoopInterface $eventLoop, array $config = [])
+    public function __construct(Client $client, CurlMultiHandler $handler, LoopInterface $eventLoop)
     {
-        $this->handler = new CurlMultiHandler();
-        $config['handler'] = HandlerStack::create($this->handler);
-        $this->client = new Client($config);
+        $this->client = $client;
+        $this->handler = $handler;
         $this->eventloop = $eventLoop;
-        $this->setConfig($config);
     }
 
     public function getAsync(string $uri, array $options = []) : PromiseInterface

@@ -8,6 +8,7 @@ use Nopolabs\Yabot\Helpers\LogTrait;
 use Nopolabs\Yabot\Message\Message;
 use Nopolabs\Yabot\Yabot;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 class PluginManager
 {
@@ -28,11 +29,6 @@ class PluginManager
 
         $this->plugins = [];
         $this->prefixMap = [];
-    }
-
-    public function getPrefixMap() : array
-    {
-        return $this->prefixMap;
     }
 
     public function loadPlugin($pluginId, PluginInterface $plugin)
@@ -102,9 +98,12 @@ class PluginManager
                 /** @var PluginInterface $plugin */
                 try {
                     $plugin->handle($message);
-                } catch (Exception $e) {
-                    $this->warning("Unhandled Exception in $pluginId: ".$e->getMessage());
-                    $this->warning($e->getTraceAsString());
+                } catch (Throwable $throwable) {
+                    $message = "Unhandled Exception in $pluginId\n"
+                        .$throwable->getMessage()."\n"
+                        .$throwable->getTraceAsString()."\n"
+                        ."Payload data: ".json_encode($message->getData());
+                    $this->warning($message);
                 }
 
                 if ($message->isHandled()) {
@@ -166,5 +165,10 @@ class PluginManager
         }
 
         return $prefix;
+    }
+
+    protected function getPrefixMap() : array
+    {
+        return $this->prefixMap;
     }
 }

@@ -62,6 +62,13 @@ class MessageTest extends TestCase
         $this->realTimeClient = $this->createMock(RealTimeClient::class);
     }
 
+    public function testGetData()
+    {
+        $message = new Message($this->slackClient, $this->data, 'formatted-text', $this->user, $this->channel);
+
+        $this->assertSame($this->data, $message->getData());
+    }
+
     public function testGetText()
     {
         $message = new Message($this->slackClient, $this->data, 'formatted-text', $this->user, $this->channel);

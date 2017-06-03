@@ -3,10 +3,10 @@
 yabot is a slack chat bot written in php.
 
 [![Build Status](https://travis-ci.org/nopolabs/yabot.svg?branch=master)](https://travis-ci.org/nopolabs/yabot)
-[![License](https://poser.pugx.org/nopolabs/yabot/license)](https://packagist.org/packages/nopolabs/yabot)
-[![Latest Stable Version](https://poser.pugx.org/nopolabs/yabot/v/stable)](https://packagist.org/packages/nopolabs/yabot)
 [![Code Climate](https://codeclimate.com/github/nopolabs/yabot/badges/gpa.svg)](https://codeclimate.com/github/nopolabs/yabot)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nopolabs/yabot/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/nopolabs/yabot/?branch=master)
+[![License](https://poser.pugx.org/nopolabs/yabot/license)](https://packagist.org/packages/nopolabs/yabot)
+[![Latest Stable Version](https://poser.pugx.org/nopolabs/yabot/v/stable)](https://packagist.org/packages/nopolabs/yabot)
 
 ## Quick start
 
@@ -136,13 +136,17 @@ Plugins built using `PluginTrait` provide a default configuration which may be o
     'plugin.help' => [
         'prefix' => Message::AUTHED_USER, // optional, string
         'isBot' => false,                 // optional, true, false, or null             
-        'channel' => '',                  // optional, may be string or array of strings
-        'user' => '',                     // optional, may be string or array of strings
+        'channel' => '',                  // optional
+        'channels' => [],                 // optional, array of strings
+        'user' => '',                     // optional
+        'users' => [],                    // optional, array of strings
         'matchers' => [
             'yabotHelp' => [
                 'isBot' => null,                          // optional, true, false, or null
-                'channel' => '',                          // optional, may be string or array of strings
-                'user' => '',                             // optional, may be string or array of strings
+                'channel' => '',                          // optional
+                'channels' => [],                         // optional, array of strings
+                'user' => '',                             // optional
+                'users' => [],                            // optional, array of strings
                 'pattern' => "/^help (?'topic'\\w+)\\b/", // pattern applied by preg_match()
                 'method' => 'help',                       // method called to handle accepted messages
             ],
@@ -156,9 +160,9 @@ Matcher shorthand syntax:
     
     // expands to:
     'help' => [
-        'isBot' => null,
-        'channel => '',
-        'user' => '',
+        'isBot' => null,   // null matches bot or non-bot
+        'channels => [],   // empty array matches any channel
+        'users' => [],     // empty array matches any user
         'pattern => "/^help (?'topic'\\w+)\\b/",
         'method' => 'help',
     ],
@@ -194,7 +198,7 @@ Slack messages use ids to reference users and channels, e.g.:
 | Why not join #tech-chat? | Why not join <#C024BE7LR>? |
 | Hey @alice, did you see my file? | Hey <@U024BE7LH>, did you see my file? |
 
-`SlackClient` manages Users and Channels objects and provides methods to help 
+`Slack\Client` manages `Slack\Users` and `Slack\Channels` objects and provides methods to help
 map user and channel names to ids and ids to names.
 
 ## Message formatting and attachments

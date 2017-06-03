@@ -130,4 +130,18 @@ class MethodMatcherTest extends TestCase
 
         $this->assertEquals($expected, $actual);
     }
+
+    public function testGetName()
+    {
+        $matcher = new MethodMatcher('name', false, [], [], [], 'method-name', $this->createMock(LoggerInterface::class));
+
+        $this->assertEquals('name', $matcher->getName());
+    }
+
+    public function testGetMethod()
+    {
+        $matcher = new MethodMatcher('name', false, [], [], [], 'method-name', $this->createMock(LoggerInterface::class));
+
+        $this->assertEquals('method-name', $matcher->getMethod());
+    }
 }

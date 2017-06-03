@@ -23,7 +23,7 @@ class HelpPlugin implements PluginInterface
         ]);
     }
 
-    public function yabotHelp(Message $msg, array $matches)
+    public function yabotHelp(Message $msg)
     {
         $msg->reply($this->yabot->getHelp());
         $msg->setHandled(true);

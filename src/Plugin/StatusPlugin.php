@@ -23,7 +23,7 @@ class StatusPlugin implements PluginInterface
         ]);
     }
 
-    public function yabotStatus(Message $msg, array $matches)
+    public function yabotStatus(Message $msg)
     {
         $msg->reply($this->yabot->getStatus());
         $msg->setHandled(true);

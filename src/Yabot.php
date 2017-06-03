@@ -109,8 +109,10 @@ class Yabot
             }
             $message = $this->messageFactory->create($data);
         } catch (Throwable $throwable) {
-            $this->warning($throwable->getMessage());
-            $this->warning($throwable->getTraceAsString());
+            $message = $throwable->getMessage()."\n"
+                .$throwable->getTraceAsString()."\n"
+                ."Payload data: ".json_encode($data);
+            $this->warning($message);
             return;
         }
 
