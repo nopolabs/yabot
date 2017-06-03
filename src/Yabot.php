@@ -5,6 +5,7 @@ namespace Nopolabs\Yabot;
 use DateTime;
 use Exception;
 use Nopolabs\Yabot\Helpers\LogTrait;
+use Nopolabs\Yabot\Helpers\LoopTrait;
 use Nopolabs\Yabot\Helpers\SlackTrait;
 use Nopolabs\Yabot\Message\MessageFactory;
 use Nopolabs\Yabot\Plugin\PluginInterface;
@@ -19,10 +20,8 @@ use Throwable;
 class Yabot
 {
     use LogTrait;
+    use LoopTrait;
     use SlackTrait;
-
-    /** @var LoopInterface */
-    private $eventLoop;
 
     /** @var MessageFactory */
     private $messageFactory;
@@ -40,8 +39,8 @@ class Yabot
         PluginManager $pluginManager
     ) {
         $this->setLog($logger);
+        $this->setLoop($eventLoop);
         $this->setSlack($slackClient);
-        $this->eventLoop = $eventLoop;
         $this->messageFactory = $messageFactory;
         $this->pluginManager = $pluginManager;
         $this->messageLog = null;
@@ -83,7 +82,7 @@ class Yabot
 
         $this->addMemoryReporting();
 
-        $this->eventLoop->run();
+        $this->getLoop()->run();
     }
 
     public function connected()
@@ -135,16 +134,6 @@ class Yabot
         array_unshift($statuses, $this->getFormattedMemoryUsage());
 
         return implode("\n", $statuses);
-    }
-
-    public function addTimer($interval, callable $callback)
-    {
-        $this->eventLoop->addTimer($interval, $callback);
-    }
-
-    public function addPeriodicTimer($interval, callable $callback)
-    {
-        $this->eventLoop->addPeriodicTimer($interval, $callback);
     }
 
     protected function addMemoryReporting()
