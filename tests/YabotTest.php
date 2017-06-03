@@ -110,7 +110,7 @@ class YabotTest extends TestCase
 
         $this->setAtExpectations($this->slackClient, [
             ['update', ['params' => [$this->isInstanceOf(Closure::class)]]],
-            ['onMessage', ['params' => ['message', [$yabot, 'onMessage']]]],
+            ['onEvent', ['params' => ['message', [$yabot, 'onMessage']]]],
         ]);
 
         $yabot->connected();
