@@ -104,10 +104,11 @@ trait PluginTrait
 
             $this->$method($message, $matches);
 
-        } catch (Exception $e) {
-            $this->warning('Exception in '.static::class.'::'.$method);
-            $this->warning($e->getMessage());
-            $this->warning($e->getTraceAsString());
+        } catch (Throwable $throwable) {
+            $errmsg = 'Exception in '.static::class.'::'.$method."\n"
+                .$throwable->getMessage()."\n"
+                .$throwable->getTraceAsString();
+            $this->warning($errmsg);
         }
     }
 

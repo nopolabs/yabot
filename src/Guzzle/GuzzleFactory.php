@@ -8,7 +8,7 @@ use React\EventLoop\LoopInterface;
 
 class GuzzleFactory
 {
-    static public function newGuzzle(LoopInterface $eventLoop, array $config) : Guzzle
+    public static function newGuzzle(LoopInterface $eventLoop, array $config) : Guzzle
     {
         $handler = new CurlMultiHandler();
 

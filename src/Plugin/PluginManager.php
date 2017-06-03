@@ -99,11 +99,11 @@ class PluginManager
                 try {
                     $plugin->handle($message);
                 } catch (Throwable $throwable) {
-                    $message = "Unhandled Exception in $pluginId\n"
+                    $errmsg = "Unhandled Exception in $pluginId\n"
                         .$throwable->getMessage()."\n"
                         .$throwable->getTraceAsString()."\n"
                         ."Payload data: ".json_encode($message->getData());
-                    $this->warning($message);
+                    $this->warning($errmsg);
                 }
 
                 if ($message->isHandled()) {
