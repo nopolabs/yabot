@@ -45,11 +45,6 @@ class Client
         $this->setLog($log);
     }
 
-    public function getRealTimeClient()
-    {
-        return $this->realTimeClient;
-    }
-
     public function init() : Client
     {
         $this->initChannelUpdateHandlers();
@@ -63,6 +58,18 @@ class Client
         $this->updateUsers();
         $this->updateChannels();
         $this->updateAuthedUser($authedUserUpdated);
+    }
+
+    public function onEvent($event, array $onEvent)
+    {
+        $this->realTimeClient->on($event, function(Payload $payload) use ($onEvent) {
+            call_user_func($onEvent, $payload);
+        });
+    }
+
+    public function getRealTimeClient()
+    {
+        return $this->realTimeClient;
     }
 
     public function getAuthedUser()
@@ -123,13 +130,6 @@ class Client
         ], $additionalParameters);
 
         $this->realTimeClient->apiCall('chat.postMessage', $parameters);
-    }
-
-    public function onMessage($event, array $onMessage)
-    {
-        $this->realTimeClient->on($event, function(Payload $payload) use ($onMessage) {
-            call_user_func($onMessage, $payload);
-        });
     }
 
     /**
@@ -199,7 +199,7 @@ class Client
     {
         $events = ['channel_created', 'channel_deleted', 'channel_rename'];
         foreach ($events as $event) {
-            $this->onMessage($event, [$this, 'updateChannels']);
+            $this->onEvent($event, [$this, 'updateChannels']);
         }
     }
 
@@ -207,7 +207,7 @@ class Client
     {
         $events = ['user_change'];
         foreach ($events as $event) {
-            $this->onMessage($event, [$this, 'updateUsers']);
+            $this->onEvent($event, [$this, 'updateUsers']);
         }
     }
 }

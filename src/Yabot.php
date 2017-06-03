@@ -94,7 +94,7 @@ class Yabot
             $this->pluginManager->updatePrefixes($authedUser->getUsername());
         });
 
-        $slack->onMessage('message', [$this, 'onMessage']);
+        $slack->onEvent('message', [$this, 'onMessage']);
     }
 
     public function onMessage(Payload $payload)
