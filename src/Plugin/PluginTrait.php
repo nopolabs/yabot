@@ -193,11 +193,8 @@ trait PluginTrait
         foreach ($matchers as $name => $params) {
             $patterns = [];
             foreach ($params['patterns'] as $pattern) {
-                try {
-                    preg_match($pattern, '', $matches);
+                if ($this->validRegExp($pattern, $name)) {
                     $patterns[] = $pattern;
-                } catch (Throwable $e) {
-                    $this->warning("$name.pattern='$pattern' ".$e->getMessage());
                 }
             }
             $params['patterns'] = $patterns;
@@ -214,5 +211,16 @@ trait PluginTrait
         }
 
         return $methodMatchers;
+    }
+
+    protected function validRegExp($pattern, $name) : bool
+    {
+        try {
+            preg_match($pattern, '');
+            return true;
+        } catch (Throwable $e) {
+            $this->warning("$name.pattern='$pattern' ".$e->getMessage());
+            return false;
+        }
     }
 }
