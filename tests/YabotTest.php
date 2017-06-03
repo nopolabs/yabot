@@ -211,29 +211,7 @@ class YabotTest extends TestCase
 
         $this->assertSame("memory usage\nline 1\nline 2", $yabot->getStatus());
     }
-
-    public function testAddTimer()
-    {
-        $callable = function () { return; };
-
-        $this->setAtExpectations($this->eventLoop, [
-            ['addTimer', ['params' => [60, $callable]]],
-        ]);
-
-        $this->newYabot()->addTimer(60, $callable);
-    }
-
-    public function testAddPeriodicTimer()
-    {
-        $callable = function () { return; };
-
-        $this->setAtExpectations($this->eventLoop, [
-            ['addPeriodicTimer', ['params' => [60, $callable]]],
-        ]);
-
-        $this->newYabot()->addPeriodicTimer(60, $callable);
-    }
-
+    
     private function newYabot(array $expectations = []) : Yabot
     {
         if (empty($expectations)) {
