@@ -80,7 +80,7 @@ class PluginManager
             $updatedPrefixMap = [];
             foreach ($prefixMap as $prefix => $plugins) {
                 if ($prefix === self::AUTHED_USER_PREFIX) {
-                    $prefix = '@' . $authedUsername;
+                    $prefix = '@'.$authedUsername;
                 }
                 $updatedPrefixMap[$prefix] = $plugins;
             }

@@ -203,20 +203,12 @@ trait PluginTrait
         $methodMatchers = [];
 
         foreach ($matchers as $name => $params) {
-            $patterns = [];
-            foreach ($params['patterns'] as $pattern) {
-                if ($this->validRegExp($pattern, $name)) {
-                    $patterns[] = $pattern;
-                }
-            }
-            $params['patterns'] = $patterns;
-
             $methodMatchers[] = new MethodMatcher(
                 $name,
                 $params['isBot'],
                 $params['channels'],
                 $params['users'],
-                $params['patterns'],
+                $this->validPatterns($params['patterns'], $name),
                 $params['method'],
                 $this->getLog()
             );
@@ -225,7 +217,18 @@ trait PluginTrait
         return $methodMatchers;
     }
 
-    protected function validRegExp($pattern, $name) : bool
+    protected function validPatterns(array $patterns, $name) : array
+    {
+        $valid = [];
+        foreach ($patterns as $pattern) {
+            if ($this->isValidRegExp($pattern, $name)) {
+                $valid[] = $pattern;
+            }
+        }
+        return $valid;
+    }
+
+    protected function isValidRegExp($pattern, $name) : bool
     {
         try {
             preg_match($pattern, '');
