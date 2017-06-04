@@ -46,11 +46,12 @@ class PluginTest extends TestCase
     public function initDataProvider() : array
     {
         $base = [
-            'prefix' => '',
+            'prefix' => PluginManager::NO_PREFIX,
             'isBot' => null,
             'channels' => [],
             'users' => [],
             'matchers' => [],
+            'priority' => PluginManager::DEFAULT_PRIORITY,
         ];
 
         $data = [
@@ -59,11 +60,11 @@ class PluginTest extends TestCase
             [['isBot' => null], array_merge($base, ['isBot' => null])],
             [['isBot' => true], array_merge($base, ['isBot' => true])],
             [['isBot' => false], array_merge($base, ['isBot' => false])],
-            [['channel' => ''], array_merge($base, ['channels' => [], 'channel' => ''])],
-            [['channel' => 'general'], array_merge($base, ['channels' => ['general'], 'channel' => 'general'])],
+            [['channel' => ''], array_merge($base, ['channels' => []])],
+            [['channel' => 'general'], array_merge($base, ['channels' => ['general']])],
             [['channels' => ['general','special']], array_merge($base, ['channels' => ['general','special']])],
-            [['user' => ''], array_merge($base, ['users' => [], 'user' => ''])],
-            [['user' => 'alice'], array_merge($base, ['users' => ['alice'], 'user' => 'alice'])],
+            [['user' => ''], array_merge($base, ['users' => []])],
+            [['user' => 'alice'], array_merge($base, ['users' => ['alice']])],
             [['users' => ['alice','bob']], array_merge($base, ['users' => ['alice','bob']])],
             [
                 ['matchers' => ['testMethod' => '/^test/']],
@@ -184,11 +185,25 @@ class PluginTest extends TestCase
         $this->assertEquals($expected, $replaced);
     }
 
+    public function testGetDefaultPriotity()
+    {
+        $this->plugin->init('plugin.test', []);
+
+        $this->assertEquals(PluginManager::DEFAULT_PRIORITY, $this->plugin->getPriority());
+    }
+
+    public function testGetPriority()
+    {
+        $this->plugin->init('plugin.test', ['priority' => 1]);
+
+        $this->assertEquals(1, $this->plugin->getPriority());
+    }
+
     public function testGetNoPrefix()
     {
         $this->plugin->init('plugin.test', []);
 
-        $this->assertEquals('', $this->plugin->getPrefix());
+        $this->assertEquals(PluginManager::NO_PREFIX, $this->plugin->getPrefix());
     }
 
     public function testGetPrefix()

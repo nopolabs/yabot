@@ -134,18 +134,15 @@ and how it will react.
 Plugins built using `PluginTrait` provide a default configuration which may be overridden in `config.php`, e.g.:
 
     'plugin.help' => [
-        'prefix' => Message::AUTHED_USER, // optional, string
-        'isBot' => false,                 // optional, true, false, or null             
-        'channel' => '',                  // optional
-        'channels' => [],                 // optional, array of strings
-        'user' => '',                     // optional
-        'users' => [],                    // optional, array of strings
+        'priority' => PluginManager::DEFAULT_PRIORITY, // optional, higher priority is dispatched sooner
+        'prefix' => PluginManager::AUTHED_USER_PREFIX, // optional, string
+        'isBot' => false,                              // optional, true, false, or null
+        'channels' => [],                              // optional, array of strings
+        'users' => [],                                 // optional, array of strings
         'matchers' => [
             'yabotHelp' => [
                 'isBot' => null,                          // optional, true, false, or null
-                'channel' => '',                          // optional
                 'channels' => [],                         // optional, array of strings
-                'user' => '',                             // optional
                 'users' => [],                            // optional, array of strings
                 'pattern' => "/^help (?'topic'\\w+)\\b/", // pattern applied by preg_match()
                 'method' => 'help',                       // method called to handle accepted messages

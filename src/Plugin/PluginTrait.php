@@ -53,6 +53,11 @@ trait PluginTrait
         return $replaced;
     }
 
+    public function getPriority(): int
+    {
+        return $this->get('priority');
+    }
+
     public function getPrefix(): string
     {
         return $this->get('prefix');
@@ -149,13 +154,14 @@ trait PluginTrait
 
     protected function canonicalConfig(array $config): array
     {
-        $config['prefix'] = $config['prefix'] ?? '';
-        $config['isBot'] = $config['isBot'] ?? null;
-        $config['channels'] = $config['channels'] ?? array_filter([$config['channel'] ?? null]);
-        $config['users'] = $config['users'] ?? array_filter([$config['user'] ?? null]);
-        $config['matchers'] = $this->canonicalMatchers($config['matchers'] ?? []);
-
-        return $config;
+        return [
+            'priority' => $config['priority'] ?? PluginManager::DEFAULT_PRIORITY,
+            'prefix' => ($config['prefix'] ?? '') ? $config['prefix'] : PluginManager::NO_PREFIX,
+            'isBot' => $config['isBot'] ?? null,
+            'channels' => $config['channels'] ?? array_filter([$config['channel'] ?? null]),
+            'users' => $config['users'] ?? array_filter([$config['user'] ?? null]),
+            'matchers' => $this->canonicalMatchers($config['matchers'] ?? []),
+        ];
     }
 
     protected function canonicalMatchers(array $matchers): array
@@ -163,21 +169,7 @@ trait PluginTrait
         $expanded = [];
 
         foreach ($matchers as $name => $params) {
-            $params = is_array($params) ? $params : ['patterns' => [$params]];
-            if (isset($params['pattern'])) {
-                $params['patterns'] = [$params['pattern']];
-                unset($params['pattern']);
-            }
-            $params['isBot'] = $params['isBot'] ?? null;
-            $params['channels'] = $params['channels'] ?? array_filter([$params['channel'] ?? null]);
-            $params['users'] = $params['users'] ?? array_filter([$params['user'] ?? null]);
-            $params['method'] = $params['method'] ?? $name;
-
-            if (!method_exists($this, $params['method'])) {
-                $this->warning("{$this->pluginId} no method named: {$params['method']}");
-            }
-
-            $expanded[$name] = $params;
+            $expanded[$name] = $this->canonicalMatcher($name, $params);
         }
 
         if (!$expanded) {
@@ -185,6 +177,25 @@ trait PluginTrait
         }
 
         return $expanded;
+    }
+
+    protected function canonicalMatcher(string $name, $params) : array
+    {
+        $params = is_array($params) ? $params : ['patterns' => [$params]];
+
+        $method = $params['method'] ?? $name;
+
+        if (!method_exists($this, $method)) {
+            $this->warning("{$this->pluginId} no method named: $method");
+        }
+
+        return [
+            'isBot' => $params['isBot'] ?? null,
+            'channels' => $params['channels'] ?? array_filter([$params['channel'] ?? null]),
+            'users' => $params['users'] ?? array_filter([$params['user'] ?? null]),
+            'patterns' => $params['patterns'] ?? array_filter([$params['pattern'] ?? null]),
+            'method' => $params['method'] ?? $name,
+        ];
     }
 
     protected function buildMethodMatchers(array $matchers) : array

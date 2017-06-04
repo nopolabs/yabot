@@ -15,25 +15,25 @@ class PluginManager
     use LogTrait;
 
     const NO_PREFIX = '<none>';
-    const AUTHED_USER_PREFIX = 'AUTHED_USER';
+    const AUTHED_USER_PREFIX = '<authed_user>';
+    const DEFAULT_PRIORITY = 100;
 
     /** @var array */
-    private $plugins;
+    protected $pluginMap;
 
     /** @var array */
-    private $prefixMap;
+    protected $priorityMap;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->setLog($logger);
 
-        $this->plugins = [];
-        $this->prefixMap = [];
+        $this->priorityMap = [];
     }
 
     public function loadPlugin($pluginId, PluginInterface $plugin)
     {
-        if (isset($this->plugins[$pluginId])) {
+        if (isset($this->pluginMap[$pluginId])) {
             $this->warning("$pluginId already loaded, ignoring duplicate.");
             return;
         }
@@ -46,14 +46,13 @@ class PluginManager
     public function getHelp() : array
     {
         $help = [];
-        foreach ($this->getPrefixMap() as $prefix => $plugins) {
+        foreach ($this->getPluginMap() as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
-            foreach ($plugins as $pluginId => $plugin) {
-                $help[] = $pluginId;
-                foreach (explode("\n", $plugin->help()) as $line) {
-                    $prefix = ($prefix === self::NO_PREFIX) ? '' : $prefix;
-                    $help[] = '    '.str_replace('<prefix>', $prefix, $line);
-                }
+            $help[] = $pluginId;
+            foreach (explode("\n", trim($plugin->help())) as $line) {
+                $prefix = $plugin->getPrefix();
+                $prefix = ($prefix === self::NO_PREFIX) ? '' : $prefix;
+                $help[] = '    '.str_replace('<prefix>', $prefix, $line);
             }
         }
 
@@ -62,74 +61,32 @@ class PluginManager
 
     public function getStatuses() : array
     {
-        $count = count($this->plugins);
+        $count = count($this->getPluginMap());
 
         $statuses = [];
         $statuses[] = "There are $count plugins loaded.";
-        foreach (array_values($this->getPrefixMap()) as $plugins) {
+        foreach ($this->getPluginMap() as $pluginId => $plugin) {
             /** @var PluginInterface $plugin */
-            foreach ($plugins as $pluginId => $plugin) {
-                $statuses[] = "$pluginId ".$plugin->status();
-            }
+            $statuses[] = "$pluginId ".$plugin->status();
         }
 
         return $statuses;
     }
 
-    public function dispatchMessage(Message $message)
-    {
-        $text = $message->getFormattedText();
-
-        $this->info('dispatchMessage: ', ['formattedText' => $text]);
-
-        foreach ($this->getPrefixMap() as $prefix => $plugins) {
-
-            if (!($matches = $this->matchesPrefix($prefix, $text))) {
-                continue;
-            }
-
-            $this->debug('Matched prefix', ['prefix' => $prefix]);
-
-            $text = ltrim($matches[1]);
-
-            $message->setPluginText($text);
-
-            foreach ($plugins as $pluginId => $plugin) {
-                /** @var PluginInterface $plugin */
-                try {
-                    $plugin->handle($message);
-                } catch (Throwable $throwable) {
-                    $errmsg = "Unhandled Exception in $pluginId\n"
-                        .$throwable->getMessage()."\n"
-                        .$throwable->getTraceAsString()."\n"
-                        ."Payload data: ".json_encode($message->getData());
-                    $this->warning($errmsg);
-                }
-
-                if ($message->isHandled()) {
-                    return;
-                }
-            }
-
-            if ($message->isHandled()) {
-                return;
-            }
-        }
-    }
-
     public function updatePrefixes($authedUsername)
     {
-        $updated = [];
-
-        foreach ($this->getPrefixMap() as $prefix => $plugins) {
-            if ($prefix === self::AUTHED_USER_PREFIX) {
-                $prefix = '@'.$authedUsername;
+        $updatedPriorityMap = [];
+        foreach ($this->priorityMap as $priority => $prefixMap) {
+            $updatedPrefixMap = [];
+            foreach ($prefixMap as $prefix => $plugins) {
+                if ($prefix === self::AUTHED_USER_PREFIX) {
+                    $prefix = '@' . $authedUsername;
+                }
+                $updatedPrefixMap[$prefix] = $plugins;
             }
-
-            $updated[$prefix] = $plugins;
+            $updatedPriorityMap[$priority] = $updatedPrefixMap;
         }
-
-        $this->prefixMap = $updated;
+        $this->priorityMap = $updatedPriorityMap;
     }
 
     public function matchesPrefix($prefix, $text) : array
@@ -143,32 +100,87 @@ class PluginManager
         return $matches;
     }
 
+    public function dispatchMessage(Message $message)
+    {
+        $text = $message->getFormattedText();
+
+        $this->info('dispatchMessage: ', ['formattedText' => $text]);
+
+        foreach ($this->getPriorityMap() as $priority => $prefixMap) {
+            $this->debug("Dispatching priority $priority");
+
+            $this->dispatchToPrefixes($prefixMap, $message, $text);
+
+            if ($message->isHandled()) {
+                return;
+            }
+        }
+    }
+
+    protected function dispatchToPrefixes(array $prefixMap, Message $message, string $text)
+    {
+        foreach ($prefixMap as $prefix => $plugins) {
+            if ($matches = $this->matchesPrefix($prefix, $text)) {
+                $this->debug("Dispatching prefix '$prefix'");
+
+                $message->setPluginText(ltrim($matches[1]));
+
+                $this->dispatchToPlugins($plugins, $message);
+
+                if ($message->isHandled()) {
+                    return;
+                }
+            }
+        }
+    }
+
+    protected function dispatchToPlugins(array $plugins, Message $message)
+    {
+        foreach ($plugins as $pluginId => $plugin) {
+            /** @var PluginInterface $plugin */
+            try {
+                $plugin->handle($message);
+
+            } catch (Throwable $throwable) {
+                $errmsg = "Unhandled Exception in $pluginId\n"
+                    .$throwable->getMessage()."\n"
+                    .$throwable->getTraceAsString()."\n"
+                    ."Payload data: ".json_encode($message->getData());
+                $this->warning($errmsg);
+            }
+
+            if ($message->isHandled()) {
+                return;
+            }
+        }
+    }
+
     protected function addPlugin($pluginId, PluginInterface $plugin)
     {
-        $this->plugins[$pluginId] = $plugin;
+        $this->pluginMap[$pluginId] = $plugin;
 
-        $prefix = $this->getPrefix($plugin);
-
-        if (!isset($this->prefixMap[$prefix])) {
-            $this->prefixMap[$prefix] = [];
+        $priority = $plugin->getPriority();
+        if (!isset($this->priorityMap[$priority])) {
+            $this->priorityMap[$priority] = [];
         }
 
-        $this->prefixMap[$prefix][$pluginId] = $plugin;
-    }
-
-    protected function getPrefix(PluginInterface $plugin) : string
-    {
         $prefix = $plugin->getPrefix();
-
-        if ($prefix === '') {
-            return self::NO_PREFIX;
+        if (!isset($this->priorityMap[$priority][$prefix])) {
+            $this->priorityMap[$priority][$prefix] = [];
         }
 
-        return $prefix;
+        $this->priorityMap[$priority][$prefix][$pluginId] = $plugin;
+
+        krsort($this->priorityMap);
     }
 
-    protected function getPrefixMap() : array
+    protected function getPluginMap() : array
     {
-        return $this->prefixMap;
+        return $this->pluginMap;
+    }
+
+    protected function getPriorityMap() : array
+    {
+        return $this->priorityMap;
     }
 }
