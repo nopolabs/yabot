@@ -172,7 +172,7 @@ trait PluginTrait
             $expanded[$name] = $this->canonicalMatcher($name, $params);
         }
 
-        if (!$expanded) {
+        if (empty($expanded)) {
             $this->warning("{$this->pluginId} has no matchers");
         }
 
