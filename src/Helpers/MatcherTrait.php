@@ -15,26 +15,26 @@ trait MatcherTrait
 
     abstract protected function debug($message, array $context = array());
 
-    public function matches(Message $message)
+    public function matches(Message $message) : array
     {
         if (!$this->matchesIsHandled($message)) {
-            return false;
+            return [];
         }
 
         if (!$this->matchesIsBot($message)) {
-            return false;
+            return [];
         }
 
         if (!$this->matchesChannels($message)) {
-            return false;
+            return [];
         }
 
         if (!$this->matchesUsers($message)) {
-            return false;
+            return [];
         }
 
         if (empty($this->patterns)) {
-            return true;
+            return [$message->getFormattedText()];
         }
 
         return $this->matchPatterns($message);

@@ -218,10 +218,10 @@ class PluginTest extends TestCase
     public function handleDataProvider()
     {
         return [
-            [[false, [], []]],
-            [[true, [], []]],
-            [[true, ['one'], []], ['method-1', ['one']]],
-            [[true, [], ['two']], ['method-2', ['two']]],
+            [[[], [], []]],
+            [[['formatted text'], [], []]],
+            [[['formatted one'], ['one'], []], ['method-1', ['one']]],
+            [[['formatted two'], [], ['two']], ['method-2', ['two']]],
         ];
     }
 

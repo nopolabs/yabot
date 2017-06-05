@@ -20,31 +20,31 @@ class MethodMatcherTest extends TestCase
                 'No constraints',
                 [null, [], [], []],
                 [false, 'general', null, '', false],
-                true,
+                ['formatted text'],
             ],
             [
                 'isBot match true === true',
                 [true, [], [], []],
                 [true, 'general', null, '', false],
-                true,
+                ['formatted text'],
             ],
             [
                 'isBot match false === false',
                 [false, [], [], []],
                 [false, 'general', null, '', false],
-                true,
+                ['formatted text'],
             ],
             [
                 'channels match',
                 [null, ['back','general'], [], []],
                 [false, 'general', null, '', false],
-                true,
+                ['formatted text'],
             ],
             [
                 'users match',
                 [null, [], ['alice','bob'], []],
                 [false, 'general', 'bob', '', false],
-                true,
+                ['formatted text'],
             ],
             [
                 'patterns match',
@@ -57,31 +57,31 @@ class MethodMatcherTest extends TestCase
                 'message already handled',
                 [null, [], [], []],
                 [false, 'general', null, '', true],
-                false,
+                [],
             ],
             [
                 'isBot match failed true !== false',
                 [true, [], [], []],
                 [false, 'general', null, '', false],
-                false,
+                [],
             ],
             [
                 'isBot match failed false !== true',
                 [false, [], [], []],
                 [true, 'general', null, '', false],
-                false,
+                [],
             ],
             [
                 'channels match failed',
                 [null, ['legal','back'], [], []],
                 [false, 'general', null, '', false],
-                false,
+                [],
             ],
             [
                 'users match failed',
                 [null, [], ['alice'], []],
                 [false, 'general', null, 'bob', false],
-                false,
+                [],
             ],
             [
                 "patterns don't match",
@@ -112,6 +112,7 @@ class MethodMatcherTest extends TestCase
             'getChannelName' => ['invoked' => 'any', 'result' => $channelName],
             'getUsername' => ['invoked' => 'any', 'result' => $username],
             'getPluginText' => ['invoked' => 'any', 'result' => $pluginText],
+            'getFormattedText' => ['invoked' => 'any', 'result' => 'formatted text'],
         ]);
 
         return $message;

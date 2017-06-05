@@ -72,7 +72,7 @@ trait PluginTrait
         $this->methodMatch($message);
     }
 
-    protected function pluginMatch(Message $message): bool
+    protected function pluginMatch(Message $message): array
     {
         return $this->getPluginMatcher()->matches($message);
     }
