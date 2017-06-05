@@ -65,7 +65,7 @@ trait PluginTrait
 
     public function handle(Message $message)
     {
-        if (!$this->pluginMatch($message)) {
+        if (empty($this->pluginMatch($message))) {
             return;
         }
 
@@ -87,17 +87,22 @@ trait PluginTrait
         foreach ($this->getMethodMatchers() as $methodMatcher) {
             /** @var MethodMatcher $methodMatcher */
             if ($matches = $methodMatcher->matches($message)) {
-                $method = $methodMatcher->getMethod();
-
-                $this->info("dispatching {$this->pluginId}:{$methodMatcher->getName()}:$method ".json_encode($matches));
-
-                $this->dispatch($method, $message, $matches);
+                $this->dispatchMatch($methodMatcher, $message, $matches);
 
                 if ($message->isHandled()) {
                     return;
                 }
             }
         }
+    }
+
+    protected function dispatchMatch(MethodMatcher $methodMatcher, Message $message, array $matches)
+    {
+        $method = $methodMatcher->getMethod();
+
+        $this->info("dispatching {$this->pluginId}:{$methodMatcher->getName()}:$method ".json_encode($matches));
+
+        $this->dispatch($method, $message, $matches);
     }
 
     protected function getMethodMatchers() : array

@@ -218,51 +218,125 @@ class PluginTest extends TestCase
     public function handleDataProvider()
     {
         return [
-            [[[], [], []]],
-            [[['formatted text'], [], []]],
-            [[['formatted one'], ['one'], []], ['method-1', ['one']]],
-            [[['formatted two'], [], ['two']], ['method-2', ['two']]],
+            [
+                [],
+                [],
+                [],
+                [],
+                [],
+            ],
+            [
+                [],
+                ['one two'],
+                [[]],
+                [[]],
+                [],
+            ],
+            [
+                [true],
+                ['one two'],
+                [['one two', 'one']],
+                [], // methodMatcher2 not called because message was handled
+                [['method-1', ['one two', 'one']]],
+            ],
+            [
+                [false],
+                ['one two'],
+                [['one two', 'one']],
+                [[]],
+                [['method-1', ['one two', 'one']]],
+            ],
+            [
+                [false],
+                ['one two'],
+                [[]],
+                [['one two', 'two']],
+                [['method-2', ['one two', 'two']]],
+            ],
+            [
+                [false, false],
+                ['one two'],
+                [['one two', 'one']],
+                [['one two', 'two']],
+                [
+                    ['method-1', ['one two', 'one']],
+                    ['method-2', ['one two', 'two']],
+                ],
+            ],
         ];
     }
 
     /**
      * @dataProvider handleDataProvider
      */
-    public function testHandle(array $match, $expected = [])
+    public function testHandle(
+        array $messageIsHandled,
+        array $pluginMatches,
+        array $matcher1Matches,
+        array $matcher2Matches,
+        array $dispatchExpected)
     {
-        list($matchPlugin, $matchMethod1, $matchMethod2) = $match;
+        $expectations = array_reduce(
+            $messageIsHandled,
+            function($expectations, $isHandled) {
+                $expectations[] = ['isHandled', ['result' => $isHandled]];
+                return $expectations;
+            },
+            []
+        );
+        /** @var Message $message */
+        $message = $this->newPartialMockWithExpectations(Message::class, $expectations);
 
-        $message = $this->createMock(Message::class);
-
+        /** @var PluginMatcher $pluginMatcher */
         $pluginMatcher = $this->newPartialMockWithExpectations(PluginMatcher::class, [
-            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchPlugin],
+            ['matches', ['params' => [$message], 'result' => $pluginMatches]],
         ]);
 
-        $methodMatcher1 = $this->newPartialMockWithExpectations(MethodMatcher::class, [
-            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchMethod1],
-            'getMethod' => ['invoked' => 'any', 'result' => 'method-1'],
-            'getName' => ['invoked' => 'any', 'result' => 'name-1'],
-        ]);
+        $expectations = array_reduce(
+            $matcher1Matches,
+            function($expectations, $matches) use ($message) {
+                $expectations[] = ['matches', ['params' => [$message], 'result' => $matches]];
+                if (!empty($matches)) {
+                    $expectations[] = ['getMethod', ['result' => 'method-1']];
+                    $expectations[] = ['getName', ['result' => 'name-1']];
+                }
+                return $expectations;
+            },
+            []
+        );
+        $methodMatcher1 = $this->newPartialMockWithExpectations(MethodMatcher::class, $expectations);
 
-        $methodMatcher2 = $this->newPartialMockWithExpectations(MethodMatcher::class, [
-            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchMethod2],
-            'getMethod' => ['invoked' => 'any', 'result' => 'method-2'],
-            'getName' => ['invoked' => 'any', 'result' => 'name-2'],
-        ]);
+        $expectations = array_reduce(
+            $matcher2Matches,
+            function($expectations, $matches) use ($message) {
+                $expectations[] = ['matches', ['params' => [$message], 'result' => $matches]];
+                if (!empty($matches)) {
+                    $expectations[] = ['getMethod', ['result' => 'method-2']];
+                    $expectations[] = ['getName', ['result' => 'name-2']];
+                }
+                return $expectations;
+            },
+            []
+        );
+        $methodMatcher2 = $this->newPartialMockWithExpectations(MethodMatcher::class, $expectations);
 
-        if (empty($expected)) {
-            $dispatch = ['invoked' => 'never'];
+        if (empty($dispatchExpected)) {
+            $expectations = [['dispatch', 'never']];
         } else {
-            list($method, $matches) = $expected;
-            $dispatch = ['params' => [$method, $message, $matches]];
+            $expectations = array_reduce(
+                $dispatchExpected,
+                function ($expectations, $dispatch) use ($message) {
+                    list($method, $matches) = $dispatch;
+                    $expectations[] = ['dispatch', ['params' => [$method, $message, $matches]]];
+                    return $expectations;
+                },
+                []
+            );
         }
-
         /** @var TestPlugin $plugin */
-        $plugin = $this->newPartialMockWithExpectations(TestPlugin::class, [
-            'getPluginMatcher' => ['invoked' => 'any', 'result' => $pluginMatcher],
-            'getMethodMatchers' => ['invoked' => 'any', 'result' => [$methodMatcher1,$methodMatcher2]],
-            'dispatch' => $dispatch,
-        ]);
+        $plugin = $this->newPartialMockWithExpectations(TestPlugin::class, $expectations);
+        $plugin->setPluginMatcher($pluginMatcher);
+        $plugin->setMethodMatchers([$methodMatcher1,$methodMatcher2]);
 
         $plugin->handle($message);
     }

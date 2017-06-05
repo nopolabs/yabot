@@ -17,10 +17,6 @@ trait MatcherTrait
 
     public function matches(Message $message) : array
     {
-        if (!$this->matchesIsHandled($message)) {
-            return [];
-        }
-
         if (!$this->matchesIsBot($message)) {
             return [];
         }
@@ -38,16 +34,6 @@ trait MatcherTrait
         }
 
         return $this->matchPatterns($message);
-    }
-
-    protected function matchesIsHandled(Message $message) : bool
-    {
-        if ($message->isHandled()) {
-            $this->debug($this->name.': message already handled');
-            return false;
-        }
-
-        return true;
     }
 
     protected function matchesIsBot(Message $message) : bool

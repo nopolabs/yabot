@@ -19,62 +19,56 @@ class PluginMatcherTest extends TestCase
             [
                 'No constraints',
                 [null, [], []],
-                [false, 'general', null, false],
+                [false, 'general', null],
                 ['formatted text'],
             ],
             [
                 'isBot match true === true',
                 [true, [], []],
-                [true, 'general', null, false],
+                [true, 'general', null],
                 ['formatted text'],
             ],
             [
                 'isBot match false === false',
                 [false, [], []],
-                [false, 'general', null, false],
+                [false, 'general', null],
                 ['formatted text'],
             ],
             [
                 'channels match',
                 [null, ['back','general'], []],
-                [false, 'general', null, false],
+                [false, 'general', null],
                 ['formatted text'],
             ],
             [
                 'users match',
                 [null, [], ['alice','bob']],
-                [false, 'general', 'bob', false],
+                [false, 'general', 'bob'],
                 ['formatted text'],
             ],
 
             [
-                'message already handled',
-                [null, [], []],
-                [false, 'general', null, true],
-                [],
-            ],
-            [
                 'isBot match failed true !== false',
                 [true, [], []],
-                [false, 'general', null, false],
+                [false, 'general', null],
                 [],
             ],
             [
                 'isBot match failed false !== true',
                 [false, [], []],
-                [true, 'general', null, false],
+                [true, 'general', null],
                 [],
             ],
             [
                 'channels match failed',
                 [null, ['legal','back'], []],
-                [false, 'general', null, false],
+                [false, 'general', null],
                 [],
             ],
             [
                 'users match failed',
                 [null, [], ['alice']],
-                [false, 'general', 'bob', false],
+                [false, 'general', 'bob'],
                 [],
             ],
         ];
@@ -91,11 +85,10 @@ class PluginMatcherTest extends TestCase
 
     private function buildMessage(array $messageData) : Message
     {
-        list($isBot, $channelName, $username, $isHandled) = $messageData;
+        list($isBot, $channelName, $username) = $messageData;
 
         /** @var Message $message */
         $message = $this->newPartialMockWithExpectations(Message::class, [
-            'isHandled' => ['invoked' => 'any', 'result' => $isHandled],
             'isBot' => ['invoked' => 'any', 'result' => $isBot],
             'getChannelName' => ['invoked' => 'any', 'result' => $channelName],
             'getUsername' => ['invoked' => 'any', 'result' => $username],

@@ -19,74 +19,68 @@ class MethodMatcherTest extends TestCase
             [
                 'No constraints',
                 [null, [], [], []],
-                [false, 'general', null, '', false],
+                [false, 'general', null, ''],
                 ['formatted text'],
             ],
             [
                 'isBot match true === true',
                 [true, [], [], []],
-                [true, 'general', null, '', false],
+                [true, 'general', null, ''],
                 ['formatted text'],
             ],
             [
                 'isBot match false === false',
                 [false, [], [], []],
-                [false, 'general', null, '', false],
+                [false, 'general', null, ''],
                 ['formatted text'],
             ],
             [
                 'channels match',
                 [null, ['back','general'], [], []],
-                [false, 'general', null, '', false],
+                [false, 'general', null, ''],
                 ['formatted text'],
             ],
             [
                 'users match',
                 [null, [], ['alice','bob'], []],
-                [false, 'general', 'bob', '', false],
+                [false, 'general', 'bob', ''],
                 ['formatted text'],
             ],
             [
                 'patterns match',
                 [null, [], [], ["/don't match (me)/",'/match (me)/']],
-                [false, 'general', null, 'match me', false],
+                [false, 'general', null, 'match me'],
                 ['match me', 'me'],
             ],
 
             [
-                'message already handled',
-                [null, [], [], []],
-                [false, 'general', null, '', true],
-                [],
-            ],
-            [
                 'isBot match failed true !== false',
                 [true, [], [], []],
-                [false, 'general', null, '', false],
+                [false, 'general', null, ''],
                 [],
             ],
             [
                 'isBot match failed false !== true',
                 [false, [], [], []],
-                [true, 'general', null, '', false],
+                [true, 'general', null, ''],
                 [],
             ],
             [
                 'channels match failed',
                 [null, ['legal','back'], [], []],
-                [false, 'general', null, '', false],
+                [false, 'general', null, ''],
                 [],
             ],
             [
                 'users match failed',
                 [null, [], ['alice'], []],
-                [false, 'general', null, 'bob', false],
+                [false, 'general', null, 'bob'],
                 [],
             ],
             [
                 "patterns don't match",
                 [null, [], [], ["/don't match (me)/",'/match (me)/']],
-                [false, 'general', null, "don't match this", false],
+                [false, 'general', null, "don't match this"],
                 [],
             ],
         ];
@@ -103,11 +97,10 @@ class MethodMatcherTest extends TestCase
 
     private function buildMessage(array $messageData) : Message
     {
-        list($isBot, $channelName, $username, $pluginText, $isHandled) = $messageData;
+        list($isBot, $channelName, $username, $pluginText) = $messageData;
 
         /** @var Message $message */
         $message = $this->newPartialMockWithExpectations(Message::class, [
-            'isHandled' => ['invoked' => 'any', 'result' => $isHandled],
             'isBot' => ['invoked' => 'any', 'result' => $isBot],
             'getChannelName' => ['invoked' => 'any', 'result' => $channelName],
             'getUsername' => ['invoked' => 'any', 'result' => $username],
