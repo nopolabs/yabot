@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "bf08c1c72f4f54d469af35f79962bac8",
+    "content-hash": "c7d36437c62f8cddb1428fd1122fb1a2",
     "packages": [
         {
             "name": "coderstephen/slack-client",
@@ -2241,12 +2241,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nopolabs/mock-with-expectations.git",
-                "reference": "904ed924a5f1efa01366490b6671ca79b07d0cdc"
+                "reference": "a93745ecbc83980ee87aa6a2aeb9ac4c329691b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nopolabs/mock-with-expectations/zipball/904ed924a5f1efa01366490b6671ca79b07d0cdc",
-                "reference": "904ed924a5f1efa01366490b6671ca79b07d0cdc",
+                "url": "https://api.github.com/repos/nopolabs/mock-with-expectations/zipball/a93745ecbc83980ee87aa6a2aeb9ac4c329691b6",
+                "reference": "a93745ecbc83980ee87aa6a2aeb9ac4c329691b6",
                 "shasum": ""
             },
             "require": {
@@ -2274,7 +2274,7 @@
                 }
             ],
             "description": "Helper trait for phpunit testing",
-            "time": "2017-05-29 05:35:36"
+            "time": "2017-05-31T22:51:05+00:00"
         },
         {
             "name": "padraic/humbug_get_contents",
@@ -4096,7 +4096,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.5.0"
+        "php": ">=7.0"
     },
     "platform-dev": []
 }

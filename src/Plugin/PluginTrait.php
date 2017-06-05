@@ -69,33 +69,40 @@ trait PluginTrait
             return;
         }
 
-        if ($matched = $this->methodMatch($message)) {
-            list($method, $matches) = $matched;
-
-            $this->dispatch($method, $message, $matches);
-        }
+        $this->methodMatch($message);
     }
 
     protected function pluginMatch(Message $message): bool
     {
-        return $this->pluginMatcher->matches($message);
+        return $this->getPluginMatcher()->matches($message);
     }
 
-    protected function methodMatch(Message $message): array
+    protected function getPluginMatcher() : PluginMatcher
     {
-        foreach ($this->methodMatchers as $methodMatcher) {
-            if (($matches = $methodMatcher->matches($message)) === false) {
-                continue;
+        return $this->pluginMatcher;
+    }
+
+    protected function methodMatch(Message $message)
+    {
+        foreach ($this->getMethodMatchers() as $methodMatcher) {
+            /** @var MethodMatcher $methodMatcher */
+            if ($matches = $methodMatcher->matches($message)) {
+                $method = $methodMatcher->getMethod();
+
+                $this->info("dispatching {$this->pluginId}:{$methodMatcher->getName()}:$method ".json_encode($matches));
+
+                $this->dispatch($method, $message, $matches);
+
+                if ($message->isHandled()) {
+                    return;
+                }
             }
-
-            $method = $methodMatcher->getMethod();
-
-            $this->info("{$this->pluginId}:{$methodMatcher->getName()}:$method matched");
-
-            return [$method, $matches];
         }
+    }
 
-        return [];
+    protected function getMethodMatchers() : array
+    {
+        return $this->methodMatchers;
     }
 
     protected function dispatch(string $method, Message $message, array $matches)

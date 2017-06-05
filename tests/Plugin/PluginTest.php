@@ -4,7 +4,9 @@ namespace Nopolabs\Yabot\Tests\Plugin;
 
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Message\Message;
+use Nopolabs\Yabot\Plugin\MethodMatcher;
 use Nopolabs\Yabot\Plugin\PluginManager;
+use Nopolabs\Yabot\Plugin\PluginMatcher;
 use Nopolabs\Yabot\Plugin\PluginTrait;
 use Nopolabs\Yabot\Yabot;
 use PHPUnit\Framework\TestCase;
@@ -216,35 +218,51 @@ class PluginTest extends TestCase
     public function handleDataProvider()
     {
         return [
-            [false, 'never'],
-            [true, []],
-            [true, ['method-name', ['matched text', 'matched', 'text']]],
+            [[false, [], []]],
+            [[true, [], []]],
+            [[true, ['one'], []], ['method-1', ['one']]],
+            [[true, [], ['two']], ['method-2', ['two']]],
         ];
     }
 
     /**
      * @dataProvider handleDataProvider
      */
-    public function testHandle(bool $matchedPlugin, $matchedMethod)
+    public function testHandle(array $match, $expected = [])
     {
+        list($matchPlugin, $matchMethod1, $matchMethod2) = $match;
+
         $message = $this->createMock(Message::class);
 
-        $expectations = [['pluginMatch', ['params' => [$message], 'result' => $matchedPlugin]]];
+        $pluginMatcher = $this->newPartialMockWithExpectations(PluginMatcher::class, [
+            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchPlugin],
+        ]);
 
-        if ($matchedMethod === 'never') {
-            $expectations[] = ['methodMatch', 'never'];
+        $methodMatcher1 = $this->newPartialMockWithExpectations(MethodMatcher::class, [
+            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchMethod1],
+            'getMethod' => ['invoked' => 'any', 'result' => 'method-1'],
+            'getName' => ['invoked' => 'any', 'result' => 'name-1'],
+        ]);
+
+        $methodMatcher2 = $this->newPartialMockWithExpectations(MethodMatcher::class, [
+            'matches' => ['invoked' => 'any', 'params' => [$message], 'result' => $matchMethod2],
+            'getMethod' => ['invoked' => 'any', 'result' => 'method-2'],
+            'getName' => ['invoked' => 'any', 'result' => 'name-2'],
+        ]);
+
+        if (empty($expected)) {
+            $dispatch = ['invoked' => 'never'];
         } else {
-            $expectations[] = ['methodMatch', ['params' => [$message], 'result' => $matchedMethod]];
-            if (empty($matchedMethod)) {
-                $expectations[] = ['dispatch', 'never'];
-            } else {
-                list($method, $matches) = $matchedMethod;
-                $expectations[] = ['dispatch', ['params' => [$method, $message, $matches]]];
-            }
+            list($method, $matches) = $expected;
+            $dispatch = ['params' => [$method, $message, $matches]];
         }
 
         /** @var TestPlugin $plugin */
-        $plugin = $this->newPartialMockWithExpectations(TestPlugin::class, $expectations);
+        $plugin = $this->newPartialMockWithExpectations(TestPlugin::class, [
+            'getPluginMatcher' => ['invoked' => 'any', 'result' => $pluginMatcher],
+            'getMethodMatchers' => ['invoked' => 'any', 'result' => [$methodMatcher1,$methodMatcher2]],
+            'dispatch' => $dispatch,
+        ]);
 
         $plugin->handle($message);
     }
