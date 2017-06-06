@@ -54,7 +54,7 @@ class GuzzleTest extends TestCase
             }
         );
 
-        $timer = $this->eventLoop->addTimer(6, function() {});
+        $timer = $this->eventLoop->addTimer(10, function() {});
 
         while ($this->eventLoop->isTimerActive($timer)) {
 
