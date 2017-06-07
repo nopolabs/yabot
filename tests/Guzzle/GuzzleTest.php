@@ -26,7 +26,10 @@ class GuzzleTest extends TestCase
     protected function setUp()
     {
         $this->eventLoop = Factory::create();
-        $this->guzzle = GuzzleFactory::newGuzzle($this->eventLoop, ['timeout' => 5]);
+        $handler = new CurlMultiHandler();
+        $client = GuzzleFactory::newClient($handler, ['timeout' => 5]);
+
+        $this->guzzle = new Guzzle($client, $handler, $this->eventLoop);
 
         $this->eventLoop->run();
     }

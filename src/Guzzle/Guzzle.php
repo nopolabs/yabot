@@ -31,6 +31,11 @@ class Guzzle
         $this->eventloop = $eventLoop;
     }
 
+    public function getClient() : Client
+    {
+        return $this->client;
+    }
+
     public function getAsync(string $uri, array $options = []) : PromiseInterface
     {
         $request = $this->client->getAsync($uri, $options);

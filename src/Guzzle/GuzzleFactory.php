@@ -5,19 +5,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use React\EventLoop\LoopInterface;
 
 class GuzzleFactory
 {
-    public static function newGuzzle(LoopInterface $eventLoop, array $config) : Guzzle
+    public static function newClient(CurlMultiHandler $handler, array $config) : Client
     {
-        $handler = new CurlMultiHandler();
-
         $config['handler'] = self::createHandlerStack($handler);
 
-        $client = new Client($config);
-
-        return new Guzzle($client, $handler, $eventLoop);
+        return new Client($config);
     }
 
     /**
