@@ -31,6 +31,7 @@ class YabotContainer extends ContainerBuilder
 
         if ($type === 'yml') {
             $this->loadYamlFile($file);
+            return;
         }
 
         throw new Exception("Do not know how to load $file");
