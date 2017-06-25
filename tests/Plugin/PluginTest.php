@@ -334,7 +334,11 @@ class PluginTest extends TestCase
             );
         }
         /** @var TestPlugin $plugin */
-        $plugin = $this->newPartialMockWithExpectations(TestPlugin::class, $expectations);
+        $plugin = $this->newPartialMockWithExpectations(
+            TestPlugin::class,
+            $expectations,
+            [$this->logger]
+        );
         $plugin->setPluginMatcher($pluginMatcher);
         $plugin->setMethodMatchers([$methodMatcher1,$methodMatcher2]);
 

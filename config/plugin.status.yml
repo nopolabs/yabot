@@ -2,7 +2,7 @@ services:
     plugin.status:
         class: Nopolabs\Yabot\Plugin\StatusPlugin
         arguments:
-            - '@logger'
             - '@yabot'
+            - '@logger'
         tags:
             - { name: yabot.plugin }

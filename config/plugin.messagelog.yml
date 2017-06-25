@@ -2,7 +2,7 @@ services:
     plugin.messagelog:
         class: Nopolabs\Yabot\Plugin\MessageLogPlugin
         arguments:
-            - '@logger'
             - '@yabot'
+            - '@logger'
         tags:
             - { name: yabot.plugin }

@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot\Helpers;
 
 
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 trait LogTrait
 {
@@ -11,7 +12,7 @@ trait LogTrait
 
     protected function setLog(LoggerInterface $log = null)
     {
-        $this->log = $log;
+        $this->log = $log ?? new NullLogger();
     }
 
     /**
@@ -24,64 +25,46 @@ trait LogTrait
 
     protected function emergency($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->emergency($message, $context);
-        }
+        $this->getLog()->emergency($message, $context);
     }
 
     protected function alert($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->alert($message, $context);
-        }
+        $this->getLog()->alert($message, $context);
     }
 
     protected function critical($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->critical($message, $context);
-        }
+        $this->getLog()->critical($message, $context);
     }
 
     protected function error($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->error($message, $context);
-        }
+        $this->getLog()->error($message, $context);
     }
 
     protected function warning($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->warning($message, $context);
-        }
+        $this->getLog()->warning($message, $context);
     }
 
     protected function notice($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->notice($message, $context);
-        }
+        $this->getLog()->notice($message, $context);
     }
 
     protected function info($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->info($message, $context);
-        }
+        $this->getLog()->info($message, $context);
     }
 
     protected function debug($message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->debug($message, $context);
-        }
+        $this->getLog()->debug($message, $context);
     }
 
     protected function log($level, $message, array $context = array())
     {
-        if ($log = $this->getLog()) {
-            $log->log($level, $message, $context);
-        }
+        $this->getLog()->log($level, $message, $context);
     }
 }

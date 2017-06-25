@@ -13,7 +13,7 @@ class MessageLogPlugin implements PluginInterface
 
     private $yabot;
 
-    public function __construct(LoggerInterface $logger, Yabot $yabot)
+    public function __construct(Yabot $yabot, LoggerInterface $logger = null)
     {
         $this->setLog($logger);
         $this->yabot = $yabot;
