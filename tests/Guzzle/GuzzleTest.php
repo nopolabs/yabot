@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Guzzle\Guzzle;
+use Nopolabs\Yabot\Guzzle\ReactAwareCurlFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Factory;
@@ -26,10 +27,9 @@ class GuzzleTest extends TestCase
     protected function setUp()
     {
         $this->eventLoop = Factory::create();
-        $handler = new CurlMultiHandler();
-        $client = GuzzleFactory::newClient($handler, ['timeout' => 5]);
+        $client = GuzzleFactory::newClient($this->eventLoop, ['timeout' => 5]);
 
-        $this->guzzle = new Guzzle($client, $handler, $this->eventLoop);
+        $this->guzzle = new Guzzle($client);
 
         $this->eventLoop->run();
     }

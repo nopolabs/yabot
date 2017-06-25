@@ -2,14 +2,20 @@
 namespace Nopolabs\Yabot\Guzzle;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlFactoryInterface;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use React\EventLoop\LoopInterface;
 
 class GuzzleFactory
 {
-    public static function newClient(CurlMultiHandler $handler, array $config) : Client
+    public static function newClient(LoopInterface $eventLoop, array $config) : Client
     {
+        $curlFactory = new ReactAwareCurlFactory($eventLoop);
+        $handler = new CurlMultiHandler(['handle_factory' => $curlFactory]);
+        $curlFactory->setHandler($handler);
+
         $config['handler'] = self::createHandlerStack($handler);
 
         return new Client($config);
