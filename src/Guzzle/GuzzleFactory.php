@@ -2,7 +2,6 @@
 namespace Nopolabs\Yabot\Guzzle;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Handler\CurlFactoryInterface;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;

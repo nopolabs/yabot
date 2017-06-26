@@ -21,15 +21,18 @@ class GuzzleTest extends TestCase
     /** @var LoopInterface */
     private $eventLoop;
 
-    /** @var Client */
+    /** @var Guzzle */
     private $guzzle;
+
+    /** @var Client */
+    private $client;
 
     protected function setUp()
     {
         $this->eventLoop = Factory::create();
-        $client = GuzzleFactory::newClient($this->eventLoop, ['timeout' => 5]);
+        $this->client = GuzzleFactory::newClient($this->eventLoop, ['timeout' => 5]);
 
-        $this->guzzle = new Guzzle($client);
+        $this->guzzle = new Guzzle($this->client);
 
         $this->eventLoop->run();
     }
@@ -37,6 +40,11 @@ class GuzzleTest extends TestCase
     protected function tearDown()
     {
         $this->eventLoop->stop();
+    }
+
+    public function testGetClient()
+    {
+        $this->assertSame($this->client, $this->guzzle->getClient());
     }
 
     /**

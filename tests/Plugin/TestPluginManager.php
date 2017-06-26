@@ -10,6 +10,11 @@ class TestPluginManager extends PluginManager
         return $this->pluginMap;
     }
 
+    public function setPriorityMap(array $priorityMap)
+    {
+        $this->priorityMap = $priorityMap;
+    }
+
     public function getPriorityMap() : array
     {
         return $this->priorityMap;

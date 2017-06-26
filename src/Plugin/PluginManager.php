@@ -76,7 +76,7 @@ class PluginManager
     public function updatePrefixes($authedUsername)
     {
         $updatedPriorityMap = [];
-        foreach ($this->priorityMap as $priority => $prefixMap) {
+        foreach ($this->getPriorityMap() as $priority => $prefixMap) {
             $updatedPrefixMap = [];
             foreach ($prefixMap as $prefix => $plugins) {
                 if ($prefix === self::AUTHED_USER_PREFIX) {
@@ -182,5 +182,10 @@ class PluginManager
     protected function getPriorityMap() : array
     {
         return $this->priorityMap;
+    }
+
+    protected function setPriorityMap(array $priorityMap)
+    {
+        $this->priorityMap = $priorityMap;
     }
 }

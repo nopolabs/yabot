@@ -1,7 +1,9 @@
 <?php
 namespace Nopolabs\Yabot\Tests\Plugin;
 
+use Exception;
 use Nopolabs\Test\MockWithExpectationsTrait;
+use Nopolabs\Yabot\Message\Message;
 use Nopolabs\Yabot\Plugin\PluginInterface;
 use Nopolabs\Yabot\Plugin\PluginManager;
 use PHPUnit\Framework\TestCase;
@@ -128,6 +130,26 @@ class PluginManagerTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testUpdatePrefixes()
+    {
+        $beforeMap = [
+            1 => ['<authed_user>' => ['test-1']],
+            2 => ['yabot' => ['test-2']],
+        ];
+        $afterMap = [
+            1 => ['@yabot-user-name' => ['test-1']],
+            2 => ['yabot' => ['test-2']],
+        ];
+
+        $manager = new TestPluginManager($this->logger);
+
+        $manager->setPriorityMap($beforeMap);
+
+        $manager->updatePrefixes('yabot-user-name');
+
+        $this->assertEquals($afterMap, $manager->getPriorityMap());
+    }
+
     public function matchesPrefixDataProvider()
     {
         return [
@@ -147,5 +169,52 @@ class PluginManagerTest extends TestCase
         $matches = $manager->matchesPrefix($prefix, $text);
 
         $this-> assertEquals($expected, $matches);
+    }
+
+    public function testDispatchMessage()
+    {
+        $message = $this->newPartialMockWithExpectations(Message::class, [
+            ['getformattedText', ['result' => 'prefix plugin-text']],
+            ['setPluginText', ['params' => ['plugin-text']]],
+            ['getData', ['result' => ['data']]],
+            ['isHandled', ['result' => false]],
+            ['isHandled', ['result' => true]],
+        ]);
+
+        $plugin1 = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['handle', 'never'],
+        ]);
+
+        $plugin2 = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['handle', ['params' => [$message], 'throws' => new Exception('boom!')]],
+        ]);
+
+        $plugin3 = $this->newPartialMockWithExpectations(PluginInterface::class, [
+            ['handle', ['params' => [$message]]],
+        ]);
+
+        $expected = '/^Unhandled Exception in plugin-id2/';
+
+        $this->setExpectation($this->logger, 'warning', [
+            'params' => [$this->matchesRegularExpression($expected), []],
+        ]);
+
+        $priorityMap = [
+            1 => [
+                'not-prefix' => [
+                    'plugin-id1' => $plugin1,
+                ],
+                'prefix' => [
+                    'plugin-id2' => $plugin2,
+                    'plugin-id3' => $plugin3,
+                ],
+            ],
+        ];
+
+        $manager = new TestPluginManager($this->logger);
+
+        $manager->setPriorityMap($priorityMap);
+
+        $manager->dispatchMessage($message);
     }
 }
