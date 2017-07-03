@@ -270,58 +270,69 @@ class MessageFactoryTest extends TestCase
     public function formatEntityDataProvider()
     {
         return [
-            ['', false, 'formatReadable'],
-            ['http://nopolabs.com', false, 'formatReadable'],
-            ['http://nopolabs.com|Nopo Labs', 'Nopo Labs', 'formatReadable'],
-            ['@U00000000', false, 'formatUser'],
-            ['@U00000000|alice', 'alice', 'formatUser'],
-            ['#C00000000', false, 'formatChannel'],
-            ['#C00000000|general', 'general', 'formatChannel'],
+            ['', ''],
+            ['http://nopolabs.com', 'http://nopolabs.com'],
+            ['http://nopolabs.com|Nopo Labs', 'Nopo Labs'],
+            ['@U00000000', '@known-user'],
+            ['@U00000000|alice', '@alice'],
+            ['#C00000000', '#known-channel'],
+            ['#C00000000|general', '#general'],
         ];
     }
 
     /**
      * @dataProvider formatEntityDataProvider
      */
-    public function testFormatEntity($entity, $readable, $formatMethod)
+    public function testFormatEntity($entity, $expected)
     {
+        $user = $this->newPartialMockWithExpectations(User::class, [
+            'getUsername' => ['invoked' => 'any', 'result' => 'known-user'],
+        ]);
+
+        $channel = $this->newPartialMockWithExpectations(Channel::class, [
+            'getName' => ['invoked' => 'any', 'result' => 'known-channel'],
+        ]);
+
         $factory = $this->newMessageFactory([
-            [$formatMethod, ['params' => [$entity, $readable], 'result' => 'expected']],
+            'getUserById' => ['invoked' => 'any', 'params' => ['U00000000'], 'result' => $user],
+            'getChannelById' => ['invoked' => 'any', 'params' => ['C00000000'], 'result' => $channel],
         ]);
 
         $formatted = $factory->formatEntity($entity);
 
-        $this->assertEquals('expected', $formatted);
+        $this->assertEquals($expected, $formatted);
     }
 
     public function formatUserDataProvider()
     {
         return [
-            ['@alice', false, false, '@alice'],
-            ['@U00000000|Alice', 'Alice', false, 'Alice'],
-            ['@U00000000|Alice', 'Alice', true, 'Alice'],
-            ['@U00000000', false, true, '@user-name'],
-            ['@U00000000', false, false, '@U00000000'],
+            ['@U00000000', null, '@known-user'],
+            ['@U00000000', 'alice', '@alice'],
+            ['@unknown-user', null, '@unknown-user'],
+            ['@unknown-user', 'bob', '@bob'],
         ];
     }
 
     /**
      * @dataProvider formatUserDataProvider
      */
-    public function testFormatUser($entity, $readable, $knownUser, $expected)
+    public function testFormatUser($userId, $readable, $expected)
     {
-        if (!$readable && $knownUser) {
-            $user = $this->newPartialMockWithExpectations(User::class, [
-                ['getUsername', ['result' => 'user-name']],
-            ]);
-            $factory = $this->newMessageFactory([
-                ['getUserById', ['params' => [substr($entity, 1)], 'result' => $user]],
-            ]);
-        } else {
-            $factory = $this->newMessageFactory();
-        }
+        $user = $this->newPartialMockWithExpectations(User::class, [
+            'getUsername' => ['invoked' => 'any', 'result' => 'known-user'],
+        ]);
 
-        $formatted = $factory->formatUser($entity, $readable);
+        $factory = $this->newMessageFactory([
+            'getUserById' => [
+                'invoked' => 'any',
+                'params' => [substr($userId, 1)],
+                'result' => function ($userId) use ($user) {
+                    return ($userId === 'U00000000') ? $user : null;
+                },
+            ],
+        ]);
+
+        $formatted = $factory->formatUser($userId, $readable);
 
         $this->assertEquals($expected, $formatted);
     }
@@ -329,43 +340,34 @@ class MessageFactoryTest extends TestCase
     public function formatChannelDataProvider()
     {
         return [
-            ['#general', false, false, '#general'],
-            ['#C00000000|general', 'general', false, 'general'],
-            ['#C00000000|general', 'general', true, 'general'],
-            ['#C00000000', false, true, '#channel-name'],
-            ['#C00000000', false, false, '#C00000000'],
+            ['#C00000000', null, '#known-channel'],
+            ['#C00000000', 'general', '#general'],
+            ['#unknown-channel', null, '#unknown-channel'],
+            ['#unknown-channel', 'special', '#special'],
         ];
     }
 
     /**
      * @dataProvider formatChannelDataProvider
      */
-    public function testFormatChannel($entity, $readable, $knownChannel, $expected)
+    public function testFormatChannel($channelId, $readable, $expected)
     {
-        if (!$readable && $knownChannel) {
-            $channel = $this->newPartialMockWithExpectations(Channel::class, [
-                ['getName', ['result' => 'channel-name']],
-            ]);
-            $factory = $this->newMessageFactory([
-                ['getChannelById', ['params' => [substr($entity, 1)], 'result' => $channel]],
-            ]);
-        } else {
-            $factory = $this->newMessageFactory();
-        }
+        $channel = $this->newPartialMockWithExpectations(Channel::class, [
+            'getName' => ['invoked' => 'any', 'result' => 'known-channel'],
+        ]);
+        $factory = $this->newMessageFactory([
+            'getChannelById' => [
+                'invoked' => 'any',
+                'params' => [substr($channelId, 1)],
+                'result' => function ($channelId) use ($channel) {
+                    return ($channelId === 'C00000000') ? $channel : null;
+                },
+            ],
+        ]);
 
-        $formatted = $factory->formatChannel($entity, $readable);
+        $formatted = $factory->formatChannel($channelId, $readable);
 
         $this->assertEquals($expected, $formatted);
-    }
-
-    public function testFormatReadable()
-    {
-        $factory = $this->newMessageFactory();
-
-        $this->assertEquals('readable', $factory->formatReadable('entity|readable', 'readable'));
-        $this->assertEquals('entity', $factory->formatReadable('entity', 'entity'));
-        $this->assertEquals('entity', $factory->formatReadable('entity', ''));
-        $this->assertEquals('entity', $factory->formatReadable('entity'));
     }
 
     private function newMessageFactory(array $expectations = [])

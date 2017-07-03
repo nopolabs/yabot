@@ -109,22 +109,24 @@ class MessageFactory
     public function formatEntity(string $entity) : string
     {
         $pipe = strrpos($entity, '|');
-        $readable = ($pipe !== false) ? substr($entity, $pipe + 1) : '';
+
+        $readable = ($pipe !== false) ? substr($entity, $pipe + 1) : null;
 
         if ($entity && $entity[0] === '@') {
             return $this->formatUser($entity, $readable);
         }
+
         if ($entity && $entity[0] === '#') {
             return $this->formatChannel($entity, $readable);
         }
 
-        return $this->formatReadable($entity, $readable);
+        return $readable ? $readable : $entity;
     }
 
-    public function formatUser(string $entity, string $readable = '') : string
+    public function formatUser(string $entity, $readable = null) : string
     {
-        if ($readable !== '') {
-            return $readable;
+        if ($readable) {
+            return "@$readable";
         }
 
         $userId = substr($entity, 1);
@@ -135,10 +137,10 @@ class MessageFactory
         return $entity;
     }
 
-    public function formatChannel(string $entity, string $readable = '') : string
+    public function formatChannel(string $entity, $readable = null) : string
     {
-        if ($readable !== '') {
-            return $readable;
+        if ($readable) {
+            return "#$readable";
         }
 
         $channelId = substr($entity, 1);
@@ -147,11 +149,6 @@ class MessageFactory
         }
 
         return $entity;
-    }
-
-    public function formatReadable(string $match, string $readable = '') : string
-    {
-        return empty($readable) ? $match : $readable;
     }
 
     protected function isMessageChanged(array $data): bool
