@@ -242,6 +242,7 @@ class MessageFactoryTest extends TestCase
             ['hello @world', [], 'hello @world'],
             ['hello <@world>', ['@world'], 'hello [@world]'],
             ['hello <@alice> and <@bob>', ['@alice', '@bob'], 'hello [@alice] and [@bob]'],
+            ['visit <http://nopolabs.com>', ['http://nopolabs.com'], 'visit [http://nopolabs.com]'],
         ];
     }
 
@@ -270,8 +271,8 @@ class MessageFactoryTest extends TestCase
     {
         return [
             ['', false, 'formatReadable'],
-            ['http://opensky.com', false, 'formatReadable'],
-            ['http://opensky.com|OpenSky', 'OpenSky', 'formatReadable'],
+            ['http://nopolabs.com', false, 'formatReadable'],
+            ['http://nopolabs.com|Nopo Labs', 'Nopo Labs', 'formatReadable'],
             ['@U00000000', false, 'formatUser'],
             ['@U00000000|alice', 'alice', 'formatUser'],
             ['#C00000000', false, 'formatChannel'],
@@ -363,6 +364,8 @@ class MessageFactoryTest extends TestCase
 
         $this->assertEquals('readable', $factory->formatReadable('entity|readable', 'readable'));
         $this->assertEquals('entity', $factory->formatReadable('entity', 'entity'));
+        $this->assertEquals('entity', $factory->formatReadable('entity', ''));
+        $this->assertEquals('entity', $factory->formatReadable('entity'));
     }
 
     private function newMessageFactory(array $expectations = [])

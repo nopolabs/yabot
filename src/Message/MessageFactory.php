@@ -151,7 +151,7 @@ class MessageFactory
 
     public function formatReadable(string $match, string $readable = '') : string
     {
-        return $readable ?? $match;
+        return empty($readable) ? $match : $readable;
     }
 
     protected function isMessageChanged(array $data): bool
