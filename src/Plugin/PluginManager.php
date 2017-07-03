@@ -52,17 +52,7 @@ class PluginManager
         $help = [];
         /** @var PluginInterface $plugin */
         foreach ($this->getPluginMap() as $pluginId => $plugin) {
-            $prefix = $plugin->getPrefix();
-            if ($prefix === self::NO_PREFIX) {
-                $prefix = '';
-            } else {
-                if ($prefix === self::AUTHED_USER_PREFIX) {
-                    $prefix = '@'.$this->getAuthedUser()->getUsername();
-                }
-
-                $prefix = "$prefix ";
-            }
-
+            $prefix = $this->helpPrefix($plugin->getPrefix());
             $help[] = $pluginId;
             $lines = explode("\n", trim($plugin->help()));
             foreach ($lines as $line) {
@@ -213,5 +203,18 @@ class PluginManager
             $updatedPriorityMap[$priority] = $updatedPrefixMap;
         }
         $this->priorityMap = $updatedPriorityMap;
+    }
+
+    protected function helpPrefix($prefix)
+    {
+        if ($prefix === self::NO_PREFIX) {
+            return '';
+        }
+
+        if ($prefix === self::AUTHED_USER_PREFIX) {
+            $prefix = '@'.$this->getAuthedUser()->getUsername();
+        }
+
+        return "$prefix ";
     }
 }
