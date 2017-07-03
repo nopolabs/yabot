@@ -212,7 +212,7 @@ class PluginManager
         }
 
         if ($prefix === self::AUTHED_USER_PREFIX) {
-            $prefix = '@'.$this->getAuthedUser()->getUsername();
+            return '@'.$this->getAuthedUser()->getUsername().' ';
         }
 
         return "$prefix ";
