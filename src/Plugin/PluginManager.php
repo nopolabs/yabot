@@ -8,6 +8,7 @@ use Nopolabs\Yabot\Helpers\LogTrait;
 use Nopolabs\Yabot\Message\Message;
 use Nopolabs\Yabot\Yabot;
 use Psr\Log\LoggerInterface;
+use Slack\User;
 use Throwable;
 
 class PluginManager
@@ -17,6 +18,9 @@ class PluginManager
     const NO_PREFIX = '<none>';
     const AUTHED_USER_PREFIX = '<authed_user>';
     const DEFAULT_PRIORITY = 100;
+
+    /** @var User */
+    protected $authedUser;
 
     /** @var array */
     protected $pluginMap;
@@ -46,13 +50,23 @@ class PluginManager
     public function getHelp() : array
     {
         $help = [];
+        /** @var PluginInterface $plugin */
         foreach ($this->getPluginMap() as $pluginId => $plugin) {
-            /** @var PluginInterface $plugin */
+            $prefix = $plugin->getPrefix();
+            if ($prefix === self::NO_PREFIX) {
+                $prefix = '';
+            } else {
+                if ($prefix === self::AUTHED_USER_PREFIX) {
+                    $prefix = '@'.$this->getAuthedUser()->getUsername();
+                }
+
+                $prefix = "$prefix ";
+            }
+
             $help[] = $pluginId;
-            foreach (explode("\n", trim($plugin->help())) as $line) {
-                $prefix = $plugin->getPrefix();
-                $prefix = ($prefix === self::NO_PREFIX) ? '' : $prefix;
-                $help[] = '    '.str_replace('<prefix>', $prefix, $line);
+            $lines = explode("\n", trim($plugin->help()));
+            foreach ($lines as $line) {
+                $help[] = '    '.str_replace('<prefix> ', $prefix, $line);
             }
         }
 
@@ -73,20 +87,11 @@ class PluginManager
         return $statuses;
     }
 
-    public function updatePrefixes($authedUsername)
+    public function setAuthedUser(User $authedUser)
     {
-        $updatedPriorityMap = [];
-        foreach ($this->getPriorityMap() as $priority => $prefixMap) {
-            $updatedPrefixMap = [];
-            foreach ($prefixMap as $prefix => $plugins) {
-                if ($prefix === self::AUTHED_USER_PREFIX) {
-                    $prefix = '@'.$authedUsername;
-                }
-                $updatedPrefixMap[$prefix] = $plugins;
-            }
-            $updatedPriorityMap[$priority] = $updatedPrefixMap;
-        }
-        $this->priorityMap = $updatedPriorityMap;
+        $this->authedUser = $authedUser;
+
+        $this->updatePrefixes($authedUser->getUsername());
     }
 
     public function matchesPrefix($prefix, $text) : array
@@ -187,5 +192,26 @@ class PluginManager
     protected function setPriorityMap(array $priorityMap)
     {
         $this->priorityMap = $priorityMap;
+    }
+
+    protected function getAuthedUser()
+    {
+        return $this->authedUser;
+    }
+
+    protected function updatePrefixes($authedUsername)
+    {
+        $updatedPriorityMap = [];
+        foreach ($this->getPriorityMap() as $priority => $prefixMap) {
+            $updatedPrefixMap = [];
+            foreach ($prefixMap as $prefix => $plugins) {
+                if ($prefix === self::AUTHED_USER_PREFIX) {
+                    $prefix = '@'.$authedUsername;
+                }
+                $updatedPrefixMap[$prefix] = $plugins;
+            }
+            $updatedPriorityMap[$priority] = $updatedPrefixMap;
+        }
+        $this->priorityMap = $updatedPriorityMap;
     }
 }

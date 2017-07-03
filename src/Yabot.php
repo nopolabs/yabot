@@ -90,7 +90,7 @@ class Yabot
         $slack = $this->getSlack();
 
         $slack->update(function(User $authedUser) {
-            $this->pluginManager->updatePrefixes($authedUser->getUsername());
+            $this->pluginManager->setAuthedUser($authedUser);
         });
 
         $slack->onEvent('message', [$this, 'onMessage']);

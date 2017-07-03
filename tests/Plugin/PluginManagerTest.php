@@ -8,6 +8,7 @@ use Nopolabs\Yabot\Plugin\PluginInterface;
 use Nopolabs\Yabot\Plugin\PluginManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Slack\User;
 
 class PluginManagerTest extends TestCase
 {
@@ -84,22 +85,41 @@ class PluginManagerTest extends TestCase
 
     public function testGetHelp()
     {
+        $authedUser = $this->newPartialMockWithExpectations(User::class, [
+            ['getUsername', ['result' => 'yabot-user-name']],
+        ]);
+
         $expected = [
-            'test.plugin',
+            'please.plugin',
+            '    line-1',
+            '    please line-2',
+            'no-prefix.plugin',
             '    line-1',
             '    line-2',
+            'authed-user.plugin',
+            '    line-1',
+            '    @yabot-user-name line-2',
         ];
 
         $pluginMap = [
-            'test.plugin' => $this->newPartialMockWithExpectations(PluginInterface::class, [
-                ['help', ['result' => "line-1\nline-2\n"]],
-                ['getPrefix', ['result' => "please"]],
+            'please.plugin' => $this->newPartialMockWithExpectations(PluginInterface::class, [
+                ['getPrefix', ['result' => 'please']],
+                ['help', ['result' => "line-1\n<prefix> line-2\n"]],
+            ]),
+            'no-prefix.plugin' => $this->newPartialMockWithExpectations(PluginInterface::class, [
+                ['getPrefix', ['result' => PluginManager::NO_PREFIX]],
+                ['help', ['result' => "line-1\n<prefix> line-2\n"]],
+            ]),
+            'authed-user.plugin' => $this->newPartialMockWithExpectations(PluginInterface::class, [
+                ['getPrefix', ['result' => PluginManager::AUTHED_USER_PREFIX]],
+                ['help', ['result' => "line-1\n<prefix> line-2\n"]],
             ]),
         ];
 
         /** @var PluginManager $manager */
         $manager = $this->newPartialMockWithExpectations(PluginManager::class, [
             ['getPluginMap', ['result' => $pluginMap]],
+            ['getAuthedUser', ['result' => $authedUser]],
         ]);
 
         $actual = $manager->getHelp();
@@ -130,8 +150,12 @@ class PluginManagerTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testUpdatePrefixes()
+    public function testSetAuthedUser()
     {
+        $authedUser = $this->newPartialMockWithExpectations(User::class, [
+            ['getUsername', ['result' => 'yabot-user-name']],
+        ]);
+
         $beforeMap = [
             1 => ['<authed_user>' => ['test-1']],
             2 => ['yabot' => ['test-2']],
@@ -145,7 +169,7 @@ class PluginManagerTest extends TestCase
 
         $manager->setPriorityMap($beforeMap);
 
-        $manager->updatePrefixes('yabot-user-name');
+        $manager->setAuthedUser($authedUser);
 
         $this->assertEquals($afterMap, $manager->getPriorityMap());
     }
