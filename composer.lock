@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c7d36437c62f8cddb1428fd1122fb1a2",
+    "content-hash": "6472dddf92cc62c1c62577485dc04cfc",
     "packages": [
         {
             "name": "coderstephen/slack-client",
@@ -435,6 +435,49 @@
                 "psr-3"
             ],
             "time": "2017-03-13T07:08:03+00:00"
+        },
+        {
+            "name": "nopolabs/react-aware-guzzle-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nopolabs/react-aware-guzzle-client.git",
+                "reference": "57890191aaa882369914a3c4545afba83e0255f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nopolabs/react-aware-guzzle-client/zipball/57890191aaa882369914a3c4545afba83e0255f3",
+                "reference": "57890191aaa882369914a3c4545afba83e0255f3",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.2",
+                "php": ">=7.0",
+                "psr/log": "^1.0",
+                "react/event-loop": "^0.4.1"
+            },
+            "require-dev": {
+                "nopolabs/mock-with-expectations": "^1.0",
+                "phpunit/phpunit": "^6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Nopolabs\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dan Revel",
+                    "email": "dan@nopolabs.com"
+                }
+            ],
+            "description": "An implementation of GuzzleHttp\\Handler\\CurlFactoryInterface that plays nicely with React",
+            "time": "2017-07-04 18:33:39"
         },
         {
             "name": "psr/cache",
@@ -2274,7 +2317,7 @@
                 }
             ],
             "description": "Helper trait for phpunit testing",
-            "time": "2017-05-31 22:51:05"
+            "time": "2017-05-31T22:51:05+00:00"
         },
         {
             "name": "padraic/humbug_get_contents",
@@ -4090,6 +4133,7 @@
     "stability-flags": {
         "coderstephen/slack-client": 20,
         "roave/security-advisories": 20,
+        "nopolabs/react-aware-guzzle-client": 20,
         "nopolabs/mock-with-expectations": 20,
         "codeclimate/php-test-reporter": 20
     },

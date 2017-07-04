@@ -5,26 +5,40 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Nopolabs\ReactAwareGuzzleClientFactory;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use React\EventLoop\LoopInterface;
 
 class GuzzleFactory
 {
-    public static function newClient(LoopInterface $eventLoop, array $config) : Client
-    {
-        $curlFactory = new ReactAwareCurlFactory($eventLoop);
-        $handler = new CurlMultiHandler(['handle_factory' => $curlFactory]);
-        $curlFactory->setHandler($handler);
+    private $eventLoop;
+    private $logger;
 
-        $config['handler'] = self::createHandlerStack($handler);
+    public function __construct(LoopInterface $eventLoop, LoggerInterface $logger = null)
+    {
+        $this->eventLoop = $eventLoop;
+        $this->logger = $logger ?? new NullLogger();
+    }
+
+    public function newClient(array $config) : Client
+    {
+        $clientFactory = new ReactAwareGuzzleClientFactory();
+        $reactAwareCurlFactory = $clientFactory->createReactAwareCurlFactory($this->eventLoop, null, $this->logger);
+        $handler = $reactAwareCurlFactory->getHandler();
+        $handlerStack =  $this->createHandlerStack($handler);
+        $config['handler'] = $handlerStack;
 
         return new Client($config);
     }
 
     /**
      * Like HandlerStack::create() except no http_errors
+     *
+     * @param CurlMultiHandler $handler
      * @return HandlerStack
      */
-    public static function createHandlerStack(CurlMultiHandler $handler) : HandlerStack
+    public function createHandlerStack(CurlMultiHandler $handler) : HandlerStack
     {
         $stack = new HandlerStack($handler);
         $stack->push(Middleware::redirect(), 'allow_redirects');
