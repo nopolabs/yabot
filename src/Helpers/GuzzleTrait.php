@@ -42,6 +42,13 @@ trait GuzzleTrait
         return $this->getGuzzle()->getAsync($uri, $options);
     }
 
+    public function postAsync(string $uri, array $options = []) : PromiseInterface
+    {
+        $options = $this->addOptions($options);
+
+        return $this->getGuzzle()->postAsync($uri, $options);
+    }
+
     public function post(string $uri, array $options = []) : ResponseInterface
     {
         $options = $this->addOptions($options);

@@ -30,6 +30,11 @@ class Guzzle
         return $this->client->getAsync($uri, $options);
     }
 
+    public function postAsync(string $uri, array $options = []) : PromiseInterface
+    {
+        return $this->client->postAsync($uri, $options);
+    }
+
     public function post(string $uri, array $options = []) : ResponseInterface
     {
         return $this->client->post($uri, $options);
