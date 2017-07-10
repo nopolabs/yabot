@@ -10,58 +10,12 @@ yabot is a slack chat bot written in php.
 
 ## Quick start
 
-You will need php 7.* and [composer](https://getcomposer.org/download/).
+See [tabot-template](https://github.com/nopolabs/yabot-template) 
+for a discussion of how to build your own bot functionality using yabot.
 
-You can use
-[yabot-init.sh](https://github.com/nopolabs/yabot/blob/master/bin/yabot-init.sh)
-to initialize a yabot project.
-You can download and run yabot-init.sh with this command
-(take a [peek](https://github.com/nopolabs/yabot/blob/master/bin/yabot-init.sh) first):
+## Architecture
 
-    wget -O - https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
-
-or:
-
-    curl -L https://raw.githubusercontent.com/nopolabs/yabot/master/bin/yabot-init.sh | bash
-
-or manually:
-
-    composer init \
-        --no-interaction \
-        --stability dev \
-        --repository '{"type":"vcs","url":"https://github.com/nopolabs/slack-client"}' \
-        --repository '{"type":"vcs","url":"https://github.com/nopolabs/phpws.git"}'
-    composer require nopolabs/yabot
-    mkdir config
-    cp -i vendor/nopolabs/yabot/yabot.php yabot.php
-    cp -i vendor/nopolabs/yabot/config/plugins.example.yml config/plugins.yml
-    cp -i vendor/nopolabs/yabot/config.example.php config.php
-    cp -i vendor/nopolabs/yabot/.gitignore .gitignore
-
-NOTE: yabot-init.sh uses nopolabs repositories for slack-client and phpws
-because it depends on updates to coderstephen/slack-client
-and devristo/phpws that are not yet available from those packages.
-    
-In order for yabot to listen to messages in your slack rooms
-you need to provide a token which you get from Slack. 
-Please read [Slack's documentation](https://get.slack.help/hc/en-us/articles/215770388)
-for information on how to issue new authentication tokens.
-
-Edit config.php and add your Slack API token:
-
-    'slack.token' => 'SLACK-TOKEN-GOES-HERE',
-
-*Do not save config.php in a public repository.*
-The slack.token is *not* meant to be shared publicly.
-yabot-init.sh creates a .gitignore file containing config.php,
-if you are using a different VCS you will need to do something similar.
-
-If you do accidentally commit the token to a public repo 
-Slack will revoke it (as I discovered).
-
-## Running yabot
-
-    php yabot.php
+TODO
 
 ## Configuration
 
