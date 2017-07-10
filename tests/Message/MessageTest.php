@@ -193,7 +193,7 @@ class MessageTest extends TestCase
         $extra = ['extra' => 'param'];
 
         $slackClient = $this->newPartialMockWithExpectations(Client::class, [
-            'say' => ['params' => ['hello', $channel, $extra]],
+            ['say', ['params' => ['hello', $channel, $extra]]],
         ]);
 
         $message = new Message($slackClient, $this->data, 'formatted-text', $this->user, $this->channel);
@@ -206,7 +206,7 @@ class MessageTest extends TestCase
         $extra = ['extra' => 'param'];
 
         $slackClient = $this->newPartialMockWithExpectations(Client::class, [
-            'say' => ['params' => ['hello', $this->channel, $extra]],
+            ['say', ['params' => ['hello', $this->channel, $extra]]],
         ]);
 
         $message = new Message($slackClient, $this->data, 'formatted-text', $this->user, $this->channel);
@@ -222,7 +222,7 @@ class MessageTest extends TestCase
         ];
 
         $slackClient = $this->newPartialMockWithExpectations(Client::class, [
-            'say' => ['params' => ['hello', $this->channel, $extra]],
+            ['say', ['params' => ['hello', $this->channel, $extra]]],
         ]);
 
         $message = new Message($slackClient, $this->data, 'formatted-text', $this->user, $this->channel);
