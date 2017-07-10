@@ -66,9 +66,6 @@ class YabotContainer extends ContainerBuilder
         return array_reduce(
             array_keys($this->findTaggedServiceIds($tag)),
             function(array $plugins, string $pluginId) {
-                if (isset($plugins[$pluginId])) {
-                    throw new Exception("Duplicate plugin id: '$pluginId''");
-                }
                 $plugins[$pluginId] = $this->get($pluginId);
                 return $plugins;
             },
