@@ -4,6 +4,9 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters type="collection">
+        <parameter key="yabot.config" type="collection">
+            <parameter key="connection_monitor.interval">10</parameter>
+        </parameter>
         <parameter key="storage.dir">storage</parameter>
         <parameter key="log.file">logs/yabot.log</parameter>
         <parameter key="log.level">debug</parameter>
@@ -22,6 +25,7 @@
             <argument type="service" id="slack.client" />
             <argument type="service" id="message.factory" />
             <argument type="service" id="plugin.manager" />
+            <argument>%yabot.config%</argument>
         </service>
 
         <service id="plugin.manager" class="Nopolabs\Yabot\Plugin\PluginManager">

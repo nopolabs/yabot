@@ -4,6 +4,7 @@ namespace Nopolabs\Yabot;
 
 use DateTime;
 use Exception;
+use Nopolabs\Yabot\Helpers\ConfigTrait;
 use Nopolabs\Yabot\Helpers\LogTrait;
 use Nopolabs\Yabot\Helpers\LoopTrait;
 use Nopolabs\Yabot\Helpers\SlackTrait;
@@ -22,6 +23,7 @@ class Yabot
     use LogTrait;
     use LoopTrait;
     use SlackTrait;
+    use ConfigTrait;
 
     /** @var MessageFactory */
     private $messageFactory;
@@ -36,11 +38,13 @@ class Yabot
         LoopInterface $eventLoop,
         Client $slackClient,
         MessageFactory $messageFactory,
-        PluginManager $pluginManager
+        PluginManager $pluginManager,
+        array $config = []
     ) {
         $this->setLog($logger);
         $this->setLoop($eventLoop);
         $this->setSlack($slackClient);
+        $this->setConfig($config);
         $this->messageFactory = $messageFactory;
         $this->pluginManager = $pluginManager;
         $this->messageLog = null;
@@ -85,6 +89,13 @@ class Yabot
         $this->getLoop()->run();
     }
 
+
+    public function shutDown()
+    {
+        $this->getSlack()->disconnect();
+        $this->getLoop()->stop();
+    }
+
     public function connected()
     {
         $slack = $this->getSlack();
@@ -94,6 +105,8 @@ class Yabot
         });
 
         $slack->onEvent('message', [$this, 'onMessage']);
+
+        $this->startConnectionMonitor();
     }
 
     public function onMessage(Payload $payload)
@@ -158,8 +171,30 @@ class Yabot
         return "Current memory usage: {$formatted}";
     }
 
-    private function logMessage($data)
+    protected function logMessage($data)
     {
         file_put_contents($this->messageLog, json_encode($data)."\n", FILE_APPEND);
+    }
+
+    protected function startConnectionMonitor()
+    {
+        if ($interval = $this->get('connection_monitor.interval')) {
+            $this->getLog()->info("Monitoring websocket connection every $interval seconds.");
+            $this->loop->addPeriodicTimer($interval, function () {
+                static $pong = true;
+                if (!$pong) {
+                    $this->getLog()->error('Connection failed: no pong!');
+                    $this->shutDown();
+                }
+                $this->getSlack()->getRealTimeClient()->ping()
+                    ->then(
+                        function (Payload $payload) use (&$pong) {
+                            $this->getLog()->info($payload->toJson());
+                            $pong = true;
+                        }
+                    );
+                $pong = false;
+            });
+        }
     }
 }

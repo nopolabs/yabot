@@ -89,7 +89,7 @@ class Client
 
     public function disconnect()
     {
-        return $this->realTimeClient->disconnect();
+        $this->realTimeClient->disconnect();
     }
 
     public function say($text, $channelOrName, array $additionalParameters = [])

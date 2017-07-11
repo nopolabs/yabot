@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nopolabs/slack-client.git",
-                "reference": "6e9b1ff60743539093d6c8b908589d07950e37c4"
+                "reference": "874653d1be303dd94bc49fc3ec39b199a8582d7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nopolabs/slack-client/zipball/6e9b1ff60743539093d6c8b908589d07950e37c4",
-                "reference": "6e9b1ff60743539093d6c8b908589d07950e37c4",
+                "url": "https://api.github.com/repos/nopolabs/slack-client/zipball/874653d1be303dd94bc49fc3ec39b199a8582d7b",
+                "reference": "874653d1be303dd94bc49fc3ec39b199a8582d7b",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +62,7 @@
             "support": {
                 "source": "https://github.com/nopolabs/slack-client/tree/master"
             },
-            "time": "2017-05-25 18:30:10"
+            "time": "2017-07-11 20:54:32"
         },
         {
             "name": "container-interop/container-interop",
@@ -2154,7 +2154,7 @@
                 "codeclimate",
                 "coverage"
             ],
-            "time": "2017-06-01T13:19:55+00:00"
+            "time": "2017-06-01 13:19:55"
         },
         {
             "name": "composer/ca-bundle",
@@ -2446,7 +2446,7 @@
                 }
             ],
             "description": "Helper trait for phpunit testing",
-            "time": "2017-07-04T23:01:04+00:00"
+            "time": "2017-07-04 23:01:04"
         },
         {
             "name": "padraic/humbug_get_contents",
