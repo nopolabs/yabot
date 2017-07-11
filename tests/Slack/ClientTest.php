@@ -110,13 +110,9 @@ class ClientTest extends TestCase
     {
         $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
 
-        $promise = $this->createMock(PromiseInterface::class);
+        $this->setAtExpectations($this->realTimeClient, [['disconnect']]);
 
-        $this->setAtExpectations($this->realTimeClient, [['disconnect', ['result' => $promise]]]);
-
-        $actual = $client->disconnect();
-
-        $this->assertSame($promise, $actual);
+        $client->disconnect();
     }
 
     public function testSayChannelNotFound()
