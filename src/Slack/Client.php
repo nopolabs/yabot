@@ -132,6 +132,17 @@ class Client
         $this->realTimeClient->apiCall('chat.postMessage', $parameters);
     }
 
+    public function directMessage($text, $userName)
+    {
+        $parameters = [
+            'text' => $text,
+            'channel' => $userName,
+            'as_user' => false,
+        ];
+
+        $this->realTimeClient->apiCall('chat.postMessage', $parameters);
+    }
+
     /**
      * @param $id
      * @return null|User

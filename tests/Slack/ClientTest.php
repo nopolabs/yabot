@@ -187,6 +187,24 @@ class ClientTest extends TestCase
         $client->post('what?', $channel, ['foo' => 'bar']);
     }
 
+    public function testDirectMessage()
+    {
+        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+
+        $this->setAtExpectations($this->realTimeClient, [
+            ['apiCall', [
+                'params' => [
+                    'chat.postMessage',
+                    [
+                        'text' => 'what?',
+                        'channel' => '@user',
+                        'as_user' => false,
+                    ],
+                ]]]]);
+
+        $client->directMessage('what?', '@user');
+    }
+
     public function testGetUserById()
     {
         $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
