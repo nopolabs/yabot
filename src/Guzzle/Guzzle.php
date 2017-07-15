@@ -40,6 +40,11 @@ class Guzzle
         return $this->client->get($uri, $options);
     }
 
+    public function put(string $uri, array $options = []) : ResponseInterface
+    {
+        return $this->client->put($uri, $options);
+    }
+    
     public function post(string $uri, array $options = []) : ResponseInterface
     {
         return $this->client->post($uri, $options);
