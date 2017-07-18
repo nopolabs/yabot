@@ -116,9 +116,7 @@ class Yabot
         $this->debug('Received message', $data);
 
         try {
-            if ($this->messageLog !== null) {
-                $this->logMessage($data);
-            }
+            $this->logMessage($data);
             $message = $this->messageFactory->create($data);
         } catch (Throwable $throwable) {
             $errmsg = $throwable->getMessage()."\n"
@@ -173,7 +171,9 @@ class Yabot
 
     protected function logMessage($data)
     {
-        file_put_contents($this->messageLog, json_encode($data)."\n", FILE_APPEND);
+        if ($this->messageLog !== null) {
+            file_put_contents($this->messageLog, json_encode($data) . "\n", FILE_APPEND);
+        }
     }
 
     protected function startConnectionMonitor()

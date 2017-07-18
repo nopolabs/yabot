@@ -21,7 +21,7 @@ class MessageLogPlugin implements PluginInterface
         $this->setConfig([
             'help' => "<prefix> start\n<prefix> stop\n",
             'prefix' => 'messagelog',
-            'messageLogFile' => 'message.log',
+            'messageLogFile' => 'logs/message.log',
             'matchers' => [
                 'start' => "/^start\\b/",
                 'stop' => "/^stop\\b/",
