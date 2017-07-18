@@ -23,10 +23,10 @@ class MessageLogPluginTest extends TestCase
     public function testStatus_logging()
     {
         $this->setAtExpectations($this->yabot, [
-            ['getMessageLog', ['result' => 'message.log']],
+            ['getMessageLog', ['result' => 'logs/message.log']],
         ]);
 
-        $this->assertEquals('logging messages in message.log', $this->plugin->status());
+        $this->assertEquals('logging messages in logs/message.log', $this->plugin->status());
     }
 
     public function testStatus_not_logging()
@@ -45,7 +45,7 @@ class MessageLogPluginTest extends TestCase
         ]);
 
         $this->setAtExpectations($this->yabot, [
-            ['setMessageLog', ['params' => ['message.log']]],
+            ['setMessageLog', ['params' => ['logs/message.log']]],
         ]);
 
         $this->plugin->start($msg);
