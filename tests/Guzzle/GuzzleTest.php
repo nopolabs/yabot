@@ -8,7 +8,6 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\CurlMultiHandler;
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Guzzle\Guzzle;
-use Nopolabs\Yabot\Guzzle\ReactAwareCurlFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Factory;
