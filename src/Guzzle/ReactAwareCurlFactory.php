@@ -3,6 +3,7 @@
 namespace Nopolabs\Yabot\Guzzle;
 
 
+use Exception;
 use GuzzleHttp\Handler\CurlFactory;
 use GuzzleHttp\Handler\CurlFactoryInterface;
 use GuzzleHttp\Handler\CurlMultiHandler;
@@ -42,7 +43,11 @@ class ReactAwareCurlFactory implements CurlFactoryInterface
 
     public function tick()
     {
-        $this->handler->tick();
+        try {
+            $this->handler->tick();
+        } catch (Exception $exception) {
+            $this->logger->warning('TICK: '.$exception->getMessage());
+        }
 
         if ($this->count === 0 && \GuzzleHttp\Promise\queue()->isEmpty()) {
             $this->stopTimer();
