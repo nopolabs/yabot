@@ -14,6 +14,7 @@ use Nopolabs\Yabot\Plugin\PluginManager;
 use Nopolabs\Yabot\Slack\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
+use React\EventLoop\Timer\TimerInterface;
 use Slack\Payload;
 use Slack\User;
 use Throwable;
@@ -32,6 +33,9 @@ class Yabot
     private $pluginManager;
 
     private $messageLog;
+
+    /** @var TimerInterface */
+    private $monitor;
 
     public function __construct(
         LoggerInterface $logger,
@@ -89,7 +93,6 @@ class Yabot
         $this->getLoop()->run();
     }
 
-
     public function shutDown()
     {
         $this->getSlack()->disconnect();
@@ -106,7 +109,7 @@ class Yabot
 
         $slack->onEvent('message', [$this, 'onMessage']);
 
-        $this->startConnectionMonitor();
+        $this->monitor = $this->startConnectionMonitor();
     }
 
     public function onMessage(Payload $payload)
@@ -176,23 +179,50 @@ class Yabot
         }
     }
 
+    protected function reconnect()
+    {
+        if ($this->monitor) {
+            $this->loop->cancelTimer($this->monitor);
+        }
+
+        $this->getSlack()->reconnect()->then(
+            function () {
+                $this->getLog()->info('Reconnected');
+                $this->monitor = $this->startConnectionMonitor();
+            },
+            function () {
+                $this->getLog()->error('Reconnect failed, shutting down.');
+                $this->shutDown();
+            }
+        );
+    }
+
+    /**
+     * @return TimerInterface|null
+     */
     protected function startConnectionMonitor()
     {
         if ($interval = $this->get('connection_monitor.interval')) {
+
             $this->getLog()->info("Monitoring websocket connection every $interval seconds.");
-            $this->loop->addPeriodicTimer($interval, function () {
+
+            return $this->loop->addPeriodicTimer($interval, function () use (&$timer) {
+
                 static $pong = true;
+
                 if (!$pong) {
-                    $this->getLog()->error('Connection failed: no pong!');
-                    $this->shutDown();
+                    $this->getLog()->error('No pong: reconnecting...');
+                    $this->reconnect();
                 }
-                $this->getSlack()->getRealTimeClient()->ping()
+
+                $this->getSlack()->ping()
                     ->then(
                         function (Payload $payload) use (&$pong) {
                             $this->getLog()->info($payload->toJson());
                             $pong = true;
                         }
                     );
+
                 $pong = false;
             });
         }

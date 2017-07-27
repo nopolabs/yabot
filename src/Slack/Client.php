@@ -92,6 +92,17 @@ class Client
         $this->realTimeClient->disconnect();
     }
 
+    public function reconnect() : PromiseInterface
+    {
+        $this->realTimeClient->disconnect();
+        return $this->realTimeClient->connect();
+    }
+
+    public function ping() : PromiseInterface
+    {
+        return $this->getRealTimeClient()->ping();
+    }
+
     public function say($text, $channelOrName, array $additionalParameters = [])
     {
         $channel = $channelOrName;
