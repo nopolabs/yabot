@@ -34,6 +34,7 @@ class GuzzleFactory
 
     /**
      * Like HandlerStack::create() except no http_errors
+     * @see http://docs.guzzlephp.org/en/stable/request-options.html#http-errors
      *
      * @param CurlMultiHandler $handler
      * @return HandlerStack
