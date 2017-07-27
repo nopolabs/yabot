@@ -224,7 +224,8 @@ class YabotTest extends TestCase
             );
         }
 
-        return $this->newPartialMockWithExpectations(
+        /** @var Yabot $yabot */
+        $yabot = $this->newPartialMockWithExpectations(
             Yabot::class,
             $expectations,
             [
@@ -235,5 +236,7 @@ class YabotTest extends TestCase
                 $this->pluginManager,
             ]
         );
+
+        return $yabot;
     }
 }

@@ -32,10 +32,14 @@ class Yabot
     /** @var PluginManager */
     private $pluginManager;
 
+    /** @var string */
     private $messageLog;
 
     /** @var TimerInterface */
     private $monitor;
+
+    /** @var bool */
+    private $pong;
 
     public function __construct(
         LoggerInterface $logger,
@@ -179,6 +183,43 @@ class Yabot
         }
     }
 
+    /**
+     * @return TimerInterface|null
+     */
+    protected function startConnectionMonitor()
+    {
+        if ($interval = $this->get('connection_monitor.interval')) {
+
+            $this->getLog()->info("Monitoring websocket connection every $interval seconds.");
+            $this->notify("Monitoring websocket connection every $interval seconds.");
+
+            $this->ping();
+
+            return $this->loop->addPeriodicTimer($interval, function () {
+
+                if (!$this->pong) {
+                    $this->getLog()->error('No pong: reconnecting...');
+                    $this->reconnect();
+                }
+
+                $this->ping();
+            });
+        }
+    }
+
+    protected function ping()
+    {
+        $this->pong = false;
+
+        $this->getSlack()->ping()
+            ->then(
+                function (Payload $payload) {
+                    $this->getLog()->info($payload->toJson());
+                    $this->pong = true;
+                }
+            );
+    }
+
     protected function reconnect()
     {
         if ($this->monitor) {
@@ -197,34 +238,10 @@ class Yabot
         );
     }
 
-    /**
-     * @return TimerInterface|null
-     */
-    protected function startConnectionMonitor()
+    protected function notify(string $message)
     {
-        if ($interval = $this->get('connection_monitor.interval')) {
-
-            $this->getLog()->info("Monitoring websocket connection every $interval seconds.");
-
-            return $this->loop->addPeriodicTimer($interval, function () use (&$timer) {
-
-                static $pong = true;
-
-                if (!$pong) {
-                    $this->getLog()->error('No pong: reconnecting...');
-                    $this->reconnect();
-                }
-
-                $this->getSlack()->ping()
-                    ->then(
-                        function (Payload $payload) use (&$pong) {
-                            $this->getLog()->info($payload->toJson());
-                            $pong = true;
-                        }
-                    );
-
-                $pong = false;
-            });
+        if ($user = $this->get('notify.user')) {
+            $this->getSlack()->directMessage($message, $user);
         }
     }
 }
