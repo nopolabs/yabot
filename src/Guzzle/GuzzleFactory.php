@@ -23,13 +23,11 @@ class GuzzleFactory
 
     public function newClient(array $config) : Client
     {
-        $clientFactory = new ReactAwareGuzzleClientFactory();
-        $reactAwareCurlFactory = $clientFactory->createReactAwareCurlFactory($this->eventLoop, null, $this->logger);
-        $handler = $reactAwareCurlFactory->getHandler();
-        $handlerStack =  $this->createHandlerStack($handler);
-        $config['handler'] = $handlerStack;
+        $clientFactory = new ReactAwareGuzzleClientFactory(function(CurlMultiHandler $handler) {
+            return $this->createHandlerStack($handler);
+        });
 
-        return new Client($config);
+        return $clientFactory->createGuzzleClient($this->eventLoop, $config, null, $this->logger);
     }
 
     /**
