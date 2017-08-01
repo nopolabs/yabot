@@ -63,7 +63,7 @@ class MessageFactory
 
     public function formatMessageText(array $data) : string
     {
-        if ($this->isMessageChanged($data) && isset($data['message']['text'])) {
+        if ($this->isMessageChanged($data, 'text')) {
             return $this->formatText($data['message']['text']);
         }
 
@@ -158,14 +158,16 @@ class MessageFactory
         return $entity;
     }
 
-    protected function isMessageChanged(array $data): bool
+    protected function isMessageChanged(array $data, $param = null): bool
     {
-        return isset($data['subtype']) && $data['subtype'] === 'message_changed';
+        return isset($data['subtype'])
+            && $data['subtype'] === 'message_changed'
+            && ($param ? isset($data['message'][$param]) : true);
     }
 
     protected function getUserId(array $data)
     {
-        if ($this->isMessageChanged($data) && isset($data['message']['user'])) {
+        if ($this->isMessageChanged($data, 'user')) {
             return $data['message']['user'];
         }
 
