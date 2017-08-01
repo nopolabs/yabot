@@ -63,7 +63,9 @@ class MessageFactoryTest extends TestCase
     {
         $user = $userId ? $this->createMock(User::class) : null;
 
-        $getUserById = ['params' => [$userId], 'result' => $user];
+        $getUserById = $userId
+            ? ['params' => [$userId], 'result' => $user]
+            : 'never';
 
         $factory = $this->newMessageFactory([
             ['getUserById', $getUserById],

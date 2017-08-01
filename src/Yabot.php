@@ -112,6 +112,7 @@ class Yabot
         });
 
         $slack->onEvent('message', [$this, 'onMessage']);
+        $slack->onEvent('team_join', [$this, 'onTeamJoin']);
 
         $this->monitor = $this->startConnectionMonitor();
     }
@@ -138,6 +139,11 @@ class Yabot
         }
 
         $this->pluginManager->dispatchMessage($message);
+    }
+
+    public function onTeamJoin(Payload $payload)
+    {
+        $this->getSlack()->updateUsers();
     }
 
     public function getHelp() : string

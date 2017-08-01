@@ -190,12 +190,7 @@ class Client
         return $this->channels->byName($name);
     }
 
-    protected function useWebSocket() : bool
-    {
-        return (bool) $this->get('use.websocket', false);
-    }
-
-    protected function updateUsers()
+    public function updateUsers()
     {
         $this->realTimeClient->getUsers()->then(function(array $users) {
             $this->users->update($users);
@@ -231,5 +226,10 @@ class Client
         foreach ($events as $event) {
             $this->onEvent($event, [$this, 'updateUsers']);
         }
+    }
+
+    protected function useWebSocket() : bool
+    {
+        return (bool) $this->get('use.websocket', false);
     }
 }

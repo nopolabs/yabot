@@ -3,17 +3,21 @@
 namespace Nopolabs\Yabot\Message;
 
 use Exception;
+use Nopolabs\Yabot\Helpers\LogTrait;
 use Nopolabs\Yabot\Helpers\SlackTrait;
 use Nopolabs\Yabot\Slack\Client;
+use Psr\Log\LoggerInterface;
 use Slack\Channel;
 
 class MessageFactory
 {
     use SlackTrait;
+    use LogTrait;
 
-    public function __construct(Client $slackClient)
+    public function __construct(Client $slackClient, LoggerInterface $logger = null)
     {
         $this->setSlack($slackClient);
+        $this->setLog($logger);
     }
 
     public function create(array $data) : Message
@@ -27,11 +31,14 @@ class MessageFactory
 
     public function getUser(array $data)
     {
-        if ($this->isMessageChanged($data) && isset($data['message']['user'])) {
-            return $this->getUserById($data['message']['user'] ?? null);
+        if ($userId = $this->getUserId($data)) {
+            return $this->getUserById($userId);
         }
 
-        return $this->getUserById($data['user'] ?? null);
+        $this->warning("Cannot find user for $userId, updating users for future reference.");
+        $this->getSlack()->updateUsers();
+
+        return null;
     }
 
     public function getChannel(array $data) : Channel
@@ -154,5 +161,18 @@ class MessageFactory
     protected function isMessageChanged(array $data): bool
     {
         return isset($data['subtype']) && $data['subtype'] === 'message_changed';
+    }
+
+    protected function getUserId(array $data)
+    {
+        if ($this->isMessageChanged($data) && isset($data['message']['user'])) {
+            return $data['message']['user'];
+        }
+
+        if (isset($data['user'])) {
+            return $data['user'];
+        }
+
+        return null;
     }
 }

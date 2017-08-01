@@ -8,6 +8,7 @@ use Nopolabs\Yabot\Plugin\PluginInterface;
 use Nopolabs\Yabot\Plugin\PluginManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Slack\Channel;
 use Slack\User;
 
 class PluginManagerTest extends TestCase
@@ -197,8 +198,20 @@ class PluginManagerTest extends TestCase
 
     public function testDispatchMessage()
     {
+        $user = $this->newPartialMockWithExpectations(User::class, [
+            ['getUsername', ['result' => 'alice']],
+        ]);
+
+        $channel = $this->newPartialMockWithExpectations(Channel::class, [
+            ['getName', ['result' => 'general']],
+        ]);
+
         $message = $this->newPartialMockWithExpectations(Message::class, [
             ['getformattedText', ['result' => 'prefix plugin-text']],
+            ['getUser', ['result' => $user]],
+            ['getChannel', ['result' => $channel]],
+            ['isBot', ['result' => false]],
+            ['isSelf', ['result' => false]],
             ['setPluginText', ['params' => ['plugin-text']]],
             ['getData', ['result' => ['data']]],
             ['isHandled', ['result' => false]],

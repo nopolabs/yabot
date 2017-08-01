@@ -89,6 +89,7 @@
 
         <service id="message.factory" class="Nopolabs\Yabot\Message\MessageFactory">
             <argument type="service" id="slack.client" />
+            <argument type="service" id="logger" />
         </service>
     </services>
 

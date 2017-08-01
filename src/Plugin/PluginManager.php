@@ -99,7 +99,13 @@ class PluginManager
     {
         $text = $message->getFormattedText();
 
-        $this->info('dispatchMessage: ', ['formattedText' => $text]);
+        $this->info('dispatchMessage: ', [
+            'formattedText' => $text,
+            'user' => $message->getUser()->getUsername(),
+            'channel' => $message->getChannel()->getName(),
+            'isBot' => $message->isBot(),
+            'isSelf' => $message->isSelf(),
+        ]);
 
         foreach ($this->getPriorityMap() as $priority => $prefixMap) {
             $this->debug("Dispatching priority $priority");
