@@ -15,10 +15,7 @@ trait LogTrait
         $this->log = $log ?? new NullLogger();
     }
 
-    /**
-     * @return LoggerInterface|null
-     */
-    protected function getLog()
+    protected function getLog() : LoggerInterface
     {
         return $this->log;
     }

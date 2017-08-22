@@ -2,7 +2,6 @@
 
 namespace Nopolabs\Yabot\Helpers;
 
-
 use GuzzleHttp\Promise\PromiseInterface;
 use Nopolabs\Yabot\Guzzle\Guzzle;
 use Psr\Http\Message\ResponseInterface;
