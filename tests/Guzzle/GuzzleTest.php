@@ -5,7 +5,6 @@ namespace Nopolabs\Yabot\Tests\Guzzle;
 use Nopolabs\Yabot\Guzzle\GuzzleFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Handler\CurlMultiHandler;
 use Nopolabs\Test\MockWithExpectationsTrait;
 use Nopolabs\Yabot\Guzzle\Guzzle;
 use PHPUnit\Framework\TestCase;
