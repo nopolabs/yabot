@@ -99,8 +99,30 @@ class Yabot
 
     public function shutDown()
     {
+        $this->getLog()->error('Shutting down...');
+
         $this->getSlack()->disconnect();
         $this->getLoop()->stop();
+    }
+
+    public function reconnect()
+    {
+        $this->getLog()->error('Reconnecting...');
+
+        if ($this->monitor) {
+            $this->loop->cancelTimer($this->monitor);
+        }
+
+        $this->getSlack()->reconnect()->then(
+            function () {
+                $this->getLog()->info('Reconnected');
+                $this->monitor = $this->startConnectionMonitor();
+            },
+            function () {
+                $this->getLog()->error('Reconnect failed, shutting down.');
+                $this->shutDown();
+            }
+        );
     }
 
     public function connected()
@@ -202,14 +224,29 @@ class Yabot
             $this->ping();
 
             return $this->loop->addPeriodicTimer($interval, function () {
-
-                if (!$this->pong) {
-                    $this->getLog()->error('No pong: reconnecting...');
-                    $this->reconnect();
-                }
-
+                $this->checkPong();
                 $this->ping();
             });
+        }
+    }
+
+    protected function checkPong()
+    {
+        if (!$this->pong) {
+            $this->getLog()->error('No pong.');
+
+            $failureStrategy = $this->get('connection_monitor.failure_strategy', 'reconnect');
+
+            if ($failureStrategy === 'reconnect') {
+                $this->reconnect();
+                return;
+            }
+
+            if ($failureStrategy !== 'shutdown') {
+                $this->getLog()->error("Unknown connection_monitor.failure_strategy '$failureStrategy'");
+            }
+
+            $this->shutDown();
         }
     }
 
@@ -224,24 +261,6 @@ class Yabot
                     $this->pong = true;
                 }
             );
-    }
-
-    protected function reconnect()
-    {
-        if ($this->monitor) {
-            $this->loop->cancelTimer($this->monitor);
-        }
-
-        $this->getSlack()->reconnect()->then(
-            function () {
-                $this->getLog()->info('Reconnected');
-                $this->monitor = $this->startConnectionMonitor();
-            },
-            function () {
-                $this->getLog()->error('Reconnect failed, shutting down.');
-                $this->shutDown();
-            }
-        );
     }
 
     protected function notify(string $message)
