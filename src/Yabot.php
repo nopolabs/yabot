@@ -15,6 +15,7 @@ use Nopolabs\Yabot\Slack\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\TimerInterface;
+use React\Promise\Timer;
 use Slack\Payload;
 use Slack\User;
 use Throwable;
@@ -90,11 +91,19 @@ class Yabot
 
         $slack->init();
 
-        $slack->connect()->then([$this, 'connected']);
+        Timer\timeout($slack->connect(), 30, $this->getLoop())
+            ->then([$this, 'connected'])
+            ->otherwise(function (Timer\TimeoutException $error) {
+                $this->getLog()->error($error->getMessage());
+                $this->getLog()->error('Connection failed, shutting down.');
+                $this->shutDown();
+            })
+            ->otherwise(function ($error) {
+                $this->getLog()->error('Connection failed, shutting down.');
+                $this->shutDown();
+            });
 
         $this->addMemoryReporting();
-
-        $this->monitor = $this->startConnectionMonitor();
 
         $this->getLoop()->run();
     }
@@ -137,6 +146,8 @@ class Yabot
 
         $slack->onEvent('message', [$this, 'onMessage']);
         $slack->onEvent('team_join', [$this, 'onTeamJoin']);
+
+        $this->monitor = $this->startConnectionMonitor();
     }
 
     public function onMessage(Payload $payload)
