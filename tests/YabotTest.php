@@ -83,16 +83,12 @@ class YabotTest extends TestCase
     {
         $yabot = $this->newYabot([
             ['getSlack', ['result' => $this->slackClient]],
+            ['connect'],
             ['addMemoryReporting'],
-        ]);
-
-        $promise = $this->newPartialMockWithExpectations(PromiseInterface::class, [
-            ['then', ['params' => [[$yabot, 'connected']]]]
         ]);
 
         $this->setAtExpectations($this->slackClient, [
             ['init'],
-            ['connect', ['result' => $promise]],
         ]);
 
         $this->setAtExpectations($this->eventLoop, [

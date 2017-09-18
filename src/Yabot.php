@@ -87,26 +87,11 @@ class Yabot
 
     public function run()
     {
-        $slack = $this->getSlack();
-
-        $slack->init();
+        $this->getSlack()->init();
 
         $this->getLog()->info('Connecting...');
 
-        Timer\timeout($slack->connect(), 30, $this->getLoop())
-            ->then(function () {
-                $this->getLog()->info('Connected.');
-                $this->connected();
-            })
-            ->otherwise(function (Timer\TimeoutException $error) {
-                $this->getLog()->error($error->getMessage());
-                $this->getLog()->error('Connection failed, shutting down.');
-                $this->shutDown();
-            })
-            ->otherwise(function ($error) {
-                $this->getLog()->error('Connection failed, shutting down.');
-                $this->shutDown();
-            });
+        $this->connect();
 
         $this->addMemoryReporting();
 
@@ -284,5 +269,23 @@ class Yabot
         if ($user = $this->get('notify.user')) {
             $this->getSlack()->directMessage($message, $user);
         }
+    }
+
+    protected function connect()
+    {
+        Timer\timeout($this->getSlack()->connect(), 30, $this->getLoop())
+            ->then(function () {
+                $this->getLog()->info('Connected.');
+                $this->connected();
+            })
+            ->otherwise(function (Timer\TimeoutException $error) {
+                $this->getLog()->error($error->getMessage());
+                $this->getLog()->error('Connection failed, shutting down.');
+                $this->shutDown();
+            })
+            ->otherwise(function ($error) {
+                $this->getLog()->error('Connection failed, shutting down.');
+                $this->shutDown();
+            });
     }
 }
