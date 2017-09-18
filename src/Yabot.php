@@ -94,6 +94,8 @@ class Yabot
 
         $this->addMemoryReporting();
 
+        $this->monitor = $this->startConnectionMonitor();
+
         $this->getLoop()->run();
     }
 
@@ -135,8 +137,6 @@ class Yabot
 
         $slack->onEvent('message', [$this, 'onMessage']);
         $slack->onEvent('team_join', [$this, 'onTeamJoin']);
-
-        $this->monitor = $this->startConnectionMonitor();
     }
 
     public function onMessage(Payload $payload)
