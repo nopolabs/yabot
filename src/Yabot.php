@@ -91,8 +91,13 @@ class Yabot
 
         $slack->init();
 
+        $this->getLog()->info('Connecting...');
+
         Timer\timeout($slack->connect(), 30, $this->getLoop())
-            ->then([$this, 'connected'])
+            ->then(function () {
+                $this->getLog()->info('Connected.');
+                $this->connected();
+            })
             ->otherwise(function (Timer\TimeoutException $error) {
                 $this->getLog()->error($error->getMessage());
                 $this->getLog()->error('Connection failed, shutting down.');
