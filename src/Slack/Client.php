@@ -112,16 +112,11 @@ class Client
 
     public function say($text, $channelOrName, array $additionalParameters = [])
     {
-        $channel = $channelOrName;
-        if (!($channel instanceof ChannelInterface)) {
-            $channel = $this->getChannelByName($channelOrName);
-            if (!($channel instanceof ChannelInterface)) {
-                $channel = $this->getChannelById($channelOrName);
-                if (!($channel instanceof ChannelInterface)) {
-                    $this->warning('No channel, trying to say: '.$text);
-                    return;
-                }
-            }
+        $channel = $this->resolveChannel($channelOrName);
+
+        if (!$channel) {
+            $this->warning('No channel, trying to say: '.$text);
+            return;
         }
 
         if (empty($additionalParameters) && $this->useWebSocket()) {
@@ -178,12 +173,12 @@ class Client
     }
 
     /**
-     * @param $id
+     * @param $userId
      * @return null|User
      */
-    public function getUserById($id)
+    public function getUserById($userId)
     {
-        return $this->users->byId($id);
+        return $this->users->byId($userId);
     }
 
     /**
@@ -196,12 +191,12 @@ class Client
     }
 
     /**
-     * @param $id
+     * @param $botId
      * @return null|Bot
      */
-    public function getBotById($id)
+    public function getBotById($botId)
     {
-        return $this->bots->byId($id);
+        return $this->bots->byId($botId);
     }
 
     /**
@@ -214,12 +209,12 @@ class Client
     }
 
     /**
-     * @param $id
+     * @param $channelId
      * @return null|Channel
      */
-    public function getChannelById($id)
+    public function getChannelById($channelId)
     {
-        return $this->channels->byId($id);
+        return $this->channels->byId($channelId);
     }
 
     /**
@@ -279,5 +274,25 @@ class Client
     protected function useWebSocket() : bool
     {
         return (bool) $this->get('use.websocket', false);
+    }
+
+    private function resolveChannel($channelOrName)
+    {
+        $channel = $channelOrName;
+        if ($channel instanceof ChannelInterface) {
+            return $channel;
+        }
+
+        $channel = $this->getChannelByName($channelOrName);
+        if ($channel instanceof ChannelInterface) {
+            return $channel;
+        }
+
+        $channel = $this->getChannelById($channelOrName);
+        if ($channel instanceof ChannelInterface) {
+            return $channel;
+        }
+
+        return null;
     }
 }
