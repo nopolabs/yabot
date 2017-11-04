@@ -8,6 +8,7 @@ use Nopolabs\Yabot\Helpers\ConfigTrait;
 use Nopolabs\Yabot\Helpers\LogTrait;
 use Psr\Log\LoggerInterface;
 use React\Promise\PromiseInterface;
+use Slack\Bot;
 use Slack\Channel;
 use Slack\ChannelInterface;
 use Slack\Payload;
@@ -25,6 +26,9 @@ class Client
     /** @var Users */
     private $users;
 
+    /** @var Bots */
+    private $bots;
+
     /** @var Channels */
     private $channels;
 
@@ -34,12 +38,14 @@ class Client
     public function __construct(
         RealTimeClient $realTimeClient,
         Users $users,
+        Bots $bots,
         Channels $channels,
         array $config = [],
         LoggerInterface $log = null)
     {
         $this->realTimeClient = $realTimeClient;
         $this->users = $users;
+        $this->bots = $bots;
         $this->channels = $channels;
         $this->setConfig($config);
         $this->setLog($log);
@@ -56,6 +62,7 @@ class Client
     public function update(Closure $authedUserUpdated)
     {
         $this->updateUsers();
+        $this->updateBots();
         $this->updateChannels();
         $this->updateAuthedUser($authedUserUpdated);
     }
@@ -154,6 +161,22 @@ class Client
         $this->realTimeClient->apiCall('chat.postMessage', $parameters);
     }
 
+
+    public function getUsersMap() : array
+    {
+        return $this->users->getMap();
+    }
+
+    public function getBotsMap() : array
+    {
+        return $this->bots->getMap();
+    }
+
+    public function getChannelsMap() : array
+    {
+        return $this->channels->getMap();
+    }
+
     /**
      * @param $id
      * @return null|User
@@ -170,6 +193,24 @@ class Client
     public function getUserByName($name)
     {
         return $this->users->byName($name);
+    }
+
+    /**
+     * @param $id
+     * @return null|Bot
+     */
+    public function getBotById($id)
+    {
+        return $this->bots->byId($id);
+    }
+
+    /**
+     * @param $name
+     * @return null|Bot
+     */
+    public function getBotByName($name)
+    {
+        return $this->bots->byName($name);
     }
 
     /**
@@ -197,7 +238,14 @@ class Client
         });
     }
 
-    protected function updateChannels()
+    public function updateBots()
+    {
+        $this->realTimeClient->getBots()->then(function(array $bots) {
+            $this->bots->update($bots);
+        });
+    }
+
+    public function updateChannels()
     {
         $this->realTimeClient->getChannels()->then(function(array $channels) {
             $this->channels->update($channels);

@@ -5,6 +5,7 @@ namespace Slack;
 
 use Closure;
 use Nopolabs\Test\MockWithExpectationsTrait;
+use Nopolabs\Yabot\Slack\Bots;
 use Nopolabs\Yabot\Slack\Channels;
 use Nopolabs\Yabot\Slack\Client;
 use Nopolabs\Yabot\Slack\Users;
@@ -20,6 +21,7 @@ class ClientTest extends TestCase
     private $realTimeClient;
     private $channels;
     private $users;
+    private $bots;
     private $logger;
 
     protected function setUp()
@@ -27,19 +29,20 @@ class ClientTest extends TestCase
         $this->realTimeClient = $this->createMock(RealTimeClient::class);
         $this->channels = $this->createMock(Channels::class);
         $this->users = $this->createMock(Users::class);
+        $this->bots = $this->createMock(Bots::class);
         $this->logger = $this->createMock(LoggerInterface::class);
     }
 
     public function testGetRealTimeClient()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $this->assertSame($this->realTimeClient, $client->getRealTimeClient());
     }
 
     public function testInit()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $this->setAtExpectations($this->realTimeClient, [
             ['on', ['params' => ['channel_created', $this->isInstanceOf(Closure::class)]]],
@@ -53,13 +56,14 @@ class ClientTest extends TestCase
 
     public function testUpdate()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $authedUser = $this->newPartialMockWithExpectations(User::class, [
             ['getUsername', ['result' => 'alice']],
         ]);
 
         $usersPromise = new FulfilledPromise(['users']);
+        $botsPromise = new FulfilledPromise(['bots']);
         $channelsPromise = new FulfilledPromise(['channels']);
         $authedUserPromise = new FulfilledPromise($authedUser);
 
@@ -70,12 +74,17 @@ class ClientTest extends TestCase
 
         $this->setAtExpectations($this->realTimeClient, [
             ['getUsers', ['result' => $usersPromise]],
+            ['getBots', ['result' => $botsPromise]],
             ['getChannels', ['result' => $channelsPromise]],
             ['getAuthedUser', ['result' => $authedUserPromise]],
         ]);
 
         $this->setAtExpectations($this->users, [
             ['update', ['params' => [['users']]]],
+        ]);
+
+        $this->setAtExpectations($this->bots, [
+            ['update', ['params' => [['bots']]]],
         ]);
 
         $this->setAtExpectations($this->channels, [
@@ -95,7 +104,7 @@ class ClientTest extends TestCase
 
     public function testConnect()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -108,7 +117,7 @@ class ClientTest extends TestCase
 
     public function testDisconnect()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $this->setAtExpectations($this->realTimeClient, [['disconnect']]);
 
@@ -154,7 +163,7 @@ class ClientTest extends TestCase
 
     public function testSend()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $channel = $this->createMock(ChannelInterface::class);
 
@@ -165,7 +174,7 @@ class ClientTest extends TestCase
 
     public function testPost()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         /** @var ChannelInterface $channel */
         $channel = $this->newPartialMockWithExpectations(ChannelInterface::class, [
@@ -189,7 +198,7 @@ class ClientTest extends TestCase
 
     public function testDirectMessage()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $this->setAtExpectations($this->realTimeClient, [
             ['apiCall', [
@@ -207,7 +216,7 @@ class ClientTest extends TestCase
 
     public function testGetUserById()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $user = $this->createMock(User::class);
 
@@ -222,7 +231,7 @@ class ClientTest extends TestCase
 
     public function testGetUserByName()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $user = $this->createMock(User::class);
 
@@ -237,7 +246,7 @@ class ClientTest extends TestCase
 
     public function testGetChannelById()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $channel = $this->createMock(Channel::class);
 
@@ -252,7 +261,7 @@ class ClientTest extends TestCase
 
     public function testGetChannelByName()
     {
-        $client = new Client($this->realTimeClient, $this->users, $this->channels, [], $this->logger);
+        $client = $this->newClient();
 
         $channel = $this->createMock(Channel::class);
 
@@ -263,5 +272,13 @@ class ClientTest extends TestCase
         $actual = $client->getChannelByName('channel-name');
 
         $this->assertSame($channel, $actual);
+    }
+
+    /**
+     * @return Client
+     */
+    protected function newClient() : Client
+    {
+        return new Client($this->realTimeClient, $this->users, $this->bots, $this->channels, [], $this->logger);
     }
 }
