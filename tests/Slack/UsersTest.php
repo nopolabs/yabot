@@ -15,8 +15,8 @@ class UsersTest extends TestCase
     public function testUsers()
     {
         $user = $this->newPartialMockWithExpectations(User::class, [
-            ['getId', ['result' => 'U00GROOT0']],
-            ['getUsername', ['result' => 'Groot']],
+            'getId' => ['invoked' => $this->any(), 'result' => 'U00GROOT0'],
+            'getUsername' => ['invoked' => $this->any(), 'result' => 'Groot'],
         ]);
 
         $users = new Users();
@@ -32,5 +32,7 @@ class UsersTest extends TestCase
         $this->assertNull($users->byId('U00UNKN00'));
         $this->assertSame($user, $users->byName('Groot'));
         $this->assertNull($users->byId('Unknown'));
+
+        $this->assertEquals(['U00GROOT0' => 'Groot'], $users->getMap());
     }
 }

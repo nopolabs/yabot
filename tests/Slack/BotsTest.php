@@ -15,8 +15,8 @@ class BotsTest extends TestCase
     public function testUsers()
     {
         $bot = $this->newPartialMockWithExpectations(Bot::class, [
-            ['getId', ['result' => 'B00ARTOO0']],
-            ['getName', ['result' => 'Artoo']],
+            'getId' => ['invoked' => $this->any(), 'result' => 'B00ARTOO0'],
+            'getName' => ['invoked' => $this->any(), 'result' => 'Artoo'],
         ]);
 
         $bots = new Bots();
@@ -32,5 +32,7 @@ class BotsTest extends TestCase
         $this->assertNull($bots->byId('B00UNKN00'));
         $this->assertSame($bot, $bots->byName('Artoo'));
         $this->assertNull($bots->byId('Unknown'));
+
+        $this->assertEquals(['B00ARTOO0' => 'Artoo'], $bots->getMap());
     }
 }
