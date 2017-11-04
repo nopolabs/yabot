@@ -79,12 +79,15 @@
         <service id="slack.client" class="Nopolabs\Yabot\Slack\Client">
             <argument type="service" id="slack.realTimeClient" />
             <argument type="service" id="users" />
+            <argument type="service" id="bots" />
             <argument type="service" id="channels" />
             <argument>%slack.client.config%</argument>
             <argument type="service" id="logger" />
        </service>
 
         <service id="users" class="Nopolabs\Yabot\Slack\Users" />
+
+        <service id="bots" class="Nopolabs\Yabot\Slack\Bots" />
 
         <service id="channels" class="Nopolabs\Yabot\Slack\Channels" />
 

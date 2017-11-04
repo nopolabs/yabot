@@ -39,4 +39,15 @@ abstract class AbstractIdNameMap
 
         return null;
     }
+
+    public function getMap() : array
+    {
+        $map = [];
+
+        foreach ($this->things as $thing) {
+            $map[$this->getId($thing)] = $this->getName($thing);
+        }
+
+        return $map;
+    }
 }
