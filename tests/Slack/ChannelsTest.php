@@ -15,8 +15,8 @@ class ChannelsTest extends TestCase
     public function testChannels()
     {
         $channel = $this->newPartialMockWithExpectations(Channel::class, [
-            ['getId', ['result' => 'C00CHAN00']],
-            ['getName', ['result' => 'channel-0']],
+            'getId' => ['invoked' => $this->any(), 'result' => 'C00CHAN00'],
+            'getName' => ['invoked' => $this->any(), 'result' => 'channel-0'],
         ]);
 
         $channels = new Channels();
@@ -32,5 +32,7 @@ class ChannelsTest extends TestCase
         $this->assertNull($channels->byId('U00UNKN00'));
         $this->assertSame($channel, $channels->byName('channel-0'));
         $this->assertNull($channels->byId('Unknown'));
+
+        $this->assertEquals(['C00CHAN00' => 'channel-0'], $channels->getMap());
     }
 }
