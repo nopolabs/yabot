@@ -248,6 +248,13 @@ class MessageTest extends TestCase
         $this->assertSame('user-name', $message->getUsername());
     }
 
+    public function testGetUsernameWhenUserIsNull()
+    {
+        $message = new Message($this->slackClient, $this->data, 'formatted-text', null, $this->channel);
+
+        $this->assertNull($message->getUsername());
+    }
+
     public function testGetChannelName()
     {
         $message = new Message($this->slackClient, $this->data, 'formatted-text', $this->user, $this->channel);

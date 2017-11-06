@@ -101,7 +101,7 @@ class PluginManager
 
         $this->info('dispatchMessage: ', [
             'formattedText' => $text,
-            'user' => $message->getUser()->getUsername(),
+            'user' => $message->getUsername(),
             'channel' => $message->getChannel()->getName(),
             'isBot' => $message->isBot(),
             'isSelf' => $message->isSelf(),
