@@ -137,7 +137,7 @@ class Message
     {
         $user = $this->getUser();
 
-        return $user ? $user->getUsername() : null;
+        return $user ? $user->getUsername() : ($this->isBot() ? 'unknown-bot' : 'unknown-user');
     }
 
     public function getChannelName()

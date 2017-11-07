@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "type": "package",
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.0",
         "coderstephen/slack-client": "dev-master",
         "guzzlehttp/guzzle": "^6.2",
         "monolog/monolog": "~1.13",
@@ -17,6 +17,7 @@
         "nopolabs/react-aware-guzzle-client": "dev-master"
     },
     "require-dev": {
+        "php": ">=7.0",
         "phpunit/phpunit": "^6.0",
         "nopolabs/mock-with-expectations": "dev-master",
         "codeclimate/php-test-reporter": "dev-master"

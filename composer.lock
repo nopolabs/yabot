@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c4e882cbdc2ca25da5cfed7b530b9c57",
+    "content-hash": "8be2a07841550d1fa3651c94068843c1",
     "packages": [
         {
             "name": "coderstephen/slack-client",
@@ -4284,7 +4284,9 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.1"
+        "php": ">=7.0"
     },
-    "platform-dev": []
+    "platform-dev": {
+        "php": ">=7.0"
+    }
 }
