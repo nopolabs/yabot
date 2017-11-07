@@ -252,7 +252,7 @@ class MessageTest extends TestCase
     {
         $message = new Message($this->slackClient, $this->data, 'formatted-text', null, $this->channel);
 
-        $this->assertNull($message->getUsername());
+        $this->assertEquals('unknown-user', $message->getUsername());
     }
 
     public function testGetChannelName()
