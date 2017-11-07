@@ -3,6 +3,11 @@
     "description": "Yet Another Bot",
     "version": "0.0.1",
     "type": "package",
+    "config" : {
+        "platform": {
+            "php": "7.0"
+        }
+    },
     "require": {
         "php": ">=7.0",
         "coderstephen/slack-client": "dev-master",
@@ -17,7 +22,6 @@
         "nopolabs/react-aware-guzzle-client": "dev-master"
     },
     "require-dev": {
-        "php": ">=7.0",
         "phpunit/phpunit": "^6.0",
         "nopolabs/mock-with-expectations": "dev-master",
         "codeclimate/php-test-reporter": "dev-master"
