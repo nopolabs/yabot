@@ -1,4 +1,5 @@
 <?php
+use Dotenv\Dotenv;
 use Nopolabs\Yabot\ErrorExceptionHandler;
 use Nopolabs\Yabot\YabotContainer;
 
@@ -10,6 +11,10 @@ $options = getopt("f:h");
 if (isset($options['h'])) {
     exit('Usage: php yabot.php [-h] [-f configFile]'.PHP_EOL);
 }
+
+// read .env and make contents available through env()
+$dotenv = new Dotenv(__DIR__);
+$dotenv->load();
 
 $configFile = $options['f'] ?? __DIR__.'/config.php';
 $config = require $configFile;

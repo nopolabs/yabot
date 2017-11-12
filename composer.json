@@ -19,7 +19,8 @@
         "symfony/yaml": "^3.2",
         "react/http": "^0.6",
         "roave/security-advisories": "dev-master",
-        "nopolabs/react-aware-guzzle-client": "dev-master"
+        "nopolabs/react-aware-guzzle-client": "dev-master",
+        "vlucas/phpdotenv": "^2.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
