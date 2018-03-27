@@ -15,7 +15,7 @@ for a discussion of how to build your own bot functionality using yabot.
 
 ## Architecture
 
-TODO
+I gave a presentation at the 2017-07-17 PHPdx user group: [PDF](Yabot-PHPdx-2017-07-18.pdf)
 
 ## Configuration
 
