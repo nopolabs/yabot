@@ -53,7 +53,7 @@ class GuzzleTraitFunctionalTest extends TestCase
         $exception = null;
 
         $this->getGuzzle()->getAsync(
-            'https://slowly.nopolabs.com/1000/data/hello',
+            'https://slowly.nopolabs.com/data/3000/hello',
             [],
             function (RequestException $e) use (&$exception) {
                 $exception = $e;
@@ -90,7 +90,7 @@ class GuzzleTraitFunctionalTest extends TestCase
 
         $status = null;
 
-        $this->getGuzzle()->getAsync('https://slowly.nopolabs.com/3000/data/hello')->then(
+        $this->getGuzzle()->getAsync('https://slowly.nopolabs.com/data/3000/hello')->then(
             function (ResponseInterface $res) use (&$status) {
                 $status = $res->getStatusCode();
             }

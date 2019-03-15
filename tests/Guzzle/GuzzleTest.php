@@ -92,7 +92,7 @@ class GuzzleTest extends TestCase
 
     /**
      * This is a 'functional' test.
-     * It makes an http get request to https://slowly.nopolabs.com/3000/data/hello
+     * It makes an http get request to https://slowly.nopolabs.com/data/3000/hello
      */
     public function testGetAsyncTimeout()
     {
@@ -105,7 +105,7 @@ class GuzzleTest extends TestCase
 
         $status = null;
 
-        $this->guzzle->getAsync('https://slowly.nopolabs.com/3000/data/hello')->then(
+        $this->guzzle->getAsync('https://slowly.nopolabs.com/data/3000/hello')->then(
             function (ResponseInterface $res) use (&$status) {
                 $status = $res->getStatusCode();
             }
