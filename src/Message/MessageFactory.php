@@ -79,15 +79,11 @@ class MessageFactory
         $formatted = [];
         if (isset($data['attachments'])) {
             foreach ($data['attachments'] as $attachment) {
-                if (isset($attachment['pretext'])) {
-                    $formatted[] = $this->formatText($attachment['pretext']);
-                }
-                if (isset($attachment['fallback'])) {
-                    $formatted[] = $this->formatText($attachment['fallback']);
-                }
+                $formatted[] = $this->formatAttachmentField($attachment, 'pretext');
+                $formatted[] = $this->formatAttachmentField($attachment, 'fallback');
             }
         }
-        return $formatted;
+        return array_values(array_filter($formatted));
     }
 
     public function formatText(string $text) : string
@@ -176,5 +172,12 @@ class MessageFactory
         }
 
         return null;
+    }
+
+    protected function formatAttachmentField(array $attachment, string $field)
+    {
+        return isset($attachment[$field])
+            ? $this->formatText($attachment[$field])
+            : null;
     }
 }
